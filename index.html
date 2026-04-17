@@ -9,12 +9,14 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#F0F2F5;color:#1a1a2e;font-size:13px}
 .app{max-width:1440px;margin:0 auto;padding:16px}
 
+/* Topbar */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .brand{font-size:18px;font-weight:700;color:#1a1a2e;letter-spacing:-.3px}
 .brand em{color:#185FA5;font-style:normal}
 .topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .live-dot{width:7px;height:7px;border-radius:50%;background:#2E7D32;display:inline-block;margin-right:4px;vertical-align:middle}
 
+/* Config */
 .cfg{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:18px;margin-bottom:14px}
 .cfg-title{font-size:13px;font-weight:600;margin-bottom:10px}
 .cfg-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
@@ -22,58 +24,57 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .cfg-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:600}
 .cfg-inp{font-size:12px;padding:8px 10px;border:1px solid #ddd;border-radius:7px;background:#fafafa;color:#1a1a2e;font-family:monospace;width:100%}
 .cfg-inp:focus{outline:none;border-color:#185FA5}
-.cfg-help{font-size:11px;color:#888;margin-top:8px;line-height:1.6}
+.cfg-help{font-size:11px;color:#888;margin-top:6px;line-height:1.5}
+.cfg-help strong{color:#555}
 
+/* Buttons */
 .btn{font-size:12px;padding:7px 14px;border-radius:7px;cursor:pointer;font-weight:500;white-space:nowrap;border:1px solid transparent;transition:all .15s}
 .btn-blue{background:#185FA5;color:#fff;border-color:#185FA5}
 .btn-blue:hover{background:#0C447C}
+.btn-blue:disabled{opacity:.4;cursor:default}
 .btn-out{background:#fff;color:#555;border-color:#ddd}
 .btn-out:hover{background:#f5f5f5}
 
+/* Status */
 .status{font-size:12px;padding:8px 12px;border-radius:7px;margin-top:8px;line-height:1.5}
 .s-info{background:#E3F2FD;color:#0D47A1}
 .s-ok{background:#E8F5E9;color:#1B5E20}
 .s-err{background:#FFEBEE;color:#B71C1C}
+.s-warn{background:#FFF8E1;color:#E65100}
 
+/* Loader */
 .loader{display:flex;flex-direction:column;align-items:center;padding:3rem;gap:12px}
 .lbar-wrap{width:280px;height:5px;background:#e0e0e0;border-radius:3px;overflow:hidden}
 .lbar{height:100%;background:#185FA5;border-radius:3px;transition:width .3s}
 .lmsg{font-size:12px;color:#888}
 
 /* Selector de campo fecha */
-.fecha-mode{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px;padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #e8e8e8}
-.fm-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:700;margin-right:4px;white-space:nowrap}
-.fpill{font-size:11px;padding:5px 12px;border:1px solid #ddd;border-radius:20px;background:#f8f8f8;cursor:pointer;color:#555;font-weight:500}
-.fpill:hover{background:#e8e8e8}
+.fecha-mode{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.fm-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:600;margin-right:2px}
+.fpill{font-size:11px;padding:5px 12px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;color:#555;font-weight:500}
+.fpill:hover{background:#f0f0f0}
 .fpill.on{background:#37474F;border-color:#37474F;color:#fff}
 
-/* Periodos */
-.time-strip{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #e8e8e8}
-.t-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:700;margin-right:4px;white-space:nowrap}
-.tpill{font-size:11px;padding:5px 12px;border:1px solid #ddd;border-radius:20px;background:#f8f8f8;cursor:pointer;color:#555;font-weight:500}
-.tpill:hover{background:#e8e8e8}
+/* Pills de tiempo */
+.time-strip{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.t-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:600;margin-right:2px}
+.tpill{font-size:11px;padding:5px 12px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;color:#555;font-weight:500}
+.tpill:hover{background:#f0f0f0}
 .tpill.on{background:#185FA5;border-color:#185FA5;color:#fff}
 .dr{display:flex;gap:6px;align-items:center}
 .dr input[type=date]{font-size:11px;padding:5px 8px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#1a1a2e}
 
 /* Filtros */
-.frow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-start;padding:12px 14px;background:#fff;border-radius:10px;border:1px solid #e8e8e8}
+.frow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
 .fg{display:flex;flex-direction:column;gap:3px}
-.fl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:700}
+.fl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:600}
 .fg select{font-size:12px;padding:6px 10px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#1a1a2e;min-width:115px;cursor:pointer}
 .fg select:hover{border-color:#185FA5}
-.srch{font-size:12px;padding:6px 10px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#1a1a2e;min-width:160px}
+.srch{font-size:12px;padding:6px 10px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#1a1a2e;min-width:165px}
 .srch:focus{outline:none;border-color:#185FA5}
 
-/* Multi-select de estados — pills clickeables */
-.estado-filter-wrap{display:flex;flex-direction:column;gap:4px}
-.estado-pills{display:flex;flex-wrap:wrap;gap:4px;max-width:520px}
-.epill{font-size:10px;padding:3px 9px;border-radius:12px;cursor:pointer;border:1px solid transparent;font-weight:600;transition:all .12s;user-select:none}
-.epill:hover{opacity:.8}
-.epill.selected{box-shadow:0 0 0 2px #185FA5}
-
 /* KPIs */
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-bottom:14px}
 .kpi{background:#fff;border-radius:9px;padding:12px 14px;border:1px solid #e8e8e8}
 .kpi-l{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:600;margin-bottom:4px}
 .kpi-v{font-size:26px;font-weight:700;line-height:1}
@@ -81,9 +82,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .c1{color:#185FA5}.c2{color:#2E7D32}.c3{color:#00695C}.c4{color:#E65100}
 .c5{color:#1565C0}.c6{color:#BF360C}.c7{color:#4527A0}.c8{color:#546E7A}.c9{color:#880E4F}
 
-/* Segmentaciones */
+/* Paneles seg */
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-@media(max-width:700px){.mgrid{grid-template-columns:1fr}}
+@media(max-width:680px){.mgrid{grid-template-columns:1fr}}
 .panel{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:14px}
 .ptitle{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
 .slist{display:flex;flex-direction:column;gap:3px}
@@ -115,7 +116,6 @@ tr:hover td{background:#fafcff}
 .pg-btn:disabled{opacity:.35;cursor:default}
 .nodata{text-align:center;padding:2.5rem;color:#bbb;font-size:13px}
 .hidden{display:none!important}
-.active-filters{font-size:11px;color:#185FA5;margin-left:8px}
 </style>
 </head>
 <body>
@@ -123,10 +123,9 @@ tr:hover td{background:#fafcff}
 
 <!-- Topbar -->
 <div class="topbar">
-  <div class="brand">
-    <em>SCALIFY</em> — Dashboard Operativo
+  <div class="brand"><em>SCALIFY</em> — Dashboard Operativo
     <span id="livebadge" class="hidden" style="font-size:11px;font-weight:400;color:#666;margin-left:8px">
-      <span class="live-dot"></span>Conectado
+      <span class="live-dot"></span>Google Sheets conectado
     </span>
   </div>
   <div class="topbar-right">
@@ -143,15 +142,18 @@ tr:hover td{background:#fafcff}
   <div class="cfg-row">
     <div class="cfg-group">
       <span class="cfg-lbl">URL del CSV publicado</span>
-      <input class="cfg-inp" id="csvurl" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?gid=…&output=csv">
+      <input class="cfg-inp" id="csvurl" placeholder="https://docs.google.com/spreadsheets/d/TU_ID/pub?gid=0&single=true&output=csv">
     </div>
     <button class="btn btn-blue" onclick="connectCSV()">Cargar datos</button>
   </div>
   <div class="cfg-help">
-    <strong>Cómo obtener la URL:</strong> Abrí tu Google Sheet → Archivo → Compartir → Publicar en la web → Elegí la hoja <strong>"Datos Detallados"</strong> → Formato <strong>CSV</strong> → Publicar → Copiá la URL.
+    <strong>Cómo obtener la URL del CSV:</strong><br>
+    1. Abrí tu Google Sheet → Archivo → Compartir → Publicar en la web<br>
+    2. Elegí la hoja <strong>"Datos Detallados"</strong> → Formato: <strong>Valores separados por comas (.csv)</strong> → Publicar<br>
+    3. Copiá la URL y pegala arriba → Cargar datos
   </div>
   <div id="msgcfg" class="status s-info" style="margin-top:10px">
-    Primero ejecutá el script de extracción en Apps Script para poblar el Sheet, luego publicalo como CSV y pegá la URL acá.
+    Primero ejecutá el script de extracción en Apps Script para poblar el Google Sheet, luego publicalo como CSV y pegá la URL acá.
   </div>
 </div>
 
@@ -166,7 +168,7 @@ tr:hover td{background:#fafcff}
 
   <!-- Selector campo de fecha -->
   <div class="fecha-mode">
-    <span class="fm-lbl">Filtrar fechas por:</span>
+    <span class="fm-lbl">Fecha por:</span>
     <button class="fpill on"  data-fm="FECHA_ACTUALIZACION" onclick="setFM(this,'FECHA_ACTUALIZACION')">Última actualización</button>
     <button class="fpill"     data-fm="FECHA_PUBLICADO"     onclick="setFM(this,'FECHA_PUBLICADO')">Publicado</button>
     <button class="fpill"     data-fm="FECHA_PLANEADO"      onclick="setFM(this,'FECHA_PLANEADO')">Planeado</button>
@@ -177,14 +179,14 @@ tr:hover td{background:#fafcff}
   <!-- Periodos -->
   <div class="time-strip">
     <span class="t-lbl">Periodo:</span>
-    <button class="tpill on" data-p="todo"         onclick="setPeriod(this,'todo')">Todo</button>
-    <button class="tpill"    data-p="hoy"           onclick="setPeriod(this,'hoy')">Hoy</button>
-    <button class="tpill"    data-p="ayer"          onclick="setPeriod(this,'ayer')">Ayer</button>
-    <button class="tpill"    data-p="semana"        onclick="setPeriod(this,'semana')">Esta semana</button>
-    <button class="tpill"    data-p="semana_pasada" onclick="setPeriod(this,'semana_pasada')">Semana pasada</button>
-    <button class="tpill"    data-p="mes"           onclick="setPeriod(this,'mes')">Este mes</button>
-    <button class="tpill"    data-p="mes_pasado"    onclick="setPeriod(this,'mes_pasado')">Mes pasado</button>
-    <button class="tpill"    data-p="custom"        onclick="setPeriod(this,'custom')">Personalizado</button>
+    <button class="tpill on" data-p="todo"          onclick="setPeriod(this,'todo')">Todo</button>
+    <button class="tpill"    data-p="hoy"            onclick="setPeriod(this,'hoy')">Hoy</button>
+    <button class="tpill"    data-p="ayer"           onclick="setPeriod(this,'ayer')">Ayer</button>
+    <button class="tpill"    data-p="semana"         onclick="setPeriod(this,'semana')">Esta semana</button>
+    <button class="tpill"    data-p="semana_pasada"  onclick="setPeriod(this,'semana_pasada')">Semana pasada</button>
+    <button class="tpill"    data-p="mes"            onclick="setPeriod(this,'mes')">Este mes</button>
+    <button class="tpill"    data-p="mes_pasado"     onclick="setPeriod(this,'mes_pasado')">Mes pasado</button>
+    <button class="tpill"    data-p="custom"         onclick="setPeriod(this,'custom')">Personalizado</button>
     <div class="dr hidden" id="customrange">
       <input type="date" id="dfrom" onchange="applyFilters()">
       <span style="color:#bbb">—</span>
@@ -194,38 +196,16 @@ tr:hover td{background:#fafcff}
 
   <!-- Filtros -->
   <div class="frow">
-    <div class="fg">
-      <span class="fl">Célula</span>
-      <select id="fcelula" onchange="applyFilters()"><option value="">Todas</option></select>
-    </div>
-    <div class="fg">
-      <span class="fl">Marca</span>
-      <select id="fmarca" onchange="applyFilters()"><option value="">Todas</option></select>
-    </div>
-    <div class="fg">
-      <span class="fl">Producto</span>
-      <select id="fproducto" onchange="applyFilters()"><option value="">Todos</option></select>
-    </div>
-    <div class="fg">
-      <span class="fl">Cuenta</span>
-      <select id="fcuenta" onchange="applyFilters()"><option value="">Todas</option></select>
-    </div>
-    <div class="fg">
-      <span class="fl">Lista</span>
-      <select id="flista" onchange="applyFilters()"><option value="">Todas</option></select>
-    </div>
-
-    <!-- Multi-select de estados -->
-    <div class="fg estado-filter-wrap">
-      <span class="fl">Estado <span class="active-filters" id="estado-count"></span></span>
-      <div class="estado-pills" id="estado-pills"></div>
-    </div>
-
-    <div class="fg" style="flex:1;min-width:150px">
+    <div class="fg"><span class="fl">Célula</span>   <select id="fcelula"   onchange="applyFilters()"><option value="">Todas</option></select></div>
+    <div class="fg"><span class="fl">Marca</span>    <select id="fmarca"    onchange="applyFilters()"><option value="">Todas</option></select></div>
+    <div class="fg"><span class="fl">Estado</span>   <select id="festado"   onchange="applyFilters()"><option value="">Todos</option></select></div>
+    <div class="fg"><span class="fl">Cuenta</span>   <select id="fcuenta"   onchange="applyFilters()"><option value="">Todas</option></select></div>
+    <div class="fg"><span class="fl">Lista</span>    <select id="flista"    onchange="applyFilters()"><option value="">Todas</option></select></div>
+    <div class="fg" style="flex:1;min-width:155px">
       <span class="fl">Buscar</span>
       <input class="srch" id="fsrch" placeholder="Nombre, SKU, producto..." oninput="applyFilters()">
     </div>
-    <button class="btn btn-out" style="align-self:flex-end;height:32px" onclick="clearFilters()">Limpiar todo</button>
+    <button class="btn btn-out" style="align-self:flex-end;height:32px" onclick="clearFilters()">Limpiar</button>
   </div>
 
   <!-- KPIs -->
@@ -233,16 +213,16 @@ tr:hover td{background:#fafcff}
 
   <!-- Segmentaciones -->
   <div class="mgrid">
-    <div class="panel"><div class="ptitle">Por estado</div>   <div class="slist" id="segestado"></div></div>
-    <div class="panel"><div class="ptitle">Por marca</div>    <div class="slist" id="segmarca"></div></div>
-    <div class="panel"><div class="ptitle">Por producto</div> <div class="slist" id="segproducto"></div></div>
-    <div class="panel"><div class="ptitle">Por célula</div>   <div class="slist" id="segcelula"></div></div>
+    <div class="panel"><div class="ptitle">Por estado</div>  <div class="slist" id="segestado"></div></div>
+    <div class="panel"><div class="ptitle">Por marca</div>   <div class="slist" id="segmarca"></div></div>
+    <div class="panel"><div class="ptitle">Por célula</div>  <div class="slist" id="segcelula"></div></div>
+    <div class="panel"><div class="ptitle">Por lista</div>   <div class="slist" id="seglista"></div></div>
   </div>
 
   <!-- Tabla -->
   <div class="tpanel">
     <div class="thdr">
-      <span class="ttitle">Detalle de tareas <span class="cbadge" id="tblcount">0</span></span>
+      <span class="ttitle">Detalle <span class="cbadge" id="tblcount">0</span></span>
       <div style="display:flex;gap:8px;align-items:center">
         <span id="fechalabel" style="font-size:11px;color:#bbb"></span>
         <select id="rpp" style="font-size:12px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;background:#fff" onchange="pg=1;renderTable()">
@@ -256,14 +236,14 @@ tr:hover td{background:#fafcff}
       <table>
         <thead><tr>
           <th style="width:210px" onclick="sb('NOMBRE')">Tarea</th>
-          <th style="width:150px" onclick="sb('ESTADO')">Estado</th>
+          <th style="width:155px" onclick="sb('ESTADO')">Estado</th>
           <th style="width:110px" onclick="sb('MARCA')">Marca</th>
-          <th style="width:110px" onclick="sb('PRODUCTO')">Producto</th>
-          <th style="width:80px"  onclick="sb('CELULA')">Célula</th>
-          <th style="width:100px" onclick="sb('CUENTA')">Cuenta</th>
+          <th style="width:90px"  onclick="sb('CELULA')">Célula</th>
+          <th style="width:95px"  onclick="sb('CUENTA')">Cuenta</th>
           <th style="width:80px"  onclick="sb('SKU')">SKU</th>
+          <th style="width:90px"  onclick="sb('LISTA')">Lista</th>
           <th style="width:80px"  onclick="sb('PRIORIDAD')">Prioridad</th>
-          <th style="width:105px" id="thfecha" onclick="sb('_fd')">Fecha</th>
+          <th style="width:100px" id="thfecha" onclick="sb('_fd')">Fecha</th>
           <th style="width:55px">Link</th>
         </tr></thead>
         <tbody id="tblbody"></tbody>
@@ -276,14 +256,13 @@ tr:hover td{background:#fafcff}
     </div>
   </div>
 
-</div><!-- /dash -->
-</div><!-- /app -->
+</div>
+</div>
 
 <script>
-// ── Colores y estilos por estado ──────────────────────────────
-const ESTADO_DEF = {
+// ── Colores por estado (nombres reales de ClickUp/Scalify) ───
+const ESTADO_STYLE = {
   'publicado':               {bg:'#E8F5E9',tc:'#1B5E20',dot:'#2E7D32'},
-  'en_proceso_publicacion':  {bg:'#E0F2F1',tc:'#004D40',dot:'#00695C'},
   'pendiente_publicacion':   {bg:'#FFF8E1',tc:'#E65100',dot:'#F57F17'},
   'edicion':                 {bg:'#E3F2FD',tc:'#0D47A1',dot:'#1565C0'},
   'grabacion':               {bg:'#FBE9E7',tc:'#BF360C',dot:'#BF360C'},
@@ -291,20 +270,24 @@ const ESTADO_DEF = {
   'pendientes_revision':     {bg:'#FCE4EC',tc:'#880E4F',dot:'#880E4F'},
   'por_corregir_edicion':    {bg:'#FFF3E0',tc:'#E65100',dot:'#EF6C00'},
   'por_corregir_grabacion':  {bg:'#FBE9E7',tc:'#4E342E',dot:'#6D4C41'},
+  'en_proceso_publicacion':  {bg:'#E0F2F1',tc:'#004D40',dot:'#00695C'},
   'active':                  {bg:'#E8F5E9',tc:'#1B5E20',dot:'#388E3C'},
   'complete':                {bg:'#E8F5E9',tc:'#1B5E20',dot:'#2E7D32'},
   'closed':                  {bg:'#ECEFF1',tc:'#37474F',dot:'#546E7A'},
 };
+
 function estStyle(name){
   const k=(name||'').toLowerCase().replace(/ /g,'_');
-  return ESTADO_DEF[k]||{bg:'#F5F5F5',tc:'#424242',dot:'#9E9E9E'};
+  return ESTADO_STYLE[k]||{bg:'#F5F5F5',tc:'#424242',dot:'#9E9E9E'};
 }
 
-const MARCA_PAL  =['#185FA5','#2E7D32','#6A1B9A','#00695C','#BF360C','#880E4F','#37474F','#1565C0'];
-const CELULA_PAL =['#185FA5','#2E7D32','#E65100','#6A1B9A','#00695C'];
-const PROD_PAL   =['#455A64','#1565C0','#4527A0','#2E7D32','#BF360C','#00695C','#880E4F'];
-const PRIO_C     ={urgent:'#B71C1C',high:'#E65100',normal:'#1565C0',low:'#78909C'};
-const FM_LABELS  ={
+const MARCA_PAL  = ['#185FA5','#2E7D32','#6A1B9A','#00695C','#BF360C','#880E4F','#37474F','#1565C0','#4E342E'];
+const CELULA_PAL = ['#185FA5','#2E7D32','#E65100','#6A1B9A','#00695C','#BF360C','#37474F'];
+const LISTA_PAL  = ['#455A64','#1565C0','#4527A0','#2E7D32','#BF360C','#00695C','#880E4F','#E65100'];
+const PRIO_C     = {urgent:'#B71C1C',high:'#E65100',normal:'#1565C0',low:'#78909C'};
+const marcaMap={}, celulaMap={}, listaMap={}, estadoMap={};
+
+const FM_LABELS = {
   FECHA_ACTUALIZACION:'Última actualización',
   FECHA_PUBLICADO:'Fecha publicado',
   FECHA_PLANEADO:'Fecha planeado',
@@ -312,16 +295,12 @@ const FM_LABELS  ={
   FECHA_EDITADO:'Fecha editado'
 };
 
-const marcaMap={},celulaMap={},prodMap={};
+let allData=[], filtered=[], headers=[], colIdx={};
+let pg=1, sortCol='_fd', sortAsc=false;
+let period='todo', fechaMode='FECHA_ACTUALIZACION';
+let csvUrl='';
 
-// ── Estado multi-select ───────────────────────────────────────
-let estadosSeleccionados = new Set(); // vacío = todos
-
-// ── Variables globales ────────────────────────────────────────
-let allData=[],filtered=[],pg=1,sortCol='_fd',sortAsc=false;
-let period='todo',fechaMode='FECHA_ACTUALIZACION',csvUrl='';
-
-// ── Config ────────────────────────────────────────────────────
+// ── Config ───────────────────────────────────────────────────
 function toggleCfg(){
   const p=document.getElementById('cfgpanel');
   p.style.display=p.style.display==='none'?'':'none';
@@ -331,21 +310,7 @@ function setMsg(id,html,type){
   el.className='status s-'+type;el.innerHTML=html;
 }
 
-// ── Proxies en cascada ────────────────────────────────────────
-const PROXIES=[
-  u=>u,
-  u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-  u=>`https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`,
-];
-
-async function fetchWithTimeout(url,ms=14000){
-  const ctrl=new AbortController();
-  const tid=setTimeout(()=>ctrl.abort(),ms);
-  try{const r=await fetch(url,{signal:ctrl.signal});clearTimeout(tid);return r;}
-  catch(e){clearTimeout(tid);throw e;}
-}
-
+// ── Carga de datos ───────────────────────────────────────────
 async function connectCSV(){
   csvUrl=document.getElementById('csvurl').value.trim();
   if(!csvUrl){setMsg('msgcfg','Pegá la URL primero','err');return;}
@@ -353,42 +318,97 @@ async function connectCSV(){
 }
 async function reloadData(){if(!csvUrl){toggleCfg();return;}await loadData();}
 
+// Proxies en orden de prioridad — se prueban en cascada si el anterior falla
+const PROXIES = [
+  url => url,                                                          // 1. Directo (funciona si el browser no bloquea CORS)
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,  // 2. allorigins raw
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, // 3. codetabs
+  url => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`,   // 4. thingproxy
+];
+
+async function fetchWithTimeout(url, ms=12000){
+  const ctrl = new AbortController();
+  const tid  = setTimeout(()=>ctrl.abort(), ms);
+  try{
+    const r = await fetch(url, {signal: ctrl.signal});
+    clearTimeout(tid);
+    return r;
+  }catch(e){
+    clearTimeout(tid);
+    throw e;
+  }
+}
+
 async function loadData(){
   showLoader('Conectando a Google Sheets...',5);
-  let text='',lastErr='';
-  for(let i=0;i<PROXIES.length;i++){
-    const pu=PROXIES[i](csvUrl);
-    setLoader(10+i*18,i===0?'Conexión directa...':'Proxy '+(i)+'...');
+  let text='', lastErr='';
+
+  for(let i=0; i<PROXIES.length; i++){
+    const proxyUrl = PROXIES[i](csvUrl);
+    const label = i===0?'directo':`proxy ${i}`;
+    setLoader(10+i*18, `Intentando conexión ${label}...`);
     try{
-      const r=await fetchWithTimeout(pu,14000);
-      if(!r.ok)throw new Error('HTTP '+r.status);
-      text=await r.text();
-      const first=text.split('\n')[0]||'';
-      if(!first.includes(','))throw new Error('No es CSV válido');
-      break;
-    }catch(e){lastErr=e.message;if(i===PROXIES.length-1){hideLoader();setMsg('msgcfg','No se pudo cargar el CSV.<br>Último error: '+lastErr,'err');document.getElementById('cfgpanel').style.display='';return;}}
+      const r = await fetchWithTimeout(proxyUrl, 14000);
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      text = await r.text();
+      // Validar que sea CSV real (primera línea debe tener comas)
+      const firstLine = text.split('\n')[0]||'';
+      if(!firstLine.includes(',')) throw new Error('Respuesta no es CSV válido');
+      break; // éxito
+    }catch(e){
+      lastErr = e.message;
+      console.warn(`Proxy ${i} falló: ${e.message}`);
+      if(i===PROXIES.length-1){
+        hideLoader();
+        setMsg('msgcfg',
+          `No se pudo cargar el CSV después de ${PROXIES.length} intentos.<br><br>`+
+          `<strong>Solución recomendada:</strong> Abrí el dashboard directamente desde Google Drive `+
+          `(en lugar de GitHub) para evitar restricciones CORS.<br><br>`+
+          `También podés intentar:<br>`+
+          `1. Verificá que la hoja esté publicada como CSV (no como página web)<br>`+
+          `2. Cerrá sesión de Google en el navegador y volvé a intentar<br>`+
+          `Último error: ${lastErr}`,
+          'err'
+        );
+        document.getElementById('cfgpanel').style.display='';
+        return;
+      }
+    }
   }
+
   try{
-    setLoader(82,'Procesando datos...');
+    setLoader(82,'Procesando '+text.split('\n').length+' filas...');
     parseCSV(text);
-    setLoader(96,'Construyendo dashboard...');
+    setLoader(95,'Construyendo dashboard...');
     buildDash();
     hideLoader();
+
     document.getElementById('cfgpanel').style.display='none';
     document.getElementById('dash').classList.remove('hidden');
     document.getElementById('livebadge').classList.remove('hidden');
     document.getElementById('btnreload').style.display='';
     document.getElementById('btnexp').style.display='';
-    document.getElementById('datainfo').textContent=allData.length.toLocaleString()+' tareas — '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-  }catch(e){hideLoader();setMsg('msgcfg','Error procesando datos: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
+    document.getElementById('datainfo').textContent=
+      allData.length.toLocaleString()+' tareas — '+
+      new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    hideLoader();
+    setMsg('msgcfg',`Error procesando los datos: ${e.message}`,'err');
+    document.getElementById('cfgpanel').style.display='';
+  }
 }
 
-function showLoader(msg,pct){document.getElementById('loader').classList.remove('hidden');setLoader(pct,msg);}
-function setLoader(pct,msg){document.getElementById('lbar').style.width=pct+'%';if(msg)document.getElementById('lmsg').textContent=msg;}
+function showLoader(msg,pct){
+  document.getElementById('loader').classList.remove('hidden');
+  setLoader(pct,msg);
+}
+function setLoader(pct,msg){
+  document.getElementById('lbar').style.width=pct+'%';
+  if(msg)document.getElementById('lmsg').textContent=msg;
+}
 function hideLoader(){document.getElementById('loader').classList.add('hidden');}
 
 // ── CSV Parser ────────────────────────────────────────────────
-let headers=[],colIdx={};
 function parseCSV(text){
   const lines=text.split(/\r?\n/).filter(l=>l.trim());
   if(!lines.length)return;
@@ -397,11 +417,12 @@ function parseCSV(text){
   allData=lines.slice(1).map(line=>{
     const vals=parseCSVLine(line);
     const row={};
-    headers.forEach((h,i)=>{row[h.trim().toUpperCase()]=(vals[i]||'').trim();});
+    headers.forEach((h,i)=>{row[h.trim().toUpperCase()]=vals[i]||'';});
     row._fd=row[fechaMode]||row.FECHA_ACTUALIZACION||'';
     return row;
   }).filter(r=>r.TAREA_ID&&r.TAREA_ID.trim());
 }
+
 function parseCSVLine(line){
   const r=[];let cur='';let q=false;
   for(let i=0;i<line.length;i++){
@@ -411,52 +432,6 @@ function parseCSVLine(line){
     else cur+=c;
   }
   r.push(cur);return r;
-}
-
-// ── Build dashboard ───────────────────────────────────────────
-function buildDash(){
-  estadosSeleccionados.clear();
-  buildEstadoPills();
-  populateSelects();
-  filtered=[...allData];
-  sb('_fd');
-}
-
-// ── Pills de estado multi-select ──────────────────────────────
-function buildEstadoPills(){
-  const estados=[...new Set(allData.map(r=>r.ESTADO).filter(v=>v&&v.trim()))].sort();
-  const container=document.getElementById('estado-pills');
-  container.innerHTML='';
-  estados.forEach(est=>{
-    const st=estStyle(est);
-    const pill=document.createElement('span');
-    pill.className='epill';
-    pill.textContent=est;
-    pill.style.background=st.bg;
-    pill.style.color=st.tc;
-    pill.style.borderColor=st.dot;
-    pill.dataset.estado=est;
-    pill.onclick=()=>toggleEstado(est,pill);
-    container.appendChild(pill);
-  });
-  actualizarContadorEstados();
-}
-
-function toggleEstado(est,pill){
-  if(estadosSeleccionados.has(est)){
-    estadosSeleccionados.delete(est);
-    pill.classList.remove('selected');
-  }else{
-    estadosSeleccionados.add(est);
-    pill.classList.add('selected');
-  }
-  actualizarContadorEstados();
-  applyFilters();
-}
-
-function actualizarContadorEstados(){
-  const cnt=estadosSeleccionados.size;
-  document.getElementById('estado-count').textContent=cnt>0?`(${cnt} seleccionados)`:'';
 }
 
 // ── Fecha mode ────────────────────────────────────────────────
@@ -469,12 +444,18 @@ function setFM(btn,mode){
   applyFilters();
 }
 
-// ── Selects ───────────────────────────────────────────────────
+// ── Filtros ───────────────────────────────────────────────────
+function buildDash(){
+  populateSelects();
+  filtered=[...allData];
+  sb('_fd');
+}
+
 function populateSelects(){
   [['fcelula','CELULA','Todas'],['fmarca','MARCA','Todas'],
-   ['fproducto','PRODUCTO','Todos'],['fcuenta','CUENTA','Todas'],['flista','LISTA','Todas']
+   ['festado','ESTADO','Todos'],['fcuenta','CUENTA','Todas'],['flista','LISTA','Todas']
   ].forEach(([id,key,def])=>{
-    const sel=document.getElementById(id);if(!sel)return;
+    const sel=document.getElementById(id);
     const cur=sel.value;
     const vals=[...new Set(allData.map(r=>r[key]).filter(v=>v&&v.trim()))].sort();
     sel.innerHTML=`<option value="">${def}</option>`;
@@ -483,7 +464,6 @@ function populateSelects(){
   });
 }
 
-// ── Rango de fechas ───────────────────────────────────────────
 function getRange(p){
   const now=new Date(),tod=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   if(p==='todo')return null;
@@ -500,6 +480,7 @@ function getRange(p){
   }
   return null;
 }
+
 function parseDate(s){
   if(!s||!s.trim())return null;
   if(/^\d{4}-\d{2}-\d{2}/.test(s)){const d=new Date(s.slice(0,10)+'T00:00:00');return isNaN(d)?null:d;}
@@ -514,59 +495,34 @@ function setPeriod(btn,p){
   applyFilters();
 }
 
-// ── FILTROS — lógica principal ────────────────────────────────
-// Lógica: (Celula = X) AND (Estado IN [seleccionados]) AND (Fecha_modo >= inicio AND <= fin) ...
 function applyFilters(){
-  const fc  = document.getElementById('fcelula').value;
-  const fm  = document.getElementById('fmarca').value;
-  const fp  = document.getElementById('fproducto').value;
-  const fcu = document.getElementById('fcuenta').value;
-  const fl  = document.getElementById('flista').value;
-  const fs  = document.getElementById('fsrch').value.toLowerCase().trim();
-  const range = getRange(period);
-
+  const fc=document.getElementById('fcelula').value;
+  const fm=document.getElementById('fmarca').value;
+  const fe=document.getElementById('festado').value;
+  const fcu=document.getElementById('fcuenta').value;
+  const fl=document.getElementById('flista').value;
+  const fs=document.getElementById('fsrch').value.toLowerCase().trim();
+  const range=getRange(period);
   filtered=allData.filter(r=>{
-    // Célula
-    if(fc && r.CELULA !== fc) return false;
-    // Marca
-    if(fm && r.MARCA  !== fm) return false;
-    // Producto
-    if(fp && r.PRODUCTO !== fp) return false;
-    // Cuenta
-    if(fcu && r.CUENTA !== fcu) return false;
-    // Lista
-    if(fl && r.LISTA  !== fl) return false;
-    // Estado — multi-select (si hay seleccionados, filtra; si no hay, pasa todos)
-    if(estadosSeleccionados.size > 0 && !estadosSeleccionados.has(r.ESTADO)) return false;
-    // Búsqueda libre
-    if(fs && !r.NOMBRE.toLowerCase().includes(fs) &&
-             !(r.SKU||'').toLowerCase().includes(fs) &&
-             !(r.PRODUCTO||'').toLowerCase().includes(fs) &&
-             !(r.LISTA||'').toLowerCase().includes(fs) &&
-             !(r.MARCA||'').toLowerCase().includes(fs)) return false;
-    // Fecha — usa el campo activo (fechaMode) de cada tarea
-    // Si la célula está seleccionada, la fecha ya pertenece a esa célula
-    if(range){
-      const fd=parseDate(r._fd);
-      if(!fd || fd<range[0] || fd>range[1]) return false;
-    }
+    if(fc&&r.CELULA!==fc)return false;
+    if(fm&&r.MARCA!==fm)return false;
+    if(fe&&r.ESTADO!==fe)return false;
+    if(fcu&&r.CUENTA!==fcu)return false;
+    if(fl&&r.LISTA!==fl)return false;
+    if(fs&&!r.NOMBRE.toLowerCase().includes(fs)&&
+          !r.SKU.toLowerCase().includes(fs)&&
+          !r.LISTA.toLowerCase().includes(fs))return false;
+    if(range){const fd=parseDate(r._fd);if(!fd||fd<range[0]||fd>range[1])return false;}
     return true;
   });
   pg=1;render();
 }
 
 function clearFilters(){
-  ['fcelula','fmarca','fproducto','fcuenta','flista'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.value='';
-  });
+  ['fcelula','fmarca','festado','fcuenta','flista'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fsrch').value='';
   document.getElementById('dfrom').value='';
   document.getElementById('dto').value='';
-  // Limpiar pills de estado
-  estadosSeleccionados.clear();
-  document.querySelectorAll('.epill').forEach(p=>p.classList.remove('selected'));
-  actualizarContadorEstados();
-  // Reset periodo
   document.querySelectorAll('.tpill').forEach(b=>b.classList.remove('on'));
   document.querySelector('[data-p="todo"]').classList.add('on');
   period='todo';
@@ -580,19 +536,19 @@ function render(){renderKPIs();renderSegs();renderTable();}
 function renderKPIs(){
   const t=filtered.length;
   const pct=n=>t?Math.round(n/t*100)+'%':'—';
-  const cnt=keys=>filtered.filter(r=>keys.some(k=>r.ESTADO.toLowerCase().replace(/ /g,'_')===k||r.ESTADO.toLowerCase()===k)).length;
-  const pub  =cnt(['publicado','complete']);
-  const enp  =cnt(['en_proceso_publicacion','active']);
+  const cnt=keys=>filtered.filter(r=>keys.some(k=>r.ESTADO.toLowerCase().replace(/ /g,'_')===k)).length;
+  const pub  =cnt(['publicado','complete','closed']);
   const pend =cnt(['pendiente_publicacion']);
-  const edit =cnt(['edicion','edición']);
-  const grab =cnt(['grabacion','grabación']);
-  const plan =cnt(['planeacion','planeación']);
+  const edit =cnt(['edicion']);
+  const grab =cnt(['grabacion']);
+  const plan =cnt(['planeacion']);
   const rev  =cnt(['pendientes_revision']);
   const pcorr=cnt(['por_corregir_edicion','por_corregir_grabacion']);
+  const enproc=cnt(['en_proceso_publicacion','active']);
   document.getElementById('kpirow').innerHTML=`
     <div class="kpi"><div class="kpi-l">Total</div><div class="kpi-v c1">${t.toLocaleString()}</div><div class="kpi-s">filtro actual</div></div>
     <div class="kpi"><div class="kpi-l">Publicadas</div><div class="kpi-v c2">${pub}</div><div class="kpi-s">${pct(pub)}</div></div>
-    <div class="kpi"><div class="kpi-l">En proceso pub.</div><div class="kpi-v c3">${enp}</div><div class="kpi-s">${pct(enp)}</div></div>
+    <div class="kpi"><div class="kpi-l">En proceso pub.</div><div class="kpi-v c3">${enproc}</div><div class="kpi-s">${pct(enproc)}</div></div>
     <div class="kpi"><div class="kpi-l">Pend. publicación</div><div class="kpi-v c4">${pend}</div><div class="kpi-s">${pct(pend)}</div></div>
     <div class="kpi"><div class="kpi-l">Edición</div><div class="kpi-v c5">${edit}</div><div class="kpi-s">${pct(edit)}</div></div>
     <div class="kpi"><div class="kpi-l">Grabación</div><div class="kpi-v c6">${grab}</div><div class="kpi-s">${pct(grab)}</div></div>
@@ -605,10 +561,10 @@ function renderKPIs(){
 function getColor(map,val,pal){if(!map[val]){map[val]=pal[Object.keys(map).length%pal.length];}return map[val];}
 
 function renderSegs(){
-  renderSeg('segestado',  'ESTADO',   n=>estStyle(n).dot,               null);
-  renderSeg('segmarca',   'MARCA',    n=>getColor(marcaMap,n,MARCA_PAL),'fmarca');
-  renderSeg('segproducto','PRODUCTO', n=>getColor(prodMap,n,PROD_PAL),  'fproducto');
-  renderSeg('segcelula',  'CELULA',   n=>getColor(celulaMap,n,CELULA_PAL),'fcelula');
+  renderSeg('segestado','ESTADO',n=>estStyle(n).dot,'festado');
+  renderSeg('segmarca','MARCA',n=>getColor(marcaMap,n,MARCA_PAL),'fmarca');
+  renderSeg('segcelula','CELULA',n=>getColor(celulaMap,n,CELULA_PAL),'fcelula');
+  renderSeg('seglista','LISTA',n=>getColor(listaMap,n,LISTA_PAL),'flista');
 }
 
 function renderSeg(cid,key,colorFn,selId){
@@ -618,16 +574,11 @@ function renderSeg(cid,key,colorFn,selId){
   const max=sorted.length?sorted[0][1]:1,total=filtered.length||1;
   const el=document.getElementById(cid);
   if(!sorted.length){el.innerHTML='<div class="nodata">Sin datos</div>';return;}
-  const cur=selId?document.getElementById(selId)?.value||'':'';
-  // Para estados, verificar si está en el set de seleccionados
+  const cur=document.getElementById(selId)?.value||'';
   el.innerHTML=sorted.map(([name,cnt])=>{
     const pct=Math.round(cnt/total*100),w=Math.round(cnt/max*100),col=colorFn(name);
     const lbl=name.length>28?name.slice(0,27)+'…':name;
-    const isOn = selId ? cur===name : estadosSeleccionados.has(name);
-    const onclick = selId
-      ? `toggleSegFilter('${selId}','${name.replace(/'/g,"\\'")}')`
-      : `toggleEstadoSeg('${name.replace(/'/g,"\\'")}')`;
-    return `<div class="srow${isOn?' on':''}" onclick="${onclick}">
+    return `<div class="srow${cur===name?' on':''}" onclick="toggleSeg('${selId}','${name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
       <span class="sdot" style="background:${col}"></span>
       <span class="sname" title="${name}">${lbl}</span>
       <div class="sbar-w"><div class="sbar" style="width:${w}%;background:${col}"></div></div>
@@ -637,34 +588,21 @@ function renderSeg(cid,key,colorFn,selId){
   }).join('');
 }
 
-function toggleSegFilter(selId,val){
+function toggleSeg(selId,val){
   const sel=document.getElementById(selId);
   if(!sel)return;
   sel.value=sel.value===val?'':val;
   applyFilters();
 }
 
-// Click en segmentación de estado → activa/desactiva la pill correspondiente
-function toggleEstadoSeg(est){
-  const pill=document.querySelector(`.epill[data-estado="${est}"]`);
-  if(!pill)return;
-  if(estadosSeleccionados.has(est)){
-    estadosSeleccionados.delete(est);
-    pill.classList.remove('selected');
-  }else{
-    estadosSeleccionados.add(est);
-    pill.classList.add('selected');
-  }
-  actualizarContadorEstados();
-  applyFilters();
-}
-
-// ── Tabla ─────────────────────────────────────────────────────
 function sb(col){
   if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
   filtered.sort((a,b)=>{
     let av=a[col]??'',bv=b[col]??'';
-    if(col==='_fd'||col.startsWith('FECHA')){const da=parseDate(av),db=parseDate(bv);av=da?da.getTime():0;bv=db?db.getTime():0;}
+    if(col==='_fd'||col.startsWith('FECHA')){
+      const da=parseDate(av),db=parseDate(bv);
+      av=da?da.getTime():0;bv=db?db.getTime():0;
+    }
     if(av<bv)return sortAsc?-1:1;if(av>bv)return sortAsc?1:-1;return 0;
   });
   pg=1;renderTable();
@@ -687,10 +625,10 @@ function renderTable(){
         <td title="${r.NOMBRE}">${r.NOMBRE}</td>
         <td><span class="badge" style="background:${st.bg};color:${st.tc}">${r.ESTADO}</span></td>
         <td title="${r.MARCA}">${r.MARCA||'—'}</td>
-        <td title="${r.PRODUCTO}">${r.PRODUCTO||'—'}</td>
         <td>${r.CELULA||'—'}</td>
         <td title="${r.CUENTA}">${r.CUENTA||'—'}</td>
         <td>${r.SKU||'—'}</td>
+        <td title="${r.LISTA}">${r.LISTA||'—'}</td>
         <td><span style="font-size:10px;font-weight:600;color:${pc}">${r.PRIORIDAD||'—'}</span></td>
         <td>${r._fd||'—'}</td>
         <td>${link}</td>
@@ -704,7 +642,7 @@ function renderTable(){
 }
 
 function exportCSV(){
-  const h=['TAREA_ID','NOMBRE','ESTADO','CELULA','MARCA','PRODUCTO','CUENTA','SKU','PRIORIDAD','ASIGNADO',
+  const h=['TAREA_ID','NOMBRE','ESTADO','MARCA','CELULA','CUENTA','SKU','LISTA','PRIORIDAD','ASIGNADO',
            'FECHA_PUBLICADO','FECHA_PLANEADO','FECHA_GRABADO','FECHA_EDITADO','FECHA_ACTUALIZACION','URL'];
   const rows=filtered.map(r=>h.map(k=>`"${String(r[k]||'').replace(/"/g,'""')}"`).join(','));
   const csv='\ufeff'+[h.join(','),...rows].join('\n');
