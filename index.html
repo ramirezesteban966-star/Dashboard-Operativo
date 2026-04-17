@@ -318,27 +318,68 @@ async function connectCSV(){
 }
 async function reloadData(){if(!csvUrl){toggleCfg();return;}await loadData();}
 
-async function loadData(){
-  showLoader('Descargando datos...',10);
-  try{
-    // Intentar fetch directo primero (funciona si el sheet es público)
-    let text='';
-    try{
-      const r=await fetch(csvUrl);
-      if(r.ok) text=await r.text();
-      else throw new Error('direct failed');
-    }catch(_){
-      // Fallback proxy
-      setLoader(40,'Usando proxy CORS...');
-      const proxy='https://corsproxy.io/?'+encodeURIComponent(csvUrl);
-      const r2=await fetch(proxy);
-      if(!r2.ok) throw new Error(`HTTP ${r2.status}`);
-      text=await r2.text();
-    }
+// Proxies en orden de prioridad — se prueban en cascada si el anterior falla
+const PROXIES = [
+  url => url,                                                          // 1. Directo (funciona si el browser no bloquea CORS)
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,  // 2. allorigins raw
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, // 3. codetabs
+  url => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`,   // 4. thingproxy
+];
 
-    setLoader(70,'Procesando '+text.split('\n').length+' filas...');
+async function fetchWithTimeout(url, ms=12000){
+  const ctrl = new AbortController();
+  const tid  = setTimeout(()=>ctrl.abort(), ms);
+  try{
+    const r = await fetch(url, {signal: ctrl.signal});
+    clearTimeout(tid);
+    return r;
+  }catch(e){
+    clearTimeout(tid);
+    throw e;
+  }
+}
+
+async function loadData(){
+  showLoader('Conectando a Google Sheets...',5);
+  let text='', lastErr='';
+
+  for(let i=0; i<PROXIES.length; i++){
+    const proxyUrl = PROXIES[i](csvUrl);
+    const label = i===0?'directo':`proxy ${i}`;
+    setLoader(10+i*18, `Intentando conexión ${label}...`);
+    try{
+      const r = await fetchWithTimeout(proxyUrl, 14000);
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      text = await r.text();
+      // Validar que sea CSV real (primera línea debe tener comas)
+      const firstLine = text.split('\n')[0]||'';
+      if(!firstLine.includes(',')) throw new Error('Respuesta no es CSV válido');
+      break; // éxito
+    }catch(e){
+      lastErr = e.message;
+      console.warn(`Proxy ${i} falló: ${e.message}`);
+      if(i===PROXIES.length-1){
+        hideLoader();
+        setMsg('msgcfg',
+          `No se pudo cargar el CSV después de ${PROXIES.length} intentos.<br><br>`+
+          `<strong>Solución recomendada:</strong> Abrí el dashboard directamente desde Google Drive `+
+          `(en lugar de GitHub) para evitar restricciones CORS.<br><br>`+
+          `También podés intentar:<br>`+
+          `1. Verificá que la hoja esté publicada como CSV (no como página web)<br>`+
+          `2. Cerrá sesión de Google en el navegador y volvé a intentar<br>`+
+          `Último error: ${lastErr}`,
+          'err'
+        );
+        document.getElementById('cfgpanel').style.display='';
+        return;
+      }
+    }
+  }
+
+  try{
+    setLoader(82,'Procesando '+text.split('\n').length+' filas...');
     parseCSV(text);
-    setLoader(90,'Construyendo dashboard...');
+    setLoader(95,'Construyendo dashboard...');
     buildDash();
     hideLoader();
 
@@ -352,7 +393,7 @@ async function loadData(){
       new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
   }catch(e){
     hideLoader();
-    setMsg('msgcfg',`Error al cargar: ${e.message}<br>Verificá que la URL sea correcta y el sheet esté publicado como CSV.`,'err');
+    setMsg('msgcfg',`Error procesando los datos: ${e.message}`,'err');
     document.getElementById('cfgpanel').style.display='';
   }
 }
