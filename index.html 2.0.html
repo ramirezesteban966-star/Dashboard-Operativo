@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SCALIFY — Dashboard Operativo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F2F4F8;--surface:#fff;--border:#E4E7EF;--border2:#CDD2E0;
+  --blue:#185FA5;--blue-light:#EBF3FD;--blue-dark:#0C447C;
+  --text:#0F1729;--text2:#4A5568;--text3:#8A95A8;
+  --green:#1E7E3A;--green-bg:#EBF7EE;
+  --amber:#B45309;--amber-bg:#FEF3C7;
+  --red:#9B1C1C;--red-bg:#FEE2E2;
+  --purple:#5B21B6;--purple-bg:#EDE9FE;
+  --teal:#0F6E56;--teal-bg:#D1FAE5;
+  --radius:8px;--radius-lg:12px;--shadow:0 1px 3px rgba(15,23,41,.08),0 1px 2px rgba(15,23,41,.05);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+.app{max-width:1520px;margin:0 auto;padding:16px 20px}
+
+/* ── Header ── */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;margin:-16px -20px 16px;display:flex;align-items:center;justify-content:space-between;height:52px;box-shadow:var(--shadow)}
+.brand{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+.brand-badge{background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.05em}
+.header-right{display:flex;gap:8px;align-items:center}
+.live-indicator{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);background:var(--green-bg);border:1px solid #A7F3D0;padding:3px 10px;border-radius:20px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── Tabs de navegación por célula ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,41,.55);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(3px)}
+.modal-box{background:var(--bg);border-radius:var(--radius-lg);width:100%;max-width:1420px;box-shadow:0 20px 60px rgba(15,23,41,.25);animation:slideIn .2s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{background:var(--surface);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.modal-title{font-size:14px;font-weight:700;color:var(--text)}
+.modal-close{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:18px;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1}
+.modal-close:hover{background:var(--red-bg);color:var(--red);border-color:#FECACA}
+.modal-body{padding:16px 20px 20px}
+.cel-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px}
+.cel-tab{font-size:12px;font-weight:600;padding:7px 18px;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s}
+.cel-tab:hover{border-color:var(--border2);color:var(--text)}
+.cel-tab.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 1px 4px rgba(24,95,165,.3)}
+.btn-celulas{background:#EDE9FE;color:#5B21B6;border:1px solid #C4B5FD;font-weight:600}
+.btn-celulas:hover{background:#DDD6FE}
+
+/* ── Botones ── */
+.btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:var(--radius);cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s;white-space:nowrap}
+.btn:hover{border-color:var(--border2);color:var(--text)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:var(--blue-dark)}
+
+/* ── Config ── */
+.cfg{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.cfg-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.cfg-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:260px}
+.cfg-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.cfg-inp{font-size:12px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:monospace;width:100%;transition:border-color .15s}
+.cfg-inp:focus{outline:none;border-color:var(--blue);background:#fff}
+.cfg-help{font-size:11px;color:var(--text3);margin-top:8px;line-height:1.6}
+.alert{font-size:12px;padding:9px 14px;border-radius:var(--radius);margin-top:10px;line-height:1.5}
+.alert-info{background:var(--blue-light);color:var(--blue-dark);border:1px solid #BFDBFE}
+.alert-err{background:var(--red-bg);color:var(--red);border:1px solid #FECACA}
+
+/* ── Loader ── */
+.loader{display:flex;flex-direction:column;align-items:center;padding:4rem;gap:14px}
+.lbar-wrap{width:300px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.lbar{height:100%;background:var(--blue);border-radius:2px;transition:width .3s ease}
+.lmsg{font-size:12px;color:var(--text3);font-weight:500}
+
+/* ── Strips (fecha, período) ── */
+.strip{display:flex;gap:4px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:10px;box-shadow:var(--shadow)}
+.strip-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-right:6px;white-space:nowrap;flex-shrink:0}
+.spill{font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);transition:all .15s;user-select:none}
+.spill:hover{border-color:var(--border2);color:var(--text)}
+.spill.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.spill.on-dark{background:#334155;border-color:#334155;color:#fff}
+.dr{display:flex;gap:6px;align-items:center}
+.dr input[type=date]{font-size:11px;padding:5px 9px;border:1px solid var(--border);border-radius:var(--radius);background:#fff;color:var(--text)}
+
+/* ── Búsqueda ── */
+.search-row{display:flex;gap:8px;margin-bottom:10px}
+.srch{flex:1;font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);color:var(--text);box-shadow:var(--shadow);transition:border-color .15s}
+.srch:focus{outline:none;border-color:var(--blue)}
+.srch::placeholder{color:var(--text3)}
+
+/* ── Chips de filtros activos ── */
+.chips-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 14px;background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:12px;min-height:40px;box-shadow:var(--shadow)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px 4px 11px;border-radius:20px;cursor:pointer;transition:opacity .1s;border:1px solid transparent;user-select:none}
+.chip:hover{opacity:.75}
+.chip-x{font-size:15px;line-height:1;opacity:.7}
+.chips-ph{font-size:11px;color:var(--text3)}
+.chips-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);white-space:nowrap;flex-shrink:0}
+.clr-all{font-size:11px;font-weight:500;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:#fff;cursor:pointer;color:var(--text2)}
+.clr-all:hover{background:var(--bg)}
+
+/* ── KPIs ── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;margin-bottom:14px}
+.kpi{background:var(--surface);border-radius:var(--radius-lg);padding:12px 14px;border:1px solid var(--border);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:currentColor;opacity:.2}
+.kpi-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:4px}
+.kpi-v{font-size:22px;font-weight:700;line-height:1}
+.kpi-s{font-size:10px;color:var(--text3);margin-top:3px}
+.kv-blue{color:var(--blue)}.kv-green{color:var(--green)}.kv-teal{color:var(--teal)}
+.kv-amber{color:var(--amber)}.kv-purple{color:var(--purple)}.kv-red{color:var(--red)}.kv-slate{color:#475569}
+
+/* ── Panel de video (NUEVO) ── */
+.video-panel{background:var(--surface);border:2px solid var(--blue);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.video-panel-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.video-panel-icon{width:28px;height:28px;background:var(--blue);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.video-panel-icon svg{width:14px;height:14px;fill:#fff}
+.video-panel-title{font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em}
+.video-panel-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.video-inputs{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.video-group{display:flex;flex-direction:column;gap:5px}
+.video-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+.video-num{width:76px;font-size:15px;font-weight:700;padding:8px 10px;border:2px solid var(--border);border-radius:var(--radius);background:#fff;color:var(--text);text-align:center;transition:border-color .15s}
+.video-num:focus{outline:none;border-color:var(--blue)}
+.video-arrow{font-size:18px;color:var(--border2);align-self:flex-end;padding-bottom:9px}
+.vcard{display:flex;flex-direction:column;gap:3px;padding:10px 14px;background:var(--blue-light);border-radius:var(--radius);border:1px solid #BFDBFE;min-width:150px}
+.vcard-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--blue)}
+.vcard-val{font-size:20px;font-weight:700;color:var(--blue)}
+.vcard-sub{font-size:10px;color:var(--text3)}
+.vcard-green{background:var(--green-bg);border-color:#A7F3D0}
+.vcard-green .vcard-lbl,.vcard-green .vcard-val{color:var(--green)}
+.video-hint{font-size:11px;color:var(--text3);margin-top:10px;line-height:1.6;padding-top:10px;border-top:1px solid var(--border)}
+
+/* ── Grid paneles ── */
+.seg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:14px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:13px 14px;box-shadow:var(--shadow)}
+.ptitle{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.ptitle-txt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.ptitle-cnt{font-size:10px;font-weight:700;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 8px;color:var(--text2)}
+.slist{display:flex;flex-direction:column;gap:2px;max-height:210px;overflow-y:auto}
+.slist::-webkit-scrollbar{width:3px}
+.slist::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.srow{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:var(--radius);cursor:pointer;transition:background .1s;user-select:none}
+.srow:hover{background:var(--bg)}
+.srow.on{background:var(--blue-light)}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.schk{width:15px;height:15px;border:1.5px solid var(--border2);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;background:#fff;transition:all .15s;font-weight:700}
+.srow.on .schk{background:var(--blue);border-color:var(--blue);color:#fff}
+.sname{flex:1;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .1s}
+.srow.on .sname{font-weight:600;color:var(--blue)}
+.sbar-w{flex:0 0 50px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.sbar{height:100%;border-radius:2px;transition:width .2s}
+.scnt{font-size:11px;font-weight:600;color:var(--text3);min-width:22px;text-align:right}
+.nodata-seg{padding:1.2rem;font-size:12px;color:var(--text3);text-align:center}
+
+/* ── Tabla ── */
+.tpanel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:14px;box-shadow:var(--shadow)}
+.thdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.ttitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.cbadge{font-size:11px;font-weight:700;background:var(--blue-light);color:var(--blue);border-radius:20px;padding:2px 8px;margin-left:5px;border:1px solid #BFDBFE}
+.twrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+th{font-size:10px;font-weight:700;color:var(--text3);text-align:left;padding:8px 12px;border-bottom:2px solid var(--border);cursor:pointer;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em;user-select:none;background:var(--bg)}
+th:first-child{border-radius:var(--radius) 0 0 0}
+th:last-child{border-radius:0 var(--radius) 0 0}
+th:hover{color:var(--blue)}
+td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .1s}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--blue-light)}
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.pg{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--text3)}
+.pg-btn{padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;color:var(--text2);font-size:12px;font-weight:500;transition:all .15s}
+.pg-btn:hover:not(:disabled){background:var(--bg);border-color:var(--border2)}
+.pg-btn:disabled{opacity:.35;cursor:default}
+.nodata{text-align:center;padding:3rem;color:var(--text3);font-size:13px}
+.hidden{display:none!important}
+
+/* ── Vista por célula ── */
+.celula-header{background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.celula-name{font-size:20px;font-weight:700}
+.celula-sub{font-size:12px;opacity:.75;margin-top:2px}
+.celula-stats{display:flex;gap:16px}
+.celula-stat{text-align:right}
+.celula-stat-v{font-size:22px;font-weight:700}
+.celula-stat-l{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- Header -->
+<div class="header">
+  <div class="brand">
+    <span class="brand-badge">SCALIFY</span>
+    Dashboard Operativo
+    <span id="livebadge" class="hidden">
+      <div class="live-indicator"><span class="live-dot"></span><span id="datainfo">Conectado</span></div>
+    </span>
+  </div>
+  <div class="header-right">
+    <button class="btn btn-celulas" id="btn-celulas" onclick="abrirModalCelulas()" style="display:none">Vista por Célula</button>
+    <button class="btn" id="btnreload" onclick="reloadData()" style="display:none">Actualizar datos</button>
+    <button class="btn" id="btncfg" onclick="toggleCfg()">Configurar fuente</button>
+    <button class="btn" id="btnexp" onclick="exportCSV()" style="display:none">Exportar CSV</button>
+  </div>
+</div>
+
+<!-- Config -->
+<div class="cfg" id="cfgpanel">
+  <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)">Conectar a Google Sheets</div>
+  <div class="cfg-row">
+    <div class="cfg-group">
+      <span class="cfg-lbl">URL del CSV publicado</span>
+      <input class="cfg-inp" id="csvurl" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?gid=…&output=csv">
+    </div>
+    <button class="btn btn-primary" onclick="connectCSV()">Cargar datos</button>
+  </div>
+  <div class="cfg-help">Sheets → Archivo → Compartir → Publicar en la web → Hoja <strong>"Datos Detallados"</strong> → CSV → Publicar → Copiar URL.</div>
+  <div id="msgcfg" class="alert alert-info" style="margin-top:10px">Pegá la URL del CSV publicado para conectar.</div>
+</div>
+
+<!-- Loader -->
+<div class="loader hidden" id="loader">
+  <div class="lmsg" id="lmsg">Conectando...</div>
+  <div class="lbar-wrap"><div class="lbar" id="lbar" style="width:5%"></div></div>
+</div>
+
+<!-- Dashboard principal -->
+<div id="dash" class="hidden">
+
+  <!-- Vista general (directiva) — siempre visible -->
+  <div id="vista-all">
+
+    <!-- Selector campo fecha -->
+    <div class="strip">
+      <span class="strip-lbl">Fecha por:</span>
+      <button class="spill on-dark" data-fm="FECHA_ACTUALIZACION" onclick="setFM(this,'FECHA_ACTUALIZACION')">Última actualización</button>
+      <button class="spill" data-fm="FECHA_PUBLICADO"  onclick="setFM(this,'FECHA_PUBLICADO')">Publicado</button>
+      <button class="spill" data-fm="FECHA_PLANEADO"   onclick="setFM(this,'FECHA_PLANEADO')">Planeado</button>
+      <button class="spill" data-fm="FECHA_GRABADO"    onclick="setFM(this,'FECHA_GRABADO')">Grabado</button>
+      <button class="spill" data-fm="FECHA_EDITADO"    onclick="setFM(this,'FECHA_EDITADO')">Editado</button>
+    </div>
+
+    <!-- Periodos -->
+    <div class="strip">
+      <span class="strip-lbl">Periodo:</span>
+      <button class="spill on" data-p="todo"         onclick="setPeriod(this,'todo')">Todo</button>
+      <button class="spill"    data-p="hoy"           onclick="setPeriod(this,'hoy')">Hoy</button>
+      <button class="spill"    data-p="ayer"          onclick="setPeriod(this,'ayer')">Ayer</button>
+      <button class="spill"    data-p="semana"        onclick="setPeriod(this,'semana')">Esta semana</button>
+      <button class="spill"    data-p="semana_pasada" onclick="setPeriod(this,'semana_pasada')">Semana pasada</button>
+      <button class="spill"    data-p="mes"           onclick="setPeriod(this,'mes')">Este mes</button>
+      <button class="spill"    data-p="mes_pasado"    onclick="setPeriod(this,'mes_pasado')">Mes pasado</button>
+      <button class="spill"    data-p="custom"        onclick="setPeriod(this,'custom')">Personalizado</button>
+      <div class="dr hidden" id="customrange">
+        <input type="date" id="dfrom" onchange="applyFilters()">
+        <span style="color:var(--border2)">—</span>
+        <input type="date" id="dto" onchange="applyFilters()">
+      </div>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="search-row">
+      <input class="srch" id="fsrch" placeholder="Buscar por nombre de tarea, SKU, producto, marca, cuenta..." oninput="applyFilters()">
+      <button class="btn" onclick="clearAll()">Limpiar todo</button>
+    </div>
+
+    <!-- Chips activos -->
+    <div class="chips-bar" id="chips-bar">
+      <span class="chips-lbl">Filtros:</span>
+      <span class="chips-ph" id="chips-ph">Sin filtros — hacé clic en los paneles para filtrar</span>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpis" id="kpirow"></div>
+
+    <!-- Panel fechas por número de video -->
+    <div class="video-panel">
+      <div class="video-panel-header">
+        <div class="video-panel-icon">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div>
+          <div class="video-panel-title">Consulta por número de video</div>
+          <div class="video-panel-sub">Conocé la fecha exacta de cualquier video del contrato</div>
+        </div>
+      </div>
+      <div class="video-inputs">
+        <div class="video-group">
+          <span class="video-lbl">Video N°</span>
+          <input class="video-num" type="number" id="vnum1" min="1" placeholder="1" oninput="calcVideo()">
+        </div>
+        <div class="vcard" id="vres1">
+          <span class="vcard-lbl" id="vlbl1">Fecha video N°</span>
+          <span class="vcard-val" id="vval1">—</span>
+          <span class="vcard-sub" id="vsub1">Escribí un número</span>
+        </div>
+        <div class="video-arrow">→</div>
+        <div class="video-group">
+          <span class="video-lbl">Video N°</span>
+          <input class="video-num" type="number" id="vnum2" min="1" placeholder="30" oninput="calcVideo()">
+        </div>
+        <div class="vcard" id="vres2">
+          <span class="vcard-lbl" id="vlbl2">Fecha video N°</span>
+          <span class="vcard-val" id="vval2">—</span>
+          <span class="vcard-sub" id="vsub2">Escribí un número</span>
+        </div>
+        <div class="vcard vcard-green hidden" id="vres-rango">
+          <span class="vcard-lbl">Duración contrato</span>
+          <span class="vcard-val" id="vval-rango">—</span>
+          <span class="vcard-sub" id="vsub-rango">días entre videos</span>
+        </div>
+      </div>
+      <div class="video-hint" id="video-hint">
+        Aplicá filtros (Célula + Estado PUBLICADO) y escribí el número del video para ver su fecha. Ejemplo: Video 1 = inicio del posteo, Video 30 = fin del contrato.
+      </div>
+    </div>
+
+    <!-- Paneles de segmentación encadenados -->
+    <div class="seg-grid">
+      <div class="panel"><div class="ptitle"><span class="ptitle-txt">Célula</span><span class="ptitle-cnt" id="cnt-CELULA">0</span></div><div class="slist" id="seg-CELULA"></div></div>
+      <div class="panel"><div class="ptitle"><span class="ptitle-txt">Estado</span><span class="ptitle-cnt" id="cnt-ESTADO">0</span></div><div class="slist" id="seg-ESTADO"></div></div>
+      <div class="panel"><div class="ptitle"><span class="ptitle-txt">Marca</span><span class="ptitle-cnt" id="cnt-MARCA">0</span></div><div class="slist" id="seg-MARCA"></div></div>
+      <div class="panel"><div class="ptitle"><span class="ptitle-txt">Producto</span><span class="ptitle-cnt" id="cnt-PRODUCTO">0</span></div><div class="slist" id="seg-PRODUCTO"></div></div>
+      <div class="panel"><div class="ptitle"><span class="ptitle-txt">Cuenta</span><span class="ptitle-cnt" id="cnt-CUENTA">0</span></div><div class="slist" id="seg-CUENTA"></div></div>
+      <div class="panel"><div class="ptitle"><span class="ptitle-txt">Lista</span><span class="ptitle-cnt" id="cnt-LISTA">0</span></div><div class="slist" id="seg-LISTA"></div></div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tpanel">
+      <div class="thdr">
+        <span class="ttitle">Tareas <span class="cbadge" id="tblcount">0</span><span id="tbl-of" style="font-size:10px;color:var(--text3);font-weight:400;margin-left:6px"></span></span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="fechalabel" style="font-size:11px;color:var(--text3)"></span>
+          <select id="rpp" style="font-size:12px;padding:5px 9px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)" onchange="pg=1;renderTable()">
+            <option value="20">20 filas</option><option value="50">50 filas</option><option value="100">100 filas</option>
+          </select>
+        </div>
+      </div>
+      <div class="twrap">
+        <table>
+          <thead><tr>
+            <th style="width:195px" onclick="sb('NOMBRE')">Tarea</th>
+            <th style="width:145px" onclick="sb('ESTADO')">Estado</th>
+            <th style="width:82px"  onclick="sb('CELULA')">Célula</th>
+            <th style="width:105px" onclick="sb('MARCA')">Marca</th>
+            <th style="width:110px" onclick="sb('PRODUCTO')">Producto</th>
+            <th style="width:100px" onclick="sb('CUENTA')">Cuenta</th>
+            <th style="width:76px"  onclick="sb('SKU_PRODUCTO')">SKU Prod.</th>
+            <th style="width:74px"  onclick="sb('SKU_MARCA')">SKU Marca</th>
+            <th style="width:78px"  onclick="sb('PRIORIDAD')">Prioridad</th>
+            <th style="width:98px"  id="thfecha" onclick="sb('_fd')">Fecha</th>
+            <th style="width:50px">Link</th>
+          </tr></thead>
+          <tbody id="tblbody"></tbody>
+        </table>
+      </div>
+      <div class="pg">
+        <button class="pg-btn" id="pgprev" onclick="pg--;renderTable()">← Anterior</button>
+        <span id="pginfo"></span>
+        <button class="pg-btn" id="pgnext" onclick="pg++;renderTable()">Siguiente →</button>
+      </div>
+    </div>
+  </div><!-- /vista-all -->
+
+  <!-- Vistas por célula (se generan dinámicamente) -->
+  <div id="celula-views"></div>
+
+</div><!-- /dash -->
+
+<!-- Modal Vista por Célula -->
+<div class="modal-overlay hidden" id="modal-celulas" onclick="cerrarModalSiOverlay(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Vista Operativa por Célula</div>
+      <button class="modal-close" onclick="cerrarModalCelulas()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="cel-tabs" id="cel-tabs"></div>
+      <div id="cel-content"></div>
+    </div>
+  </div>
+</div>
+</div><!-- /app -->
+
+<script>
+// ── Estilos por estado ────────────────────────────────────────
+const EST={
+  'publicado':              {bg:'#D1FAE5',tc:'#065F46',dot:'#059669'},
+  'en_proceso_publicacion': {bg:'#CCFBF1',tc:'#134E4A',dot:'#0D9488'},
+  'pendiente_publicacion':  {bg:'#FEF3C7',tc:'#92400E',dot:'#D97706'},
+  'edicion':                {bg:'#DBEAFE',tc:'#1E3A8A',dot:'#2563EB'},
+  'grabacion':              {bg:'#FEE2E2',tc:'#7F1D1D',dot:'#DC2626'},
+  'planeacion':             {bg:'#EDE9FE',tc:'#4C1D95',dot:'#7C3AED'},
+  'pendientes_revision':    {bg:'#FCE7F3',tc:'#831843',dot:'#DB2777'},
+  'por_corregir_edicion':   {bg:'#FFF7ED',tc:'#7C2D12',dot:'#EA580C'},
+  'por_corregir_grabacion': {bg:'#FEF2F2',tc:'#450A0A',dot:'#B91C1C'},
+  'active':                 {bg:'#D1FAE5',tc:'#065F46',dot:'#059669'},
+  'complete':               {bg:'#D1FAE5',tc:'#065F46',dot:'#10B981'},
+  'closed':                 {bg:'#F1F5F9',tc:'#334155',dot:'#64748B'},
+};
+const estSt=n=>{const k=(n||'').toLowerCase().replace(/ /g,'_');return EST[k]||{bg:'#F8FAFC',tc:'#475569',dot:'#94A3B8'};};
+
+const PAL=['#2563EB','#059669','#D97706','#7C3AED','#0D9488','#DC2626','#DB2777','#475569','#EA580C','#1D4ED8'];
+const PRIO={urgent:'#DC2626',high:'#D97706',normal:'#2563EB',low:'#94A3B8'};
+const FML={FECHA_ACTUALIZACION:'Última actualización',FECHA_PUBLICADO:'Publicado',FECHA_PLANEADO:'Planeado',FECHA_GRABADO:'Grabado',FECHA_EDITADO:'Editado'};
+
+const CMAP={};
+const getDimColor=(dim,val)=>{const k=dim+':'+val;if(!CMAP[k]){const n=Object.keys(CMAP).filter(x=>x.startsWith(dim+':')).length;CMAP[k]=PAL[n%PAL.length];}return CMAP[k];};
+
+// ── Estado global ─────────────────────────────────────────────
+let allData=[],filtered=[],pg=1,sortCol='_fd',sortAsc=false;
+let period='todo',fechaMode='FECHA_ACTUALIZACION',csvUrl='';
+
+const DIMS=['CELULA','ESTADO','MARCA','PRODUCTO','CUENTA','LISTA'];
+const DIM_LBL={CELULA:'Célula',ESTADO:'Estado',MARCA:'Marca',PRODUCTO:'Producto',CUENTA:'Cuenta',LISTA:'Lista'};
+const SEL=Object.fromEntries(DIMS.map(d=>[d,new Set()]));
+
+// ── Config ────────────────────────────────────────────────────
+const toggleCfg=()=>{const p=document.getElementById('cfgpanel');p.style.display=p.style.display==='none'?'':'none';};
+const setMsg=(id,h,t)=>{const el=document.getElementById(id);el.className='alert alert-'+(t==='err'?'err':'info');el.innerHTML=h;};
+
+const PROX=[u=>u,u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,u=>`https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`];
+const fetchTO=async(url,ms=14000)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{signal:c.signal});clearTimeout(t);return r;}catch(e){clearTimeout(t);throw e;}};
+
+async function connectCSV(){csvUrl=document.getElementById('csvurl').value.trim();if(!csvUrl){setMsg('msgcfg','Pegá la URL primero','err');return;}await loadData();}
+async function reloadData(){if(!csvUrl){toggleCfg();return;}await loadData();}
+
+async function loadData(){
+  showL('Conectando a Google Sheets...',5);let text='',err='';
+  for(let i=0;i<PROX.length;i++){
+    setL(10+i*18,i===0?'Conexión directa...':'Proxy '+i+'...');
+    try{const r=await fetchTO(PROX[i](csvUrl));if(!r.ok)throw new Error('HTTP '+r.status);text=await r.text();if(!(text.split('\n')[0]||'').includes(','))throw new Error('No es CSV');break;}
+    catch(e){err=e.message;if(i===PROX.length-1){hideL();setMsg('msgcfg','Error: '+err,'err');document.getElementById('cfgpanel').style.display='';return;}}
+  }
+  try{
+    setL(80,'Procesando...');parseCSV(text);setL(95,'Construyendo...');initDash();hideL();
+    document.getElementById('cfgpanel').style.display='none';
+    document.getElementById('dash').classList.remove('hidden');
+    document.getElementById('livebadge').classList.remove('hidden');
+    document.getElementById('btnreload').style.display='';
+    document.getElementById('btnexp').style.display='';
+    document.getElementById('btn-celulas').style.display='';
+    document.getElementById('datainfo').textContent=allData.length.toLocaleString()+' tareas — '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){hideL();setMsg('msgcfg','Error: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
+}
+const showL=(m,p)=>{document.getElementById('loader').classList.remove('hidden');setL(p,m);};
+const setL=(p,m)=>{document.getElementById('lbar').style.width=p+'%';if(m)document.getElementById('lmsg').textContent=m;};
+const hideL=()=>document.getElementById('loader').classList.add('hidden');
+
+// ── CSV Parser ────────────────────────────────────────────────
+let headers=[];
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  headers=parseCSVLine(lines[0]);
+  allData=lines.slice(1).map(line=>{
+    const v=parseCSVLine(line);const r={};
+    headers.forEach((h,i)=>{r[h.trim().toUpperCase()]=(v[i]||'').trim();});
+    r._fd=r[fechaMode]||r.FECHA_ACTUALIZACION||'';
+    return r;
+  }).filter(r=>r.TAREA_ID&&r.TAREA_ID.trim());
+}
+function parseCSVLine(line){
+  const r=[];let cur='';let q=false;
+  for(let i=0;i<line.length;i++){const c=line[i];
+    if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}
+    else if(c===','&&!q){r.push(cur);cur='';}else cur+=c;
+  }r.push(cur);return r;
+}
+
+// ── Init ──────────────────────────────────────────────────────
+function initDash(){
+  DIMS.forEach(d=>SEL[d].clear());
+  generarTabsCelulas();
+  filtered=[...allData];
+  sb('_fd');
+}
+
+// ── Modal Vista por Célula ───────────────────────────────────
+let celulasDisponibles=[];
+
+function generarTabsCelulas(){
+  celulasDisponibles=[...new Set(allData.map(r=>r.CELULA).filter(v=>v&&v.trim()))].sort();
+  // Solo precarga la lista; el modal se construye al abrirse
+}
+
+function abrirModalCelulas(){
+  const modal=document.getElementById('modal-celulas');
+  modal.classList.remove('hidden');
+  document.body.style.overflow='hidden';
+  // Construir tabs si no están
+  const tabs=document.getElementById('cel-tabs');
+  if(!tabs.children.length) renderCelulaTabs();
+}
+
+function cerrarModalCelulas(){
+  document.getElementById('modal-celulas').classList.add('hidden');
+  document.body.style.overflow='';
+}
+
+function cerrarModalSiOverlay(e){
+  if(e.target.id==='modal-celulas') cerrarModalCelulas();
+}
+
+function renderCelulaTabs(){
+  const tabs=document.getElementById('cel-tabs');
+  tabs.innerHTML='';
+  celulasDisponibles.forEach((cel,i)=>{
+    const btn=document.createElement('button');
+    btn.className='cel-tab'+(i===0?' active':'');
+    btn.textContent=cel;
+    btn.onclick=()=>{
+      document.querySelectorAll('.cel-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCelulaContent(cel);
+    };
+    tabs.appendChild(btn);
+  });
+  if(celulasDisponibles.length) renderCelulaContent(celulasDisponibles[0]);
+}
+
+function renderCelulaContent(cel){
+  document.getElementById('cel-content').innerHTML=buildCelulaView(cel);
+}
+
+function buildCelulaView(cel){
+  const tareas=allData.filter(r=>r.CELULA===cel);
+  const total=tareas.length;
+  const pub=tareas.filter(r=>r.ESTADO.toLowerCase().includes('publicado')||r.ESTADO.toLowerCase()==='complete').length;
+  const enProc=tareas.filter(r=>r.ESTADO.toLowerCase().includes('proceso')||r.ESTADO.toLowerCase()==='active').length;
+
+  // Colores por célula
+  const numCel=parseInt(cel.replace(/\D/g,''))||1;
+  const colors=['#185FA5','#059669','#D97706','#7C3AED','#0D9488'];
+  const col=colors[(numCel-1)%colors.length];
+
+  return `
+    <div class="celula-header" style="background:linear-gradient(135deg,${col},${col}CC)">
+      <div>
+        <div class="celula-name">${cel}</div>
+        <div class="celula-sub">${total} tareas totales</div>
+      </div>
+      <div class="celula-stats">
+        <div class="celula-stat"><div class="celula-stat-v">${pub}</div><div class="celula-stat-l">Publicadas</div></div>
+        <div class="celula-stat"><div class="celula-stat-v">${enProc}</div><div class="celula-stat-l">En proceso</div></div>
+        <div class="celula-stat"><div class="celula-stat-v">${total-pub-enProc}</div><div class="celula-stat-l">Restantes</div></div>
+      </div>
+    </div>
+    ${buildCelulaSegGrid(tareas,cel)}
+    ${buildCelulaTabla(tareas,cel)}
+  `;
+}
+
+function buildCelulaSegGrid(tareas,cel){
+  const dims=['ESTADO','MARCA','PRODUCTO','CUENTA'];
+  const panels=dims.map(dim=>{
+    const counts={};
+    tareas.forEach(r=>{if(r[dim]&&r[dim].trim())counts[r[dim]]=(counts[r[dim]]||0)+1;});
+    const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const max=sorted.length?sorted[0][1]:1;
+    const rows=sorted.map(([val,cnt])=>{
+      const w=Math.round(cnt/max*100);
+      const col=dim==='ESTADO'?estSt(val).dot:getDimColor(dim,val);
+      return `<div class="srow">
+        <span class="sdot" style="background:${col}"></span>
+        <span class="sname">${val}</span>
+        <div class="sbar-w"><div class="sbar" style="width:${w}%;background:${col}"></div></div>
+        <span class="scnt">${cnt}</span>
+      </div>`;
+    }).join('');
+    return `<div class="panel"><div class="ptitle"><span class="ptitle-txt">${DIM_LBL[dim]||dim}</span><span class="ptitle-cnt">${sorted.length}</span></div><div class="slist">${rows||'<div class="nodata-seg">Sin datos</div>'}</div></div>`;
+  }).join('');
+  return `<div class="seg-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${panels}</div>`;
+}
+
+function buildCelulaTabla(tareas,cel){
+  const ultimas=tareas.slice(0,50);
+  const rows=ultimas.map(r=>{
+    const st=estSt(r.ESTADO);
+    const pc=PRIO[r.PRIORIDAD]||'#94A3B8';
+    const link=r.URL?`<a href="${r.URL}" target="_blank" style="color:var(--blue);font-size:11px">Abrir</a>`:'—';
+    return `<tr><td title="${r.NOMBRE}">${r.NOMBRE}</td><td><span class="badge" style="background:${st.bg};color:${st.tc}">${r.ESTADO}</span></td><td title="${r.MARCA}">${r.MARCA||'—'}</td><td>${r.PRODUCTO||'—'}</td><td>${r.CUENTA||'—'}</td><td><span style="font-size:10px;font-weight:600;color:${pc}">${r.PRIORIDAD||'—'}</span></td><td>${r._fd||'—'}</td><td>${link}</td></tr>`;
+  }).join('');
+  return `<div class="tpanel"><div class="thdr"><span class="ttitle">Tareas de ${cel} <span class="cbadge">${tareas.length}</span></span><span style="font-size:11px;color:var(--text3)">Mostrando primeras 50</span></div><div class="twrap"><table><thead><tr><th style="width:210px">Tarea</th><th style="width:150px">Estado</th><th style="width:110px">Marca</th><th style="width:110px">Producto</th><th style="width:105px">Cuenta</th><th style="width:80px">Prioridad</th><th style="width:100px">Fecha</th><th style="width:55px">Link</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="nodata">Sin tareas</td></tr>'}</tbody></table></div></div>`;
+}
+
+// setVista reemplazado por modal — ver abrirModalCelulas()
+
+// ── Fecha mode ────────────────────────────────────────────────
+function setFM(btn,mode){
+  document.querySelectorAll('[data-fm]').forEach(b=>{b.className='spill';});
+  btn.className='spill on-dark';fechaMode=mode;
+  allData.forEach(r=>{r._fd=r[mode]||r.FECHA_ACTUALIZACION||'';});
+  filtered.forEach(r=>{r._fd=r[mode]||r.FECHA_ACTUALIZACION||'';});
+  document.getElementById('thfecha').textContent=FML[mode];
+  document.getElementById('fechalabel').textContent=FML[mode];
+  applyFilters();
+}
+
+// ── Períodos ──────────────────────────────────────────────────
+function getRange(p){
+  const now=new Date(),tod=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  if(p==='todo')return null;
+  if(p==='hoy')return[tod,new Date(tod.getTime()+864e5-1)];
+  if(p==='ayer'){const y=new Date(tod.getTime()-864e5);return[y,new Date(tod.getTime()-1)];}
+  if(p==='semana'){const d=tod.getDay(),m=new Date(tod.getTime()-(d===0?6:d-1)*864e5);return[m,now];}
+  if(p==='semana_pasada'){const d=tod.getDay(),m=new Date(tod.getTime()-(d===0?6:d-1)*864e5);return[new Date(m.getTime()-7*864e5),new Date(m.getTime()-1)];}
+  if(p==='mes')return[new Date(now.getFullYear(),now.getMonth(),1),now];
+  if(p==='mes_pasado')return[new Date(now.getFullYear(),now.getMonth()-1,1),new Date(now.getFullYear(),now.getMonth(),0,23,59,59)];
+  if(p==='custom'){const f=document.getElementById('dfrom').value,t=document.getElementById('dto').value;if(!f&&!t)return null;return[f?new Date(f):new Date(0),t?new Date(t+'T23:59:59'):new Date()];}
+  return null;
+}
+const parseDate=s=>{
+  if(!s||!s.trim())return null;
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)){const d=new Date(s.slice(0,10)+'T00:00:00');return isNaN(d)?null:d;}
+  if(s.includes('/')){const p=s.split('/');if(p.length===3){const d=new Date(`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}T00:00:00`);return isNaN(d)?null:d;}}
+  return null;
+};
+function setPeriod(btn,p){
+  document.querySelectorAll('[data-p]').forEach(b=>b.className='spill');
+  btn.className='spill on';period=p;
+  document.getElementById('customrange').classList[p==='custom'?'remove':'add']('hidden');
+  applyFilters();
+}
+
+// ── Filtros encadenados ───────────────────────────────────────
+function pasaBase(r,exceptDim,range,fs){
+  if(range){const fd=parseDate(r._fd);if(!fd||fd<range[0]||fd>range[1])return false;}
+  if(fs){const hay=r.NOMBRE.toLowerCase().includes(fs)||(r.SKU_PRODUCTO||'').toLowerCase().includes(fs)||(r.PRODUCTO||'').toLowerCase().includes(fs)||(r.MARCA||'').toLowerCase().includes(fs)||(r.CUENTA||'').toLowerCase().includes(fs);if(!hay)return false;}
+  for(const d of DIMS){if(d===exceptDim)continue;if(SEL[d].size>0&&!SEL[d].has(r[d]))return false;}
+  return true;
+}
+
+function applyFilters(){
+  const range=getRange(period);
+  const fs=document.getElementById('fsrch').value.toLowerCase().trim();
+  filtered=allData.filter(r=>pasaBase(r,null,range,fs));
+  pg=1;render(range,fs);
+}
+
+function toggleSel(dim,val){
+  SEL[dim].has(val)?SEL[dim].delete(val):SEL[dim].add(val);
+  applyFilters();
+}
+
+function clearAll(){
+  DIMS.forEach(d=>SEL[d].clear());
+  document.getElementById('fsrch').value='';
+  document.getElementById('dfrom').value='';
+  document.getElementById('dto').value='';
+  document.querySelectorAll('[data-p]').forEach(b=>b.className='spill');
+  document.querySelector('[data-p="todo"]').className='spill on';
+  period='todo';
+  document.getElementById('customrange').classList.add('hidden');
+  // CORREGIDO: limpiar también el panel de video
+  document.getElementById('vnum1').value='';
+  document.getElementById('vnum2').value='';
+  document.getElementById('vval1').textContent='—';
+  document.getElementById('vval2').textContent='—';
+  document.getElementById('vlbl1').textContent='Fecha video N°';
+  document.getElementById('vlbl2').textContent='Fecha video N°';
+  document.getElementById('vsub1').textContent='Escribí un número';
+  document.getElementById('vsub2').textContent='Escribí un número';
+  document.getElementById('vres-rango').classList.add('hidden');
+  document.getElementById('video-hint').textContent='Aplicá filtros (Célula + Estado PUBLICADO) y escribí el número del video para ver su fecha. Ejemplo: Video 1 = inicio del posteo, Video 30 = fin del contrato.';
+  filtered=[...allData];pg=1;render(null,'');
+}
+
+// ── Render ────────────────────────────────────────────────────
+function render(range,fs){
+  if(range===undefined)range=getRange(period);
+  if(fs===undefined)fs=document.getElementById('fsrch').value.toLowerCase().trim();
+  renderKPIs();
+  renderPaneles(range,fs);
+  renderChips();
+  calcVideo();
+  renderTable();
+}
+
+// ── KPIs ──────────────────────────────────────────────────────
+function renderKPIs(){
+  const t=filtered.length;
+  const pct=n=>t?Math.round(n/t*100)+'%':'—';
+  const cnt=keys=>filtered.filter(r=>keys.some(k=>r.ESTADO.toLowerCase().replace(/ /g,'_')===k||r.ESTADO.toLowerCase()===k)).length;
+  const pub=cnt(['publicado','complete']);const enp=cnt(['en_proceso_publicacion','active']);
+  const pend=cnt(['pendiente_publicacion']);const edit=cnt(['edicion','edición']);
+  const grab=cnt(['grabacion','grabación']);const plan=cnt(['planeacion','planeación']);
+  const rev=cnt(['pendientes_revision']);const pc=cnt(['por_corregir_edicion','por_corregir_grabacion']);
+  document.getElementById('kpirow').innerHTML=`
+    <div class="kpi kv-blue" style="color:var(--blue)"><div class="kpi-l">Total filtrado</div><div class="kpi-v kv-blue">${t.toLocaleString()}</div><div class="kpi-s">de ${allData.length.toLocaleString()} total</div></div>
+    <div class="kpi" style="color:var(--green)"><div class="kpi-l">Publicadas</div><div class="kpi-v kv-green">${pub}</div><div class="kpi-s">${pct(pub)}</div></div>
+    <div class="kpi" style="color:var(--teal)"><div class="kpi-l">En proceso pub.</div><div class="kpi-v kv-teal">${enp}</div><div class="kpi-s">${pct(enp)}</div></div>
+    <div class="kpi" style="color:var(--amber)"><div class="kpi-l">Pend. publicación</div><div class="kpi-v kv-amber">${pend}</div><div class="kpi-s">${pct(pend)}</div></div>
+    <div class="kpi" style="color:var(--blue)"><div class="kpi-l">Edición</div><div class="kpi-v kv-blue">${edit}</div><div class="kpi-s">${pct(edit)}</div></div>
+    <div class="kpi" style="color:var(--red)"><div class="kpi-l">Grabación</div><div class="kpi-v kv-red">${grab}</div><div class="kpi-s">${pct(grab)}</div></div>
+    <div class="kpi" style="color:var(--purple)"><div class="kpi-l">Planeación</div><div class="kpi-v kv-purple">${plan}</div><div class="kpi-s">${pct(plan)}</div></div>
+    <div class="kpi" style="color:#64748B"><div class="kpi-l">Revisión</div><div class="kpi-v kv-slate">${rev}</div><div class="kpi-s">${pct(rev)}</div></div>
+    <div class="kpi" style="color:var(--red)"><div class="kpi-l">Por corregir</div><div class="kpi-v kv-red">${pc}</div><div class="kpi-s">${pct(pc)}</div></div>`;
+}
+
+// ── Paneles encadenados ───────────────────────────────────────
+function renderPaneles(range,fs){
+  DIMS.forEach(dim=>{
+    const base=allData.filter(r=>pasaBase(r,dim,range,fs));
+    const counts={};
+    base.forEach(r=>{if(r[dim]&&r[dim].trim())counts[r[dim]]=(counts[r[dim]]||0)+1;});
+    const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    const max=sorted.length?sorted[0][1]:1;
+    const el=document.getElementById('seg-'+dim);
+    const cntEl=document.getElementById('cnt-'+dim);
+    if(cntEl)cntEl.textContent=sorted.length;
+    if(!sorted.length){el.innerHTML='<div class="nodata-seg">Sin datos</div>';return;}
+    el.innerHTML=sorted.map(([val,cnt])=>{
+      const w=Math.round(cnt/max*100);
+      const isOn=SEL[dim].has(val);
+      const col=dim==='ESTADO'?estSt(val).dot:getDimColor(dim,val);
+      const safeVal=val.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return `<div class="srow${isOn?' on':''}" onclick="toggleSel('${dim}','${safeVal}')">
+        <span class="sdot" style="background:${col}"></span>
+        <div class="schk">${isOn?'✓':''}</div>
+        <span class="sname" title="${val}">${val.length>26?val.slice(0,25)+'…':val}</span>
+        <div class="sbar-w"><div class="sbar" style="width:${w}%;background:${col}"></div></div>
+        <span class="scnt">${cnt}</span>
+      </div>`;
+    }).join('');
+  });
+}
+
+// ── Chips ─────────────────────────────────────────────────────
+function renderChips(){
+  const bar=document.getElementById('chips-bar');
+  const ph=document.getElementById('chips-ph');
+  const chips=[];
+  DIMS.forEach(dim=>{
+    SEL[dim].forEach(val=>{
+      const col=dim==='ESTADO'?estSt(val).dot:getDimColor(dim,val);
+      const safeVal=val.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      chips.push(`<span class="chip" style="background:${col}18;color:${col};border-color:${col}40" onclick="toggleSel('${dim}','${safeVal}')">${DIM_LBL[dim]}: ${val.length>20?val.slice(0,19)+'…':val}<span class="chip-x">×</span></span>`);
+    });
+  });
+  bar.innerHTML='<span class="chips-lbl">Filtros activos:</span>';
+  if(chips.length){
+    bar.insertAdjacentHTML('beforeend',chips.join(''));
+    bar.insertAdjacentHTML('beforeend','<button class="clr-all" onclick="clearAll()">Limpiar todo</button>');
+  }else{ph.classList.remove('hidden');bar.appendChild(ph);}
+}
+
+// ── Fechas por número de video ────────────────────────────────
+function calcVideo(){
+  const n1=parseInt(document.getElementById('vnum1').value)||0;
+  const n2=parseInt(document.getElementById('vnum2').value)||0;
+
+  const conFecha=filtered
+    .map(r=>({...r,_fd_d:parseDate(r._fd)}))
+    .filter(r=>r._fd_d)
+    .sort((a,b)=>a._fd_d-b._fd_d);
+
+  const fmt=d=>d?d.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}):'—';
+
+  const setCard=(id,lbl,val,sub)=>{
+    document.getElementById('vlbl'+id).textContent=lbl;
+    document.getElementById('vval'+id).textContent=val;
+    document.getElementById('vsub'+id).textContent=sub;
+  };
+
+  if(n1>0){
+    const r=conFecha[n1-1];
+    setCard(1,`Fecha video ${n1}`,r?fmt(r._fd_d):'Sin dato',r?(r.NOMBRE||'').slice(0,35)+'…':`Solo ${conFecha.length} tareas`);
+  }else{setCard(1,'Fecha video N°','—','Escribí un número');}
+
+  if(n2>0){
+    const r=conFecha[n2-1];
+    setCard(2,`Fecha video ${n2}`,r?fmt(r._fd_d):'Sin dato',r?(r.NOMBRE||'').slice(0,35)+'…':`Solo ${conFecha.length} tareas`);
+  }else{setCard(2,'Fecha video N°','—','Escribí un número');}
+
+  const rangoEl=document.getElementById('vres-rango');
+  if(n1>0&&n2>0&&n1!==n2){
+    const r1=conFecha[Math.min(n1,n2)-1],r2=conFecha[Math.max(n1,n2)-1];
+    if(r1&&r2){
+      const dias=Math.round(Math.abs(r2._fd_d-r1._fd_d)/864e5);
+      document.getElementById('vval-rango').textContent=dias+' días';
+      document.getElementById('vsub-rango').textContent=`Video ${Math.min(n1,n2)} → Video ${Math.max(n1,n2)}`;
+      rangoEl.classList.remove('hidden');
+    }else rangoEl.classList.add('hidden');
+  }else rangoEl.classList.add('hidden');
+
+  document.getElementById('video-hint').textContent=conFecha.length>0
+    ?`${conFecha.length} tareas con fecha. Del ${fmt(conFecha[0]._fd_d)} (video 1) al ${fmt(conFecha[conFecha.length-1]._fd_d)} (video ${conFecha.length}).`
+    :'Aplicá filtros para ver las fechas. Ejemplo: CELULA#1 + PUBLICADO.';
+}
+
+// ── Tabla ─────────────────────────────────────────────────────
+function sb(col){
+  if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
+  filtered.sort((a,b)=>{
+    let av=a[col]??'',bv=b[col]??'';
+    if(col==='_fd'||col.startsWith('FECHA')){const da=parseDate(av),db=parseDate(bv);av=da?da.getTime():0;bv=db?db.getTime():0;}
+    if(av<bv)return sortAsc?-1:1;if(av>bv)return sortAsc?1:-1;return 0;
+  });
+  pg=1;renderTable();
+}
+function renderTable(){
+  const rpp=parseInt(document.getElementById('rpp').value)||20;
+  const total=filtered.length,pages=Math.max(1,Math.ceil(total/rpp));
+  if(pg>pages)pg=pages;if(pg<1)pg=1;
+  const slice=filtered.slice((pg-1)*rpp,pg*rpp);
+  const tbody=document.getElementById('tblbody');
+  if(!slice.length){tbody.innerHTML='<tr><td colspan="11" class="nodata">Sin tareas con los filtros aplicados</td></tr>';}
+  else{
+    tbody.innerHTML=slice.map(r=>{
+      const st=estSt(r.ESTADO);const pc=PRIO[r.PRIORIDAD]||'#94A3B8';
+      const link=r.URL?`<a href="${r.URL}" target="_blank" style="color:var(--blue);font-size:11px">Abrir</a>`:'—';
+      return `<tr><td title="${r.NOMBRE}">${r.NOMBRE}</td><td><span class="badge" style="background:${st.bg};color:${st.tc}">${r.ESTADO}</span></td><td>${r.CELULA||'—'}</td><td title="${r.MARCA}">${r.MARCA||'—'}</td><td title="${r.PRODUCTO}">${r.PRODUCTO||'—'}</td><td title="${r.CUENTA}">${r.CUENTA||'—'}</td><td>${r.SKU_PRODUCTO||'—'}</td><td>${r.SKU_MARCA||'—'}</td><td><span style="font-size:10px;font-weight:700;color:${pc}">${r.PRIORIDAD||'—'}</span></td><td>${r._fd||'—'}</td><td>${link}</td></tr>`;
+    }).join('');
+  }
+  document.getElementById('tblcount').textContent=total.toLocaleString();
+  document.getElementById('tbl-of').textContent=total<allData.length?`de ${allData.length.toLocaleString()} total`:'tareas';
+  document.getElementById('pginfo').textContent=`Pág. ${pg} de ${pages}`;
+  document.getElementById('pgprev').disabled=pg<=1;
+  document.getElementById('pgnext').disabled=pg>=pages;
+}
+
+function exportCSV(){
+  const h=['TAREA_ID','NOMBRE','ESTADO','CELULA','MARCA','PRODUCTO','CUENTA','SKU_PRODUCTO','SKU_MARCA','PRIORIDAD','ASIGNADO','FECHA_PUBLICADO','FECHA_PLANEADO','FECHA_GRABADO','FECHA_EDITADO','FECHA_ACTUALIZACION','URL'];
+  const rows=filtered.map(r=>h.map(k=>`"${String(r[k]||'').replace(/"/g,'""')}"`).join(','));
+  const csv='\ufeff'+[h.join(','),...rows].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`scalify_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+</script>
+</body>
+</html>
