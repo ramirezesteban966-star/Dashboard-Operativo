@@ -190,6 +190,17 @@ tr:hover td{background:var(--blue-light)}
 .celula-stat-v{font-size:22px;font-weight:700}
 .celula-stat-l{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.05em}
 
+/* ── Modal estados que cuentan ── */
+.estados-modal{position:fixed;inset:0;background:rgba(15,23,41,.5);z-index:2000;display:flex;align-items:center;justify-content:center}
+.estados-box{background:#fff;border-radius:12px;padding:24px;width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.estados-box h3{font-size:13px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.estados-box p{font-size:11px;color:var(--text3);margin-bottom:16px;line-height:1.5}
+.estado-chk-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;cursor:pointer;transition:background .1s}
+.estado-chk-row:hover{background:var(--bg)}
+.estado-chk-row input{width:16px;height:16px;cursor:pointer;accent-color:var(--blue)}
+.estado-chk-row label{font-size:12px;color:var(--text);cursor:pointer;flex:1}
+.estado-chk-row .est-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+
 /* ══════════════════════════════════════════
    TAB CONTRATOS
 ══════════════════════════════════════════ */
@@ -478,8 +489,9 @@ tr:hover td{background:var(--blue-light)}
             <button class="spill" data-ccel="Celula 5" onclick="filtrarCelula('Celula 5',this)">Célula 5</button>
           </div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input class="srch" id="ct-srch" placeholder="Buscar marca o producto..." oninput="renderContratos()" style="max-width:220px;font-size:12px;padding:6px 12px">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input class="srch" id="ct-srch" placeholder="Buscar marca o producto..." oninput="renderContratos()" style="max-width:200px;font-size:12px;padding:6px 12px">
+          <button class="btn btn-sm" onclick="abrirFiltroEstadosCt()">⚙ Estados que cuentan</button>
           <button class="btn btn-sm" onclick="loadContratos()">↻ Actualizar</button>
         </div>
       </div>
@@ -596,6 +608,18 @@ tr:hover td{background:var(--blue-light)}
     <div class="modal-body">
       <div class="cel-tabs" id="cel-tabs"></div>
       <div id="cel-content"></div>
+    </div>
+  </div>
+</div>
+<!-- Modal filtro estados contratos -->
+<div class="estados-modal hidden" id="modal-estados-ct" onclick="if(event.target.id==='modal-estados-ct')cerrarFiltroEstadosCt()">
+  <div class="estados-box">
+    <h3>Estados que cuentan como "posteados"</h3>
+    <p>Elegí qué estados de ClickUp se suman al progreso del contrato. Podés combinar varios.</p>
+    <div id="estados-ct-list"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn" onclick="cerrarFiltroEstadosCt()">Cancelar</button>
+      <button class="btn btn-primary" onclick="aplicarFiltroEstadosCt()">Aplicar</button>
     </div>
   </div>
 </div>
@@ -718,6 +742,11 @@ async function loadData(){
     document.getElementById('btn-celulas').style.display='';
     document.getElementById('datainfo').textContent=allData.length.toLocaleString()+' tareas — '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('badge-op').textContent=allData.length.toLocaleString();
+    // Si contratos ya estaba cargado, recalcular con los datos de ClickUp
+    if(contratosData.length){
+      contratosData=cruzarContratosConClickUp(contratosData);
+      document.getElementById('badge-ct').textContent=contratosData.length;
+    }
   }catch(e){hideL();setMsg('msgcfg','Error: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
 }
 const showL=(m,p)=>{document.getElementById('loader').classList.remove('hidden');setL(p,m);};
@@ -964,8 +993,128 @@ function exportCSV(){
 }
 
 // ═══════════════════════════════════════════════════════
-// TAB CONTRATOS
+// TAB CONTRATOS — con cruce ClickUp en browser
 // ═══════════════════════════════════════════════════════
+
+// Estados que cuentan — configurables por el usuario
+// Por defecto: publicado + en_proceso_publicacion
+let estadosQueCuentan=new Set(['publicado','en_proceso_publicacion','complete','active']);
+
+// Todos los estados disponibles en el CSV de ClickUp (se llenan al cargar)
+const ESTADOS_CONFIG=[
+  {key:'publicado',          label:'Publicado',             bg:'#D1FAE5',tc:'#065F46'},
+  {key:'en_proceso_publicacion',label:'En proceso publicación',bg:'#CCFBF1',tc:'#134E4A'},
+  {key:'complete',           label:'Complete',              bg:'#D1FAE5',tc:'#065F46'},
+  {key:'active',             label:'Active',                bg:'#D1FAE5',tc:'#065F46'},
+  {key:'pendiente_publicacion',label:'Pendiente publicación',bg:'#FEF3C7',tc:'#92400E'},
+  {key:'edicion',            label:'Edición',               bg:'#DBEAFE',tc:'#1E3A8A'},
+  {key:'grabacion',          label:'Grabación',             bg:'#FEE2E2',tc:'#7F1D1D'},
+  {key:'planeacion',         label:'Planeación',            bg:'#EDE9FE',tc:'#4C1D95'},
+];
+
+function abrirFiltroEstadosCt(){
+  // Construir lista dinámica con todos los estados presentes en el CSV
+  const estadosPresentes=new Set(allData.map(r=>(r.ESTADO||'').toLowerCase().replace(/ /g,'_')));
+  const modal=document.getElementById('modal-estados-ct');
+  const list=document.getElementById('estados-ct-list');
+  
+  // Combinar estados config + los que aparecen en el CSV
+  const todos=[...ESTADOS_CONFIG];
+  estadosPresentes.forEach(e=>{
+    if(e&&!todos.find(x=>x.key===e)) todos.push({key:e,label:e.replace(/_/g,' '),bg:'#F8FAFC',tc:'#475569'});
+  });
+  
+  list.innerHTML=todos.filter(e=>e.key).map(e=>`
+    <div class="estado-chk-row">
+      <input type="checkbox" id="ect-${e.key}" value="${e.key}" ${estadosQueCuentan.has(e.key)?'checked':''}>
+      <label for="ect-${e.key}"><span class="est-badge" style="background:${e.bg};color:${e.tc}">${e.label}</span></label>
+    </div>`).join('');
+  modal.classList.remove('hidden');
+}
+
+function cerrarFiltroEstadosCt(){document.getElementById('modal-estados-ct').classList.add('hidden');}
+
+function aplicarFiltroEstadosCt(){
+  estadosQueCuentan.clear();
+  document.querySelectorAll('#estados-ct-list input:checked').forEach(cb=>estadosQueCuentan.add(cb.value));
+  cerrarFiltroEstadosCt();
+  // Recalcular conteos desde ClickUp y re-renderizar
+  contratosData=cruzarContratosConClickUp(contratosData);
+  renderContratos();
+}
+
+/**
+ * Cruza contratos con allData (ClickUp) para calcular posteados por ciclo.
+ * Usa estadosQueCuentan para determinar qué estados suman.
+ */
+function cruzarContratosConClickUp(contratos){
+  if(!contratos.length||!allData.length) return contratos;
+  
+  // Contar por SKU+Célula los estados que cuentan, ordenados por fecha publicado
+  const conteoBySKUCel={};
+  
+  allData.forEach(r=>{
+    const sku=(r.SKU_PRODUCTO||'').trim();
+    const cel=(r.CELULA||'').trim();
+    const estado=(r.ESTADO||'').toLowerCase().replace(/ /g,'_');
+    if(!sku||!cel) return;
+    if(!estadosQueCuentan.has(estado)) return;
+    
+    const clave=cel+'||'+sku;
+    if(!conteoBySKUCel[clave]) conteoBySKUCel[clave]=[];
+    // Guardar la fecha para ordenar y asignar a ciclos
+    conteoBySKUCel[clave].push({
+      fecha:parseDate(r.FECHA_PUBLICADO||r.FECHA_ACTUALIZACION||'')||new Date(0),
+      estado:estado
+    });
+  });
+  
+  // Ordenar por fecha dentro de cada SKU+Cel
+  Object.keys(conteoBySKUCel).forEach(k=>{
+    conteoBySKUCel[k].sort((a,b)=>a.fecha-b.fecha);
+  });
+  
+  // Asignar a cada contrato su conteo basado en el ciclo_offset
+  return contratos.map(c=>{
+    const sku=(c.SKU||'').trim();
+    const cel=(c.CELULA_ID||'').trim();
+    const clave=cel+'||'+sku;
+    const videosMes=parseInt(String(c.VIDEOS_MES||'0'))||0;
+    const cicloOffset=parseInt(String(c.CICLO_OFFSET||'0'))||0;
+    
+    const items=conteoBySKUCel[clave]||[];
+    const totalSKU=items.length;
+    
+    // Videos de este ciclo = los que caen entre offset y offset+videosMes
+    const posteadosCiclo=Math.min(
+      Math.max(0, totalSKU-cicloOffset),
+      videosMes
+    );
+    const pct=videosMes>0?posteadosCiclo/videosMes:0;
+    const restantes=Math.max(0,videosMes-posteadosCiclo);
+    
+    // Recalcular semáforo
+    const diasR=c.DIAS_RESTANTES!==''&&c.DIAS_RESTANTES!==undefined&&c.DIAS_RESTANTES!=='null'?parseInt(c.DIAS_RESTANTES):'';
+    let semaforo=c.SEMAFORO||'en_curso';
+    // Solo recalcular si el contrato está activo
+    const estado=(c.ESTADO||'').toLowerCase();
+    if(estado!=='finalizado'&&estado!=='pausado'&&estado!=='pendiente'){
+      if(videosMes>0&&posteadosCiclo>=videosMes) semaforo='completado';
+      else if(diasR!==''&&diasR<0) semaforo='vencido';
+      else if(diasR!==''&&diasR<=7) semaforo='urgente';
+      else semaforo='en_curso';
+    }
+    
+    return {...c,
+      POSTEADOS_CICLO:posteadosCiclo,
+      POSTEADOS_TOTAL_SKU:totalSKU,
+      PCT_COMPLETADO:pct,
+      VIDEOS_RESTANTES:restantes,
+      SEMAFORO:semaforo
+    };
+  });
+}
+
 async function loadContratos(){
   const url=document.getElementById('csvurl-contratos').value.trim();
   if(!url){setMsg('msgcfg','Pegá la URL de CONTRATOS_PUB','warn');document.getElementById('cfgpanel').style.display='';return;}
@@ -973,6 +1122,8 @@ async function loadContratos(){
   try{
     const text=await fetchCSV(url);
     contratosData=parseCSVGeneric(text);
+    // Cruzar con allData de ClickUp para calcular posteados reales
+    if(allData.length) contratosData=cruzarContratosConClickUp(contratosData);
     document.getElementById('ct-no-data').classList.add('hidden');
     document.getElementById('ct-content').classList.remove('hidden');
     document.getElementById('badge-ct').textContent=contratosData.length;
@@ -1106,6 +1257,16 @@ function renderContratosSidebar(datos){
     if(porSem[s]){html+=`<div class="sidebar-kpi"><span class="sidebar-kpi-lbl">${semNombres[s]||s}</span><span class="sidebar-kpi-val" style="color:${semColors[s]||'var(--text)'}">${porSem[s]}</span></div>`;}
   });
 
+  // Agregar sección de estados que cuentan
+  const estLabels=[...estadosQueCuentan].map(e=>{
+    const cfg=ESTADOS_CONFIG.find(x=>x.key===e);
+    return cfg?`<span class="est-badge" style="background:${cfg.bg};color:${cfg.tc};font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px">${cfg.label}</span>`:e;
+  }).join(' ');
+  html+=`<div class="sidebar-sep"></div>
+    <div class="sidebar-title">Estados contando</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 0">${estLabels||'Ninguno'}</div>
+    <button class="btn btn-sm" onclick="abrirFiltroEstadosCt()" style="margin-top:8px;width:100%">⚙ Cambiar estados</button>`;
+  
   document.getElementById('ct-sidebar').innerHTML=html;
 }
 
