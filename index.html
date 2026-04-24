@@ -24,12 +24,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Arial,sans-
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;margin:-16px -20px 16px;display:flex;align-items:center;justify-content:space-between;height:52px;box-shadow:var(--shadow)}
 .brand{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
 .brand-badge{background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.05em}
-.header-right{display:flex;gap:8px;align-items:center}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .live-indicator{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);background:var(--green-bg);border:1px solid #A7F3D0;padding:3px 10px;border-radius:20px}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* ── Tabs de navegación por célula ── */
+/* ── Tabs principales ── */
+.main-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px;background:var(--surface);border-radius:var(--radius-lg) var(--radius-lg) 0 0;overflow:hidden;box-shadow:var(--shadow)}
+.main-tab{font-size:12px;font-weight:600;padding:12px 20px;cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.main-tab:hover{color:var(--text);background:var(--bg)}
+.main-tab.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--blue-light)}
+.main-tab .tab-badge{font-size:10px;font-weight:700;background:var(--border);color:var(--text3);border-radius:20px;padding:1px 6px;transition:all .15s}
+.main-tab.active .tab-badge{background:var(--blue);color:#fff}
+.tab-pane{display:none}.tab-pane.active{display:block}
+
+/* ── Modal ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(15,23,41,.55);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(3px)}
 .modal-box{background:var(--bg);border-radius:var(--radius-lg);width:100%;max-width:1420px;box-shadow:0 20px 60px rgba(15,23,41,.25);animation:slideIn .2s ease}
 @keyframes slideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
@@ -50,6 +59,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Arial,sans-
 .btn:hover{border-color:var(--border2);color:var(--text)}
 .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
 .btn-primary:hover{background:var(--blue-dark)}
+.btn-sm{font-size:11px;padding:4px 10px}
 
 /* ── Config ── */
 .cfg{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
@@ -62,6 +72,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Arial,sans-
 .alert{font-size:12px;padding:9px 14px;border-radius:var(--radius);margin-top:10px;line-height:1.5}
 .alert-info{background:var(--blue-light);color:var(--blue-dark);border:1px solid #BFDBFE}
 .alert-err{background:var(--red-bg);color:var(--red);border:1px solid #FECACA}
+.alert-warn{background:var(--amber-bg);color:var(--amber);border:1px solid #FDE68A}
 
 /* ── Loader ── */
 .loader{display:flex;flex-direction:column;align-items:center;padding:4rem;gap:14px}
@@ -69,7 +80,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Arial,sans-
 .lbar{height:100%;background:var(--blue);border-radius:2px;transition:width .3s ease}
 .lmsg{font-size:12px;color:var(--text3);font-weight:500}
 
-/* ── Strips (fecha, período) ── */
+/* ── Strips ── */
 .strip{display:flex;gap:4px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:10px;box-shadow:var(--shadow)}
 .strip-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-right:6px;white-space:nowrap;flex-shrink:0}
 .spill{font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);transition:all .15s;user-select:none}
@@ -85,7 +96,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Arial,sans-
 .srch:focus{outline:none;border-color:var(--blue)}
 .srch::placeholder{color:var(--text3)}
 
-/* ── Chips de filtros activos ── */
+/* ── Chips ── */
 .chips-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 14px;background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:12px;min-height:40px;box-shadow:var(--shadow)}
 .chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px 4px 11px;border-radius:20px;cursor:pointer;transition:opacity .1s;border:1px solid transparent;user-select:none}
 .chip:hover{opacity:.75}
@@ -105,7 +116,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Arial,sans-
 .kv-blue{color:var(--blue)}.kv-green{color:var(--green)}.kv-teal{color:var(--teal)}
 .kv-amber{color:var(--amber)}.kv-purple{color:var(--purple)}.kv-red{color:var(--red)}.kv-slate{color:#475569}
 
-/* ── Panel de video (NUEVO) ── */
+/* ── Video panel ── */
 .video-panel{background:var(--surface);border:2px solid var(--blue);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
 .video-panel-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
 .video-panel-icon{width:28px;height:28px;background:var(--blue);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -178,6 +189,95 @@ tr:hover td{background:var(--blue-light)}
 .celula-stat{text-align:right}
 .celula-stat-v{font-size:22px;font-weight:700}
 .celula-stat-l{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.05em}
+
+/* ══════════════════════════════════════════
+   TAB CONTRATOS
+══════════════════════════════════════════ */
+.contratos-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.contratos-filtros{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.contratos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-bottom:16px}
+
+/* Tarjeta de contrato */
+.ccard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow);transition:box-shadow .15s;position:relative;overflow:hidden}
+.ccard:hover{box-shadow:0 4px 12px rgba(15,23,41,.12)}
+.ccard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.ccard.sem-en_curso::before{background:var(--blue)}
+.ccard.sem-completado::before{background:var(--green)}
+.ccard.sem-vencido::before{background:var(--red)}
+.ccard.sem-urgente::before{background:var(--amber)}
+.ccard.sem-pausado::before{background:#94A3B8}
+.ccard.sem-finalizado::before{background:#94A3B8}
+.ccard.sem-pendiente::before{background:var(--purple)}
+
+.ccard-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px}
+.ccard-marca{font-size:13px;font-weight:700;color:var(--text);line-height:1.3}
+.ccard-producto{font-size:11px;color:var(--text2);margin-top:2px}
+.ccard-semaforo{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.sem-badge-en_curso{background:var(--blue-light);color:var(--blue)}
+.sem-badge-completado{background:var(--green-bg);color:var(--green)}
+.sem-badge-vencido{background:var(--red-bg);color:var(--red)}
+.sem-badge-urgente{background:var(--amber-bg);color:var(--amber)}
+.sem-badge-pausado{background:#F1F5F9;color:#64748B}
+.sem-badge-finalizado{background:#F1F5F9;color:#64748B}
+.sem-badge-pendiente{background:var(--purple-bg);color:var(--purple)}
+
+.ccard-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ccard-chip{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--bg);border:1px solid var(--border);color:var(--text2)}
+.ccard-chip.ciclo{background:var(--purple-bg);border-color:#C4B5FD;color:var(--purple)}
+.ccard-chip.celula{background:var(--blue-light);border-color:#BFDBFE;color:var(--blue)}
+
+/* Barra de progreso */
+.progress-wrap{margin-bottom:10px}
+.progress-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.progress-count{font-size:18px;font-weight:700;color:var(--text)}
+.progress-total{font-size:12px;color:var(--text3)}
+.progress-pct{font-size:12px;font-weight:600;color:var(--text2)}
+.progress-bar-bg{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.fill-en_curso{background:var(--blue)}
+.fill-completado{background:var(--green)}
+.fill-vencido{background:var(--red)}
+.fill-urgente{background:var(--amber)}
+.fill-pausado,.fill-finalizado,.fill-pendiente{background:#94A3B8}
+
+.ccard-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)}
+.ccard-dias{font-weight:600}
+.ccard-dias.vencido{color:var(--red)}
+.ccard-dias.urgente{color:var(--amber)}
+.ccard-dias.ok{color:var(--green)}
+.ccard-fechas{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+
+/* Resumen lateral de contratos */
+.contratos-layout{display:grid;grid-template-columns:1fr 280px;gap:16px;align-items:start}
+@media(max-width:900px){.contratos-layout{grid-template-columns:1fr}}
+.contratos-sidebar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow);position:sticky;top:16px}
+.sidebar-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:12px}
+.sidebar-kpi{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.sidebar-kpi:last-child{border-bottom:none}
+.sidebar-kpi-lbl{font-size:12px;color:var(--text2)}
+.sidebar-kpi-val{font-size:15px;font-weight:700}
+.sidebar-sep{height:1px;background:var(--border);margin:12px 0}
+
+/* ══════════════════════════════════════════
+   TAB VENTAS
+══════════════════════════════════════════ */
+.ventas-cfg{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;box-shadow:var(--shadow)}
+.ventas-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:16px}
+.ventas-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:800px){.ventas-grid{grid-template-columns:1fr}}
+.ventas-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)}
+.ventas-panel-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px}
+.venta-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.venta-row:last-child{border-bottom:none}
+.venta-marca{font-size:12px;font-weight:600;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.venta-bar-w{flex:0 0 80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.venta-bar{height:100%;border-radius:2px;background:var(--teal)}
+.venta-val{font-size:12px;font-weight:700;color:var(--teal);min-width:60px;text-align:right}
+.venta-units{font-size:10px;color:var(--text3);min-width:40px;text-align:right}
+
+/* Tabla ventas por ciclo */
+.ciclo-match{background:var(--green-bg);border-left:3px solid var(--green)}
+.ciclo-nomatch{opacity:.6}
 </style>
 </head>
 <body>
@@ -200,18 +300,34 @@ tr:hover td{background:var(--blue-light)}
   </div>
 </div>
 
-<!-- Config -->
+<!-- Config panel -->
 <div class="cfg" id="cfgpanel">
-  <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)">Conectar a Google Sheets</div>
-  <div class="cfg-row">
+  <div style="font-size:14px;font-weight:700;margin-bottom:14px;color:var(--text)">Conectar fuentes de datos</div>
+  <div class="cfg-row" style="margin-bottom:10px">
     <div class="cfg-group">
-      <span class="cfg-lbl">URL del CSV publicado</span>
+      <span class="cfg-lbl">URL CSV — ClickUp (Datos Detallados)</span>
       <input class="cfg-inp" id="csvurl" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?gid=…&output=csv">
     </div>
-    <button class="btn btn-primary" onclick="connectCSV()">Cargar datos</button>
+    <button class="btn btn-primary" onclick="connectCSV()">Cargar todo</button>
   </div>
-  <div class="cfg-help">Sheets → Archivo → Compartir → Publicar en la web → Hoja <strong>"Datos Detallados"</strong> → CSV → Publicar → Copiar URL.</div>
-  <div id="msgcfg" class="alert alert-info" style="margin-top:10px">Pegá la URL del CSV publicado para conectar.</div>
+  <div class="cfg-row" style="margin-bottom:10px">
+    <div class="cfg-group">
+      <span class="cfg-lbl">URL CSV — Contratos (CONTRATOS_PUB de Gerencia Comercial)</span>
+      <input class="cfg-inp" id="csvurl-contratos" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?gid=…&output=csv">
+    </div>
+    <button class="btn" onclick="loadContratos()">Cargar contratos</button>
+  </div>
+  <div class="cfg-row">
+    <div class="cfg-group">
+      <span class="cfg-lbl">URL CSV — Ventas TikTok (hoja consolidada con SKU_Scalify)</span>
+      <input class="cfg-inp" id="csvurl-ventas" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?gid=…&output=csv">
+    </div>
+    <button class="btn" onclick="loadVentas()">Cargar ventas</button>
+  </div>
+  <div class="cfg-help">Las 3 URLs se guardan automáticamente en el navegador. Sólo necesitás configurarlas una vez.<br>
+  Para Contratos: Gerencia Comercial → Generar CONTRATOS_PUB → Publicar esa hoja como CSV.<br>
+  Para Ventas: TikTok Shop base → publicar la hoja con columna SKU_Scalify como CSV.</div>
+  <div id="msgcfg" class="alert alert-info" style="margin-top:10px">Pegá las URLs para conectar. El dashboard funciona con sólo la URL de ClickUp.</div>
 </div>
 
 <!-- Loader -->
@@ -223,10 +339,21 @@ tr:hover td{background:var(--blue-light)}
 <!-- Dashboard principal -->
 <div id="dash" class="hidden">
 
-  <!-- Vista general (directiva) — siempre visible -->
-  <div id="vista-all">
+  <!-- Tabs principales -->
+  <div class="main-tabs">
+    <button class="main-tab active" onclick="switchTab('operativo',this)">
+      📊 Vista Operativa <span class="tab-badge" id="badge-op">—</span>
+    </button>
+    <button class="main-tab" onclick="switchTab('contratos',this)">
+      📋 Contratos <span class="tab-badge" id="badge-ct">—</span>
+    </button>
+    <button class="main-tab" onclick="switchTab('ventas',this)">
+      💰 Ventas <span class="tab-badge" id="badge-vt">—</span>
+    </button>
+  </div>
 
-    <!-- Selector campo fecha -->
+  <!-- ═══ TAB: VISTA OPERATIVA ═══ -->
+  <div id="tab-operativo" class="tab-pane active">
     <div class="strip">
       <span class="strip-lbl">Fecha por:</span>
       <button class="spill on-dark" data-fm="FECHA_ACTUALIZACION" onclick="setFM(this,'FECHA_ACTUALIZACION')">Última actualización</button>
@@ -235,8 +362,6 @@ tr:hover td{background:var(--blue-light)}
       <button class="spill" data-fm="FECHA_GRABADO"    onclick="setFM(this,'FECHA_GRABADO')">Grabado</button>
       <button class="spill" data-fm="FECHA_EDITADO"    onclick="setFM(this,'FECHA_EDITADO')">Editado</button>
     </div>
-
-    <!-- Periodos -->
     <div class="strip">
       <span class="strip-lbl">Periodo:</span>
       <button class="spill on" data-p="todo"         onclick="setPeriod(this,'todo')">Todo</button>
@@ -253,65 +378,33 @@ tr:hover td{background:var(--blue-light)}
         <input type="date" id="dto" onchange="applyFilters()">
       </div>
     </div>
-
-    <!-- Búsqueda -->
     <div class="search-row">
       <input class="srch" id="fsrch" placeholder="Buscar por nombre de tarea, SKU, producto, marca, cuenta..." oninput="applyFilters()">
       <button class="btn" onclick="clearAll()">Limpiar todo</button>
     </div>
-
-    <!-- Chips activos -->
     <div class="chips-bar" id="chips-bar">
       <span class="chips-lbl">Filtros:</span>
       <span class="chips-ph" id="chips-ph">Sin filtros — hacé clic en los paneles para filtrar</span>
     </div>
-
-    <!-- KPIs -->
     <div class="kpis" id="kpirow"></div>
-
-    <!-- Panel fechas por número de video -->
     <div class="video-panel">
       <div class="video-panel-header">
-        <div class="video-panel-icon">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </div>
+        <div class="video-panel-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
         <div>
           <div class="video-panel-title">Consulta por número de video</div>
           <div class="video-panel-sub">Conocé la fecha exacta de cualquier video del contrato</div>
         </div>
       </div>
       <div class="video-inputs">
-        <div class="video-group">
-          <span class="video-lbl">Video N°</span>
-          <input class="video-num" type="number" id="vnum1" min="1" placeholder="1" oninput="calcVideo()">
-        </div>
-        <div class="vcard" id="vres1">
-          <span class="vcard-lbl" id="vlbl1">Fecha video N°</span>
-          <span class="vcard-val" id="vval1">—</span>
-          <span class="vcard-sub" id="vsub1">Escribí un número</span>
-        </div>
+        <div class="video-group"><span class="video-lbl">Video N°</span><input class="video-num" type="number" id="vnum1" min="1" placeholder="1" oninput="calcVideo()"></div>
+        <div class="vcard" id="vres1"><span class="vcard-lbl" id="vlbl1">Fecha video N°</span><span class="vcard-val" id="vval1">—</span><span class="vcard-sub" id="vsub1">Escribí un número</span></div>
         <div class="video-arrow">→</div>
-        <div class="video-group">
-          <span class="video-lbl">Video N°</span>
-          <input class="video-num" type="number" id="vnum2" min="1" placeholder="30" oninput="calcVideo()">
-        </div>
-        <div class="vcard" id="vres2">
-          <span class="vcard-lbl" id="vlbl2">Fecha video N°</span>
-          <span class="vcard-val" id="vval2">—</span>
-          <span class="vcard-sub" id="vsub2">Escribí un número</span>
-        </div>
-        <div class="vcard vcard-green hidden" id="vres-rango">
-          <span class="vcard-lbl">Duración contrato</span>
-          <span class="vcard-val" id="vval-rango">—</span>
-          <span class="vcard-sub" id="vsub-rango">días entre videos</span>
-        </div>
+        <div class="video-group"><span class="video-lbl">Video N°</span><input class="video-num" type="number" id="vnum2" min="1" placeholder="30" oninput="calcVideo()"></div>
+        <div class="vcard" id="vres2"><span class="vcard-lbl" id="vlbl2">Fecha video N°</span><span class="vcard-val" id="vval2">—</span><span class="vcard-sub" id="vsub2">Escribí un número</span></div>
+        <div class="vcard vcard-green hidden" id="vres-rango"><span class="vcard-lbl">Duración contrato</span><span class="vcard-val" id="vval-rango">—</span><span class="vcard-sub" id="vsub-rango">días entre videos</span></div>
       </div>
-      <div class="video-hint" id="video-hint">
-        Aplicá filtros (Célula + Estado PUBLICADO) y escribí el número del video para ver su fecha. Ejemplo: Video 1 = inicio del posteo, Video 30 = fin del contrato.
-      </div>
+      <div class="video-hint" id="video-hint">Aplicá filtros (Célula + Estado PUBLICADO) y escribí el número del video para ver su fecha.</div>
     </div>
-
-    <!-- Paneles de segmentación encadenados -->
     <div class="seg-grid">
       <div class="panel"><div class="ptitle"><span class="ptitle-txt">Célula</span><span class="ptitle-cnt" id="cnt-CELULA">0</span></div><div class="slist" id="seg-CELULA"></div></div>
       <div class="panel"><div class="ptitle"><span class="ptitle-txt">Estado</span><span class="ptitle-cnt" id="cnt-ESTADO">0</span></div><div class="slist" id="seg-ESTADO"></div></div>
@@ -320,8 +413,6 @@ tr:hover td{background:var(--blue-light)}
       <div class="panel"><div class="ptitle"><span class="ptitle-txt">Cuenta</span><span class="ptitle-cnt" id="cnt-CUENTA">0</span></div><div class="slist" id="seg-CUENTA"></div></div>
       <div class="panel"><div class="ptitle"><span class="ptitle-txt">Lista</span><span class="ptitle-cnt" id="cnt-LISTA">0</span></div><div class="slist" id="seg-LISTA"></div></div>
     </div>
-
-    <!-- Tabla -->
     <div class="tpanel">
       <div class="thdr">
         <span class="ttitle">Tareas <span class="cbadge" id="tblcount">0</span><span id="tbl-of" style="font-size:10px;color:var(--text3);font-weight:400;margin-left:6px"></span></span>
@@ -356,10 +447,131 @@ tr:hover td{background:var(--blue-light)}
         <button class="pg-btn" id="pgnext" onclick="pg++;renderTable()">Siguiente →</button>
       </div>
     </div>
-  </div><!-- /vista-all -->
+  </div><!-- /tab-operativo -->
 
-  <!-- Vistas por célula (se generan dinámicamente) -->
-  <div id="celula-views"></div>
+  <!-- ═══ TAB: CONTRATOS ═══ -->
+  <div id="tab-contratos" class="tab-pane">
+    <div id="ct-no-data" class="alert alert-info">
+      Cargá la URL de <strong>CONTRATOS_PUB</strong> en "Configurar fuente" para ver los ciclos de contrato.<br>
+      En Gerencia Comercial: ejecutá "Generar CONTRATOS_PUB" → publicá esa hoja como CSV → pegá la URL arriba.
+    </div>
+    <div id="ct-content" class="hidden">
+      <!-- Filtros de contratos -->
+      <div class="contratos-header">
+        <div class="contratos-filtros">
+          <span class="strip-lbl">Estado:</span>
+          <button class="spill on" data-cf="todos" onclick="filtrarContratos('todos',this)">Todos</button>
+          <button class="spill" data-cf="en_curso" onclick="filtrarContratos('en_curso',this)">En curso</button>
+          <button class="spill" data-cf="urgente" onclick="filtrarContratos('urgente',this)">⚠ Urgente</button>
+          <button class="spill" data-cf="vencido" onclick="filtrarContratos('vencido',this)">🔴 Vencido</button>
+          <button class="spill" data-cf="completado" onclick="filtrarContratos('completado',this)">✅ Completado</button>
+          <button class="spill" data-cf="pausado" onclick="filtrarContratos('pausado',this)">Pausado</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="srch" id="ct-srch" placeholder="Buscar marca o producto..." oninput="renderContratos()" style="max-width:220px;font-size:12px;padding:6px 12px">
+          <button class="btn btn-sm" onclick="loadContratos()">↻ Actualizar</button>
+        </div>
+      </div>
+
+      <div class="contratos-layout">
+        <!-- Grid de tarjetas -->
+        <div>
+          <div id="ct-grid" class="contratos-grid"></div>
+          <div id="ct-tabla-wrap">
+            <div class="tpanel">
+              <div class="thdr"><span class="ttitle">Detalle por contrato</span></div>
+              <div class="twrap">
+                <table>
+                  <thead><tr>
+                    <th style="width:110px">Célula</th>
+                    <th style="width:120px">Marca</th>
+                    <th style="width:140px">Producto</th>
+                    <th style="width:60px">Ciclo</th>
+                    <th style="width:90px">Progreso</th>
+                    <th style="width:70px">Videos</th>
+                    <th style="width:90px">Semáforo</th>
+                    <th style="width:90px">Días rest.</th>
+                    <th style="width:100px">Inicio prog.</th>
+                    <th style="width:100px">Fin prog.</th>
+                  </tr></thead>
+                  <tbody id="ct-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar resumen -->
+        <div class="contratos-sidebar">
+          <div class="sidebar-title">Resumen de contratos</div>
+          <div id="ct-sidebar"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-contratos -->
+
+  <!-- ═══ TAB: VENTAS ═══ -->
+  <div id="tab-ventas" class="tab-pane">
+    <div id="vt-no-data" class="alert alert-info">
+      Cargá la URL de <strong>Ventas TikTok</strong> en "Configurar fuente" para ver el análisis de ventas.<br>
+      En TikTok Shop base: asegurate de agregar la columna <strong>SKU_Scalify</strong> en MAESTRO_PRODUCTOS para cruzar con los contratos. Luego publicá la hoja como CSV.
+    </div>
+    <div id="vt-content" class="hidden">
+      <div class="strip" style="margin-bottom:10px">
+        <span class="strip-lbl">Período:</span>
+        <button class="spill on" data-vp="todo" onclick="filtrarVentas('todo',this)">Todo</button>
+        <button class="spill" data-vp="semana" onclick="filtrarVentas('semana',this)">Esta semana</button>
+        <button class="spill" data-vp="mes" onclick="filtrarVentas('mes',this)">Este mes</button>
+        <button class="spill" data-vp="mes_pasado" onclick="filtrarVentas('mes_pasado',this)">Mes pasado</button>
+      </div>
+
+      <!-- KPIs de ventas -->
+      <div class="ventas-kpis" id="vt-kpis"></div>
+
+      <!-- Grid de análisis -->
+      <div class="ventas-grid">
+        <div class="ventas-panel">
+          <div class="ventas-panel-title">Ventas por marca (unidades)</div>
+          <div id="vt-por-marca"></div>
+        </div>
+        <div class="ventas-panel">
+          <div class="ventas-panel-title">Ventas por marca (ingresos USD)</div>
+          <div id="vt-por-marca-usd"></div>
+        </div>
+        <div class="ventas-panel">
+          <div class="ventas-panel-title">Ventas por semana</div>
+          <div id="vt-por-semana"></div>
+        </div>
+        <div class="ventas-panel">
+          <div class="ventas-panel-title">Ventas por cuenta</div>
+          <div id="vt-por-cuenta"></div>
+        </div>
+      </div>
+
+      <!-- Tabla ventas vs ciclos -->
+      <div class="tpanel">
+        <div class="thdr">
+          <span class="ttitle">Ventas cruzadas con ciclos de contrato</span>
+          <span style="font-size:11px;color:var(--text3)">🟢 = dentro del ciclo activo</span>
+        </div>
+        <div class="twrap">
+          <table>
+            <thead><tr>
+              <th style="width:120px">Marca</th>
+              <th style="width:140px">Producto (Scalify)</th>
+              <th style="width:80px">SKU</th>
+              <th style="width:70px">Unidades</th>
+              <th style="width:90px">Ingresos USD</th>
+              <th style="width:90px">Semana</th>
+              <th style="width:80px">Ciclo activo</th>
+              <th style="width:90px">Videos post.</th>
+            </tr></thead>
+            <tbody id="vt-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-ventas -->
 
 </div><!-- /dash -->
 
@@ -379,50 +591,107 @@ tr:hover td{background:var(--blue-light)}
 </div><!-- /app -->
 
 <script>
-// ── Estilos por estado ────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// CONSTANTES Y ESTADO GLOBAL
+// ═══════════════════════════════════════════════════════
 const EST={
-  'publicado':              {bg:'#D1FAE5',tc:'#065F46',dot:'#059669'},
-  'en_proceso_publicacion': {bg:'#CCFBF1',tc:'#134E4A',dot:'#0D9488'},
-  'pendiente_publicacion':  {bg:'#FEF3C7',tc:'#92400E',dot:'#D97706'},
-  'edicion':                {bg:'#DBEAFE',tc:'#1E3A8A',dot:'#2563EB'},
-  'grabacion':              {bg:'#FEE2E2',tc:'#7F1D1D',dot:'#DC2626'},
-  'planeacion':             {bg:'#EDE9FE',tc:'#4C1D95',dot:'#7C3AED'},
-  'pendientes_revision':    {bg:'#FCE7F3',tc:'#831843',dot:'#DB2777'},
-  'por_corregir_edicion':   {bg:'#FFF7ED',tc:'#7C2D12',dot:'#EA580C'},
-  'por_corregir_grabacion': {bg:'#FEF2F2',tc:'#450A0A',dot:'#B91C1C'},
-  'active':                 {bg:'#D1FAE5',tc:'#065F46',dot:'#059669'},
-  'complete':               {bg:'#D1FAE5',tc:'#065F46',dot:'#10B981'},
-  'closed':                 {bg:'#F1F5F9',tc:'#334155',dot:'#64748B'},
+  'publicado':{bg:'#D1FAE5',tc:'#065F46',dot:'#059669'},
+  'en_proceso_publicacion':{bg:'#CCFBF1',tc:'#134E4A',dot:'#0D9488'},
+  'pendiente_publicacion':{bg:'#FEF3C7',tc:'#92400E',dot:'#D97706'},
+  'edicion':{bg:'#DBEAFE',tc:'#1E3A8A',dot:'#2563EB'},
+  'grabacion':{bg:'#FEE2E2',tc:'#7F1D1D',dot:'#DC2626'},
+  'planeacion':{bg:'#EDE9FE',tc:'#4C1D95',dot:'#7C3AED'},
+  'pendientes_revision':{bg:'#FCE7F3',tc:'#831843',dot:'#DB2777'},
+  'por_corregir_edicion':{bg:'#FFF7ED',tc:'#7C2D12',dot:'#EA580C'},
+  'por_corregir_grabacion':{bg:'#FEF2F2',tc:'#450A0A',dot:'#B91C1C'},
+  'active':{bg:'#D1FAE5',tc:'#065F46',dot:'#059669'},
+  'complete':{bg:'#D1FAE5',tc:'#065F46',dot:'#10B981'},
+  'closed':{bg:'#F1F5F9',tc:'#334155',dot:'#64748B'},
 };
 const estSt=n=>{const k=(n||'').toLowerCase().replace(/ /g,'_');return EST[k]||{bg:'#F8FAFC',tc:'#475569',dot:'#94A3B8'};};
-
 const PAL=['#2563EB','#059669','#D97706','#7C3AED','#0D9488','#DC2626','#DB2777','#475569','#EA580C','#1D4ED8'];
 const PRIO={urgent:'#DC2626',high:'#D97706',normal:'#2563EB',low:'#94A3B8'};
 const FML={FECHA_ACTUALIZACION:'Última actualización',FECHA_PUBLICADO:'Publicado',FECHA_PLANEADO:'Planeado',FECHA_GRABADO:'Grabado',FECHA_EDITADO:'Editado'};
-
 const CMAP={};
 const getDimColor=(dim,val)=>{const k=dim+':'+val;if(!CMAP[k]){const n=Object.keys(CMAP).filter(x=>x.startsWith(dim+':')).length;CMAP[k]=PAL[n%PAL.length];}return CMAP[k];};
 
-// ── Estado global ─────────────────────────────────────────────
+// Estado global
 let allData=[],filtered=[],pg=1,sortCol='_fd',sortAsc=false;
 let period='todo',fechaMode='FECHA_ACTUALIZACION',csvUrl='';
+let contratosData=[],filtroContratos='todos';
+let ventasData=[],filtroVentas='todo';
 
 const DIMS=['CELULA','ESTADO','MARCA','PRODUCTO','CUENTA','LISTA'];
 const DIM_LBL={CELULA:'Célula',ESTADO:'Estado',MARCA:'Marca',PRODUCTO:'Producto',CUENTA:'Cuenta',LISTA:'Lista'};
 const SEL=Object.fromEntries(DIMS.map(d=>[d,new Set()]));
 
-// ── Config ────────────────────────────────────────────────────
-const toggleCfg=()=>{const p=document.getElementById('cfgpanel');p.style.display=p.style.display==='none'?'':'none';};
-const setMsg=(id,h,t)=>{const el=document.getElementById(id);el.className='alert alert-'+(t==='err'?'err':'info');el.innerHTML=h;};
+// ═══════════════════════════════════════════════════════
+// PERSISTENCIA — localStorage para URLs
+// ═══════════════════════════════════════════════════════
+function saveUrls(){
+  try{
+    localStorage.setItem('scalify_csv_clickup', document.getElementById('csvurl').value.trim());
+    localStorage.setItem('scalify_csv_contratos', document.getElementById('csvurl-contratos').value.trim());
+    localStorage.setItem('scalify_csv_ventas', document.getElementById('csvurl-ventas').value.trim());
+  }catch(e){}
+}
+function loadUrls(){
+  try{
+    const cu=localStorage.getItem('scalify_csv_clickup')||'';
+    const cc=localStorage.getItem('scalify_csv_contratos')||'';
+    const cv=localStorage.getItem('scalify_csv_ventas')||'';
+    if(cu) document.getElementById('csvurl').value=cu;
+    if(cc) document.getElementById('csvurl-contratos').value=cc;
+    if(cv) document.getElementById('csvurl-ventas').value=cv;
+  }catch(e){}
+}
+window.addEventListener('load',loadUrls);
 
+// ═══════════════════════════════════════════════════════
+// TABS PRINCIPALES
+// ═══════════════════════════════════════════════════════
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='contratos') renderContratos();
+  if(id==='ventas') renderVentas();
+}
+
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const toggleCfg=()=>{const p=document.getElementById('cfgpanel');p.style.display=p.style.display==='none'?'':'none';};
+const setMsg=(id,h,t)=>{const el=document.getElementById(id);el.className='alert alert-'+(t==='err'?'err':t==='warn'?'warn':'info');el.innerHTML=h;};
 const PROX=[u=>u,u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,u=>`https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`];
 const fetchTO=async(url,ms=14000)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{signal:c.signal});clearTimeout(t);return r;}catch(e){clearTimeout(t);throw e;}};
 
-async function connectCSV(){csvUrl=document.getElementById('csvurl').value.trim();if(!csvUrl){setMsg('msgcfg','Pegá la URL primero','err');return;}await loadData();}
+async function fetchCSV(url){
+  let text='',err='';
+  for(let i=0;i<PROX.length;i++){
+    try{const r=await fetchTO(PROX[i](url));if(!r.ok)throw new Error('HTTP '+r.status);text=await r.text();if(text.length>100&&text.includes(','))break;}
+    catch(e){err=e.message;}
+  }
+  if(!text) throw new Error('No se pudo leer el CSV: '+err);
+  return text;
+}
+
+async function connectCSV(){
+  csvUrl=document.getElementById('csvurl').value.trim();
+  if(!csvUrl){setMsg('msgcfg','Pegá la URL de ClickUp primero','err');return;}
+  saveUrls();
+  await loadData();
+  // También cargar contratos y ventas si tienen URL
+  const cu=document.getElementById('csvurl-contratos').value.trim();
+  const cv=document.getElementById('csvurl-ventas').value.trim();
+  if(cu) loadContratos();
+  if(cv) loadVentas();
+}
 async function reloadData(){if(!csvUrl){toggleCfg();return;}await loadData();}
 
 async function loadData(){
-  showL('Conectando a Google Sheets...',5);let text='',err='';
+  showL('Conectando a ClickUp...',5);let text='',err='';
   for(let i=0;i<PROX.length;i++){
     setL(10+i*18,i===0?'Conexión directa...':'Proxy '+i+'...');
     try{const r=await fetchTO(PROX[i](csvUrl));if(!r.ok)throw new Error('HTTP '+r.status);text=await r.text();if(!(text.split('\n')[0]||'').includes(','))throw new Error('No es CSV');break;}
@@ -437,13 +706,16 @@ async function loadData(){
     document.getElementById('btnexp').style.display='';
     document.getElementById('btn-celulas').style.display='';
     document.getElementById('datainfo').textContent=allData.length.toLocaleString()+' tareas — '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('badge-op').textContent=allData.length.toLocaleString();
   }catch(e){hideL();setMsg('msgcfg','Error: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
 }
 const showL=(m,p)=>{document.getElementById('loader').classList.remove('hidden');setL(p,m);};
 const setL=(p,m)=>{document.getElementById('lbar').style.width=p+'%';if(m)document.getElementById('lmsg').textContent=m;};
 const hideL=()=>document.getElementById('loader').classList.add('hidden');
 
-// ── CSV Parser ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// CSV PARSER
+// ═══════════════════════════════════════════════════════
 let headers=[];
 function parseCSV(text){
   const lines=text.split(/\r?\n/).filter(l=>l.trim());
@@ -462,8 +734,20 @@ function parseCSVLine(line){
     else if(c===','&&!q){r.push(cur);cur='';}else cur+=c;
   }r.push(cur);return r;
 }
+function parseCSVGeneric(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2) return [];
+  const hdrs=parseCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
+  return lines.slice(1).map(line=>{
+    const v=parseCSVLine(line);const r={};
+    hdrs.forEach((h,i)=>{r[h]=(v[i]||'').trim();});
+    return r;
+  }).filter(r=>Object.values(r).some(v=>v));
+}
 
-// ── Init ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// INIT DASHBOARD
+// ═══════════════════════════════════════════════════════
 function initDash(){
   DIMS.forEach(d=>SEL[d].clear());
   generarTabsCelulas();
@@ -471,117 +755,57 @@ function initDash(){
   sb('_fd');
 }
 
-// ── Modal Vista por Célula ───────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// MODAL VISTA POR CÉLULA
+// ═══════════════════════════════════════════════════════
 let celulasDisponibles=[];
-
 function generarTabsCelulas(){
   celulasDisponibles=[...new Set(allData.map(r=>r.CELULA).filter(v=>v&&v.trim()))].sort();
-  // Solo precarga la lista; el modal se construye al abrirse
 }
-
 function abrirModalCelulas(){
-  const modal=document.getElementById('modal-celulas');
-  modal.classList.remove('hidden');
-  document.body.style.overflow='hidden';
-  // Construir tabs si no están
-  const tabs=document.getElementById('cel-tabs');
-  if(!tabs.children.length) renderCelulaTabs();
+  const modal=document.getElementById('modal-celulas');modal.classList.remove('hidden');document.body.style.overflow='hidden';
+  const tabs=document.getElementById('cel-tabs');if(!tabs.children.length) renderCelulaTabs();
 }
-
-function cerrarModalCelulas(){
-  document.getElementById('modal-celulas').classList.add('hidden');
-  document.body.style.overflow='';
-}
-
-function cerrarModalSiOverlay(e){
-  if(e.target.id==='modal-celulas') cerrarModalCelulas();
-}
-
+function cerrarModalCelulas(){document.getElementById('modal-celulas').classList.add('hidden');document.body.style.overflow='';}
+function cerrarModalSiOverlay(e){if(e.target.id==='modal-celulas') cerrarModalCelulas();}
 function renderCelulaTabs(){
-  const tabs=document.getElementById('cel-tabs');
-  tabs.innerHTML='';
+  const tabs=document.getElementById('cel-tabs');tabs.innerHTML='';
   celulasDisponibles.forEach((cel,i)=>{
-    const btn=document.createElement('button');
-    btn.className='cel-tab'+(i===0?' active':'');
-    btn.textContent=cel;
-    btn.onclick=()=>{
-      document.querySelectorAll('.cel-tab').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      renderCelulaContent(cel);
-    };
+    const btn=document.createElement('button');btn.className='cel-tab'+(i===0?' active':'');btn.textContent=cel;
+    btn.onclick=()=>{document.querySelectorAll('.cel-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderCelulaContent(cel);};
     tabs.appendChild(btn);
   });
   if(celulasDisponibles.length) renderCelulaContent(celulasDisponibles[0]);
 }
-
-function renderCelulaContent(cel){
-  document.getElementById('cel-content').innerHTML=buildCelulaView(cel);
-}
-
+function renderCelulaContent(cel){document.getElementById('cel-content').innerHTML=buildCelulaView(cel);}
 function buildCelulaView(cel){
-  const tareas=allData.filter(r=>r.CELULA===cel);
-  const total=tareas.length;
+  const tareas=allData.filter(r=>r.CELULA===cel);const total=tareas.length;
   const pub=tareas.filter(r=>r.ESTADO.toLowerCase().includes('publicado')||r.ESTADO.toLowerCase()==='complete').length;
   const enProc=tareas.filter(r=>r.ESTADO.toLowerCase().includes('proceso')||r.ESTADO.toLowerCase()==='active').length;
-
-  // Colores por célula
   const numCel=parseInt(cel.replace(/\D/g,''))||1;
   const colors=['#185FA5','#059669','#D97706','#7C3AED','#0D9488'];
   const col=colors[(numCel-1)%colors.length];
-
-  return `
-    <div class="celula-header" style="background:linear-gradient(135deg,${col},${col}CC)">
-      <div>
-        <div class="celula-name">${cel}</div>
-        <div class="celula-sub">${total} tareas totales</div>
-      </div>
-      <div class="celula-stats">
-        <div class="celula-stat"><div class="celula-stat-v">${pub}</div><div class="celula-stat-l">Publicadas</div></div>
-        <div class="celula-stat"><div class="celula-stat-v">${enProc}</div><div class="celula-stat-l">En proceso</div></div>
-        <div class="celula-stat"><div class="celula-stat-v">${total-pub-enProc}</div><div class="celula-stat-l">Restantes</div></div>
-      </div>
-    </div>
-    ${buildCelulaSegGrid(tareas,cel)}
-    ${buildCelulaTabla(tareas,cel)}
-  `;
+  return`<div class="celula-header" style="background:linear-gradient(135deg,${col},${col}CC)"><div><div class="celula-name">${cel}</div><div class="celula-sub">${total} tareas totales</div></div><div class="celula-stats"><div class="celula-stat"><div class="celula-stat-v">${pub}</div><div class="celula-stat-l">Publicadas</div></div><div class="celula-stat"><div class="celula-stat-v">${enProc}</div><div class="celula-stat-l">En proceso</div></div><div class="celula-stat"><div class="celula-stat-v">${total-pub-enProc}</div><div class="celula-stat-l">Restantes</div></div></div></div>${buildCelulaSegGrid(tareas)}${buildCelulaTabla(tareas,cel)}`;
 }
-
-function buildCelulaSegGrid(tareas,cel){
+function buildCelulaSegGrid(tareas){
   const dims=['ESTADO','MARCA','PRODUCTO','CUENTA'];
   const panels=dims.map(dim=>{
-    const counts={};
-    tareas.forEach(r=>{if(r[dim]&&r[dim].trim())counts[r[dim]]=(counts[r[dim]]||0)+1;});
-    const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    const max=sorted.length?sorted[0][1]:1;
-    const rows=sorted.map(([val,cnt])=>{
-      const w=Math.round(cnt/max*100);
-      const col=dim==='ESTADO'?estSt(val).dot:getDimColor(dim,val);
-      return `<div class="srow">
-        <span class="sdot" style="background:${col}"></span>
-        <span class="sname">${val}</span>
-        <div class="sbar-w"><div class="sbar" style="width:${w}%;background:${col}"></div></div>
-        <span class="scnt">${cnt}</span>
-      </div>`;
-    }).join('');
-    return `<div class="panel"><div class="ptitle"><span class="ptitle-txt">${DIM_LBL[dim]||dim}</span><span class="ptitle-cnt">${sorted.length}</span></div><div class="slist">${rows||'<div class="nodata-seg">Sin datos</div>'}</div></div>`;
+    const counts={};tareas.forEach(r=>{if(r[dim]&&r[dim].trim())counts[r[dim]]=(counts[r[dim]]||0)+1;});
+    const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);const max=sorted.length?sorted[0][1]:1;
+    const rows=sorted.map(([val,cnt])=>{const w=Math.round(cnt/max*100);const col=dim==='ESTADO'?estSt(val).dot:getDimColor(dim,val);return`<div class="srow"><span class="sdot" style="background:${col}"></span><span class="sname">${val}</span><div class="sbar-w"><div class="sbar" style="width:${w}%;background:${col}"></div></div><span class="scnt">${cnt}</span></div>`;}).join('');
+    return`<div class="panel"><div class="ptitle"><span class="ptitle-txt">${DIM_LBL[dim]||dim}</span><span class="ptitle-cnt">${sorted.length}</span></div><div class="slist">${rows||'<div class="nodata-seg">Sin datos</div>'}</div></div>`;
   }).join('');
-  return `<div class="seg-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${panels}</div>`;
+  return`<div class="seg-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${panels}</div>`;
 }
-
 function buildCelulaTabla(tareas,cel){
   const ultimas=tareas.slice(0,50);
-  const rows=ultimas.map(r=>{
-    const st=estSt(r.ESTADO);
-    const pc=PRIO[r.PRIORIDAD]||'#94A3B8';
-    const link=r.URL?`<a href="${r.URL}" target="_blank" style="color:var(--blue);font-size:11px">Abrir</a>`:'—';
-    return `<tr><td title="${r.NOMBRE}">${r.NOMBRE}</td><td><span class="badge" style="background:${st.bg};color:${st.tc}">${r.ESTADO}</span></td><td title="${r.MARCA}">${r.MARCA||'—'}</td><td>${r.PRODUCTO||'—'}</td><td>${r.CUENTA||'—'}</td><td><span style="font-size:10px;font-weight:600;color:${pc}">${r.PRIORIDAD||'—'}</span></td><td>${r._fd||'—'}</td><td>${link}</td></tr>`;
-  }).join('');
-  return `<div class="tpanel"><div class="thdr"><span class="ttitle">Tareas de ${cel} <span class="cbadge">${tareas.length}</span></span><span style="font-size:11px;color:var(--text3)">Mostrando primeras 50</span></div><div class="twrap"><table><thead><tr><th style="width:210px">Tarea</th><th style="width:150px">Estado</th><th style="width:110px">Marca</th><th style="width:110px">Producto</th><th style="width:105px">Cuenta</th><th style="width:80px">Prioridad</th><th style="width:100px">Fecha</th><th style="width:55px">Link</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="nodata">Sin tareas</td></tr>'}</tbody></table></div></div>`;
+  const rows=ultimas.map(r=>{const st=estSt(r.ESTADO);const pc=PRIO[r.PRIORIDAD]||'#94A3B8';const link=r.URL?`<a href="${r.URL}" target="_blank" style="color:var(--blue);font-size:11px">Abrir</a>`:'—';return`<tr><td title="${r.NOMBRE}">${r.NOMBRE}</td><td><span class="badge" style="background:${st.bg};color:${st.tc}">${r.ESTADO}</span></td><td title="${r.MARCA}">${r.MARCA||'—'}</td><td>${r.PRODUCTO||'—'}</td><td>${r.CUENTA||'—'}</td><td><span style="font-size:10px;font-weight:600;color:${pc}">${r.PRIORIDAD||'—'}</span></td><td>${r._fd||'—'}</td><td>${link}</td></tr>`;}).join('');
+  return`<div class="tpanel"><div class="thdr"><span class="ttitle">Tareas de ${cel} <span class="cbadge">${tareas.length}</span></span><span style="font-size:11px;color:var(--text3)">Primeras 50</span></div><div class="twrap"><table><thead><tr><th style="width:210px">Tarea</th><th style="width:150px">Estado</th><th style="width:110px">Marca</th><th style="width:110px">Producto</th><th style="width:105px">Cuenta</th><th style="width:80px">Prioridad</th><th style="width:100px">Fecha</th><th style="width:55px">Link</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="nodata">Sin tareas</td></tr>'}</tbody></table></div></div>`;
 }
 
-// setVista reemplazado por modal — ver abrirModalCelulas()
-
-// ── Fecha mode ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// VISTA OPERATIVA — lógica original completa
+// ═══════════════════════════════════════════════════════
 function setFM(btn,mode){
   document.querySelectorAll('[data-fm]').forEach(b=>{b.className='spill';});
   btn.className='spill on-dark';fechaMode=mode;
@@ -591,8 +815,6 @@ function setFM(btn,mode){
   document.getElementById('fechalabel').textContent=FML[mode];
   applyFilters();
 }
-
-// ── Períodos ──────────────────────────────────────────────────
 function getRange(p){
   const now=new Date(),tod=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   if(p==='todo')return null;
@@ -617,72 +839,45 @@ function setPeriod(btn,p){
   document.getElementById('customrange').classList[p==='custom'?'remove':'add']('hidden');
   applyFilters();
 }
-
-// ── Filtros encadenados ───────────────────────────────────────
 function pasaBase(r,exceptDim,range,fs){
   if(range){const fd=parseDate(r._fd);if(!fd||fd<range[0]||fd>range[1])return false;}
   if(fs){const hay=r.NOMBRE.toLowerCase().includes(fs)||(r.SKU_PRODUCTO||'').toLowerCase().includes(fs)||(r.PRODUCTO||'').toLowerCase().includes(fs)||(r.MARCA||'').toLowerCase().includes(fs)||(r.CUENTA||'').toLowerCase().includes(fs);if(!hay)return false;}
   for(const d of DIMS){if(d===exceptDim)continue;if(SEL[d].size>0&&!SEL[d].has(r[d]))return false;}
   return true;
 }
-
 function applyFilters(){
-  const range=getRange(period);
-  const fs=document.getElementById('fsrch').value.toLowerCase().trim();
-  filtered=allData.filter(r=>pasaBase(r,null,range,fs));
-  pg=1;render(range,fs);
+  const range=getRange(period);const fs=document.getElementById('fsrch').value.toLowerCase().trim();
+  filtered=allData.filter(r=>pasaBase(r,null,range,fs));pg=1;render(range,fs);
 }
-
-function toggleSel(dim,val){
-  SEL[dim].has(val)?SEL[dim].delete(val):SEL[dim].add(val);
-  applyFilters();
-}
-
+function toggleSel(dim,val){SEL[dim].has(val)?SEL[dim].delete(val):SEL[dim].add(val);applyFilters();}
 function clearAll(){
   DIMS.forEach(d=>SEL[d].clear());
-  document.getElementById('fsrch').value='';
-  document.getElementById('dfrom').value='';
-  document.getElementById('dto').value='';
+  document.getElementById('fsrch').value='';document.getElementById('dfrom').value='';document.getElementById('dto').value='';
   document.querySelectorAll('[data-p]').forEach(b=>b.className='spill');
-  document.querySelector('[data-p="todo"]').className='spill on';
-  period='todo';
+  document.querySelector('[data-p="todo"]').className='spill on';period='todo';
   document.getElementById('customrange').classList.add('hidden');
-  // CORREGIDO: limpiar también el panel de video
-  document.getElementById('vnum1').value='';
-  document.getElementById('vnum2').value='';
-  document.getElementById('vval1').textContent='—';
-  document.getElementById('vval2').textContent='—';
-  document.getElementById('vlbl1').textContent='Fecha video N°';
-  document.getElementById('vlbl2').textContent='Fecha video N°';
-  document.getElementById('vsub1').textContent='Escribí un número';
-  document.getElementById('vsub2').textContent='Escribí un número';
+  document.getElementById('vnum1').value='';document.getElementById('vnum2').value='';
+  document.getElementById('vval1').textContent='—';document.getElementById('vval2').textContent='—';
+  document.getElementById('vlbl1').textContent='Fecha video N°';document.getElementById('vlbl2').textContent='Fecha video N°';
+  document.getElementById('vsub1').textContent='Escribí un número';document.getElementById('vsub2').textContent='Escribí un número';
   document.getElementById('vres-rango').classList.add('hidden');
-  document.getElementById('video-hint').textContent='Aplicá filtros (Célula + Estado PUBLICADO) y escribí el número del video para ver su fecha. Ejemplo: Video 1 = inicio del posteo, Video 30 = fin del contrato.';
+  document.getElementById('video-hint').textContent='Aplicá filtros (Célula + Estado PUBLICADO) y escribí el número del video para ver su fecha.';
   filtered=[...allData];pg=1;render(null,'');
 }
-
-// ── Render ────────────────────────────────────────────────────
 function render(range,fs){
   if(range===undefined)range=getRange(period);
   if(fs===undefined)fs=document.getElementById('fsrch').value.toLowerCase().trim();
-  renderKPIs();
-  renderPaneles(range,fs);
-  renderChips();
-  calcVideo();
-  renderTable();
+  renderKPIs();renderPaneles(range,fs);renderChips();calcVideo();renderTable();
 }
-
-// ── KPIs ──────────────────────────────────────────────────────
 function renderKPIs(){
-  const t=filtered.length;
-  const pct=n=>t?Math.round(n/t*100)+'%':'—';
+  const t=filtered.length;const pct=n=>t?Math.round(n/t*100)+'%':'—';
   const cnt=keys=>filtered.filter(r=>keys.some(k=>r.ESTADO.toLowerCase().replace(/ /g,'_')===k||r.ESTADO.toLowerCase()===k)).length;
   const pub=cnt(['publicado','complete']);const enp=cnt(['en_proceso_publicacion','active']);
   const pend=cnt(['pendiente_publicacion']);const edit=cnt(['edicion','edición']);
   const grab=cnt(['grabacion','grabación']);const plan=cnt(['planeacion','planeación']);
   const rev=cnt(['pendientes_revision']);const pc=cnt(['por_corregir_edicion','por_corregir_grabacion']);
   document.getElementById('kpirow').innerHTML=`
-    <div class="kpi kv-blue" style="color:var(--blue)"><div class="kpi-l">Total filtrado</div><div class="kpi-v kv-blue">${t.toLocaleString()}</div><div class="kpi-s">de ${allData.length.toLocaleString()} total</div></div>
+    <div class="kpi" style="color:var(--blue)"><div class="kpi-l">Total filtrado</div><div class="kpi-v kv-blue">${t.toLocaleString()}</div><div class="kpi-s">de ${allData.length.toLocaleString()} total</div></div>
     <div class="kpi" style="color:var(--green)"><div class="kpi-l">Publicadas</div><div class="kpi-v kv-green">${pub}</div><div class="kpi-s">${pct(pub)}</div></div>
     <div class="kpi" style="color:var(--teal)"><div class="kpi-l">En proceso pub.</div><div class="kpi-v kv-teal">${enp}</div><div class="kpi-s">${pct(enp)}</div></div>
     <div class="kpi" style="color:var(--amber)"><div class="kpi-l">Pend. publicación</div><div class="kpi-v kv-amber">${pend}</div><div class="kpi-s">${pct(pend)}</div></div>
@@ -692,135 +887,343 @@ function renderKPIs(){
     <div class="kpi" style="color:#64748B"><div class="kpi-l">Revisión</div><div class="kpi-v kv-slate">${rev}</div><div class="kpi-s">${pct(rev)}</div></div>
     <div class="kpi" style="color:var(--red)"><div class="kpi-l">Por corregir</div><div class="kpi-v kv-red">${pc}</div><div class="kpi-s">${pct(pc)}</div></div>`;
 }
-
-// ── Paneles encadenados ───────────────────────────────────────
 function renderPaneles(range,fs){
   DIMS.forEach(dim=>{
-    const base=allData.filter(r=>pasaBase(r,dim,range,fs));
-    const counts={};
+    const base=allData.filter(r=>pasaBase(r,dim,range,fs));const counts={};
     base.forEach(r=>{if(r[dim]&&r[dim].trim())counts[r[dim]]=(counts[r[dim]]||0)+1;});
-    const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-    const max=sorted.length?sorted[0][1]:1;
-    const el=document.getElementById('seg-'+dim);
-    const cntEl=document.getElementById('cnt-'+dim);
+    const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);const max=sorted.length?sorted[0][1]:1;
+    const el=document.getElementById('seg-'+dim);const cntEl=document.getElementById('cnt-'+dim);
     if(cntEl)cntEl.textContent=sorted.length;
     if(!sorted.length){el.innerHTML='<div class="nodata-seg">Sin datos</div>';return;}
     el.innerHTML=sorted.map(([val,cnt])=>{
-      const w=Math.round(cnt/max*100);
-      const isOn=SEL[dim].has(val);
+      const w=Math.round(cnt/max*100);const isOn=SEL[dim].has(val);
       const col=dim==='ESTADO'?estSt(val).dot:getDimColor(dim,val);
       const safeVal=val.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return `<div class="srow${isOn?' on':''}" onclick="toggleSel('${dim}','${safeVal}')">
-        <span class="sdot" style="background:${col}"></span>
-        <div class="schk">${isOn?'✓':''}</div>
-        <span class="sname" title="${val}">${val.length>26?val.slice(0,25)+'…':val}</span>
-        <div class="sbar-w"><div class="sbar" style="width:${w}%;background:${col}"></div></div>
-        <span class="scnt">${cnt}</span>
-      </div>`;
+      return`<div class="srow${isOn?' on':''}" onclick="toggleSel('${dim}','${safeVal}')"><span class="sdot" style="background:${col}"></span><div class="schk">${isOn?'✓':''}</div><span class="sname" title="${val}">${val.length>26?val.slice(0,25)+'…':val}</span><div class="sbar-w"><div class="sbar" style="width:${w}%;background:${col}"></div></div><span class="scnt">${cnt}</span></div>`;
     }).join('');
   });
 }
-
-// ── Chips ─────────────────────────────────────────────────────
 function renderChips(){
-  const bar=document.getElementById('chips-bar');
-  const ph=document.getElementById('chips-ph');
-  const chips=[];
-  DIMS.forEach(dim=>{
-    SEL[dim].forEach(val=>{
-      const col=dim==='ESTADO'?estSt(val).dot:getDimColor(dim,val);
-      const safeVal=val.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      chips.push(`<span class="chip" style="background:${col}18;color:${col};border-color:${col}40" onclick="toggleSel('${dim}','${safeVal}')">${DIM_LBL[dim]}: ${val.length>20?val.slice(0,19)+'…':val}<span class="chip-x">×</span></span>`);
-    });
-  });
+  const bar=document.getElementById('chips-bar');const ph=document.getElementById('chips-ph');const chips=[];
+  DIMS.forEach(dim=>{SEL[dim].forEach(val=>{
+    const col=dim==='ESTADO'?estSt(val).dot:getDimColor(dim,val);
+    const safeVal=val.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    chips.push(`<span class="chip" style="background:${col}18;color:${col};border-color:${col}40" onclick="toggleSel('${dim}','${safeVal}')">${DIM_LBL[dim]}: ${val.length>20?val.slice(0,19)+'…':val}<span class="chip-x">×</span></span>`);
+  });});
   bar.innerHTML='<span class="chips-lbl">Filtros activos:</span>';
-  if(chips.length){
-    bar.insertAdjacentHTML('beforeend',chips.join(''));
-    bar.insertAdjacentHTML('beforeend','<button class="clr-all" onclick="clearAll()">Limpiar todo</button>');
-  }else{ph.classList.remove('hidden');bar.appendChild(ph);}
+  if(chips.length){bar.insertAdjacentHTML('beforeend',chips.join(''));bar.insertAdjacentHTML('beforeend','<button class="clr-all" onclick="clearAll()">Limpiar todo</button>');}
+  else{ph.classList.remove('hidden');bar.appendChild(ph);}
 }
-
-// ── Fechas por número de video ────────────────────────────────
 function calcVideo(){
-  const n1=parseInt(document.getElementById('vnum1').value)||0;
-  const n2=parseInt(document.getElementById('vnum2').value)||0;
-
-  const conFecha=filtered
-    .map(r=>({...r,_fd_d:parseDate(r._fd)}))
-    .filter(r=>r._fd_d)
-    .sort((a,b)=>a._fd_d-b._fd_d);
-
+  const n1=parseInt(document.getElementById('vnum1').value)||0;const n2=parseInt(document.getElementById('vnum2').value)||0;
+  const conFecha=filtered.map(r=>({...r,_fd_d:parseDate(r._fd)})).filter(r=>r._fd_d).sort((a,b)=>a._fd_d-b._fd_d);
   const fmt=d=>d?d.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}):'—';
-
-  const setCard=(id,lbl,val,sub)=>{
-    document.getElementById('vlbl'+id).textContent=lbl;
-    document.getElementById('vval'+id).textContent=val;
-    document.getElementById('vsub'+id).textContent=sub;
-  };
-
-  if(n1>0){
-    const r=conFecha[n1-1];
-    setCard(1,`Fecha video ${n1}`,r?fmt(r._fd_d):'Sin dato',r?(r.NOMBRE||'').slice(0,35)+'…':`Solo ${conFecha.length} tareas`);
-  }else{setCard(1,'Fecha video N°','—','Escribí un número');}
-
-  if(n2>0){
-    const r=conFecha[n2-1];
-    setCard(2,`Fecha video ${n2}`,r?fmt(r._fd_d):'Sin dato',r?(r.NOMBRE||'').slice(0,35)+'…':`Solo ${conFecha.length} tareas`);
-  }else{setCard(2,'Fecha video N°','—','Escribí un número');}
-
+  const setCard=(id,lbl,val,sub)=>{document.getElementById('vlbl'+id).textContent=lbl;document.getElementById('vval'+id).textContent=val;document.getElementById('vsub'+id).textContent=sub;};
+  if(n1>0){const r=conFecha[n1-1];setCard(1,`Fecha video ${n1}`,r?fmt(r._fd_d):'Sin dato',r?(r.NOMBRE||'').slice(0,35)+'…':`Solo ${conFecha.length} tareas`);}else{setCard(1,'Fecha video N°','—','Escribí un número');}
+  if(n2>0){const r=conFecha[n2-1];setCard(2,`Fecha video ${n2}`,r?fmt(r._fd_d):'Sin dato',r?(r.NOMBRE||'').slice(0,35)+'…':`Solo ${conFecha.length} tareas`);}else{setCard(2,'Fecha video N°','—','Escribí un número');}
   const rangoEl=document.getElementById('vres-rango');
-  if(n1>0&&n2>0&&n1!==n2){
-    const r1=conFecha[Math.min(n1,n2)-1],r2=conFecha[Math.max(n1,n2)-1];
-    if(r1&&r2){
-      const dias=Math.round(Math.abs(r2._fd_d-r1._fd_d)/864e5);
-      document.getElementById('vval-rango').textContent=dias+' días';
-      document.getElementById('vsub-rango').textContent=`Video ${Math.min(n1,n2)} → Video ${Math.max(n1,n2)}`;
-      rangoEl.classList.remove('hidden');
-    }else rangoEl.classList.add('hidden');
-  }else rangoEl.classList.add('hidden');
-
-  document.getElementById('video-hint').textContent=conFecha.length>0
-    ?`${conFecha.length} tareas con fecha. Del ${fmt(conFecha[0]._fd_d)} (video 1) al ${fmt(conFecha[conFecha.length-1]._fd_d)} (video ${conFecha.length}).`
-    :'Aplicá filtros para ver las fechas. Ejemplo: CELULA#1 + PUBLICADO.';
+  if(n1>0&&n2>0&&n1!==n2){const r1=conFecha[Math.min(n1,n2)-1],r2=conFecha[Math.max(n1,n2)-1];if(r1&&r2){const dias=Math.round(Math.abs(r2._fd_d-r1._fd_d)/864e5);document.getElementById('vval-rango').textContent=dias+' días';document.getElementById('vsub-rango').textContent=`Video ${Math.min(n1,n2)} → Video ${Math.max(n1,n2)}`;rangoEl.classList.remove('hidden');}else rangoEl.classList.add('hidden');}else rangoEl.classList.add('hidden');
+  document.getElementById('video-hint').textContent=conFecha.length>0?`${conFecha.length} tareas con fecha. Del ${fmt(conFecha[0]._fd_d)} (video 1) al ${fmt(conFecha[conFecha.length-1]._fd_d)} (video ${conFecha.length}).`:'Aplicá filtros para ver las fechas.';
 }
-
-// ── Tabla ─────────────────────────────────────────────────────
 function sb(col){
   if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
-  filtered.sort((a,b)=>{
-    let av=a[col]??'',bv=b[col]??'';
-    if(col==='_fd'||col.startsWith('FECHA')){const da=parseDate(av),db=parseDate(bv);av=da?da.getTime():0;bv=db?db.getTime():0;}
-    if(av<bv)return sortAsc?-1:1;if(av>bv)return sortAsc?1:-1;return 0;
-  });
+  filtered.sort((a,b)=>{let av=a[col]??'',bv=b[col]??'';if(col==='_fd'||col.startsWith('FECHA')){const da=parseDate(av),db=parseDate(bv);av=da?da.getTime():0;bv=db?db.getTime():0;}if(av<bv)return sortAsc?-1:1;if(av>bv)return sortAsc?1:-1;return 0;});
   pg=1;renderTable();
 }
 function renderTable(){
-  const rpp=parseInt(document.getElementById('rpp').value)||20;
-  const total=filtered.length,pages=Math.max(1,Math.ceil(total/rpp));
-  if(pg>pages)pg=pages;if(pg<1)pg=1;
-  const slice=filtered.slice((pg-1)*rpp,pg*rpp);
-  const tbody=document.getElementById('tblbody');
+  const rpp=parseInt(document.getElementById('rpp').value)||20;const total=filtered.length,pages=Math.max(1,Math.ceil(total/rpp));
+  if(pg>pages)pg=pages;if(pg<1)pg=1;const slice=filtered.slice((pg-1)*rpp,pg*rpp);const tbody=document.getElementById('tblbody');
   if(!slice.length){tbody.innerHTML='<tr><td colspan="11" class="nodata">Sin tareas con los filtros aplicados</td></tr>';}
-  else{
-    tbody.innerHTML=slice.map(r=>{
-      const st=estSt(r.ESTADO);const pc=PRIO[r.PRIORIDAD]||'#94A3B8';
-      const link=r.URL?`<a href="${r.URL}" target="_blank" style="color:var(--blue);font-size:11px">Abrir</a>`:'—';
-      return `<tr><td title="${r.NOMBRE}">${r.NOMBRE}</td><td><span class="badge" style="background:${st.bg};color:${st.tc}">${r.ESTADO}</span></td><td>${r.CELULA||'—'}</td><td title="${r.MARCA}">${r.MARCA||'—'}</td><td title="${r.PRODUCTO}">${r.PRODUCTO||'—'}</td><td title="${r.CUENTA}">${r.CUENTA||'—'}</td><td>${r.SKU_PRODUCTO||'—'}</td><td>${r.SKU_MARCA||'—'}</td><td><span style="font-size:10px;font-weight:700;color:${pc}">${r.PRIORIDAD||'—'}</span></td><td>${r._fd||'—'}</td><td>${link}</td></tr>`;
-    }).join('');
-  }
+  else{tbody.innerHTML=slice.map(r=>{const st=estSt(r.ESTADO);const pc=PRIO[r.PRIORIDAD]||'#94A3B8';const link=r.URL?`<a href="${r.URL}" target="_blank" style="color:var(--blue);font-size:11px">Abrir</a>`:'—';return`<tr><td title="${r.NOMBRE}">${r.NOMBRE}</td><td><span class="badge" style="background:${st.bg};color:${st.tc}">${r.ESTADO}</span></td><td>${r.CELULA||'—'}</td><td title="${r.MARCA}">${r.MARCA||'—'}</td><td title="${r.PRODUCTO}">${r.PRODUCTO||'—'}</td><td title="${r.CUENTA}">${r.CUENTA||'—'}</td><td>${r.SKU_PRODUCTO||'—'}</td><td>${r.SKU_MARCA||'—'}</td><td><span style="font-size:10px;font-weight:700;color:${pc}">${r.PRIORIDAD||'—'}</span></td><td>${r._fd||'—'}</td><td>${link}</td></tr>`;}).join('');}
   document.getElementById('tblcount').textContent=total.toLocaleString();
   document.getElementById('tbl-of').textContent=total<allData.length?`de ${allData.length.toLocaleString()} total`:'tareas';
   document.getElementById('pginfo').textContent=`Pág. ${pg} de ${pages}`;
-  document.getElementById('pgprev').disabled=pg<=1;
-  document.getElementById('pgnext').disabled=pg>=pages;
+  document.getElementById('pgprev').disabled=pg<=1;document.getElementById('pgnext').disabled=pg>=pages;
 }
-
 function exportCSV(){
   const h=['TAREA_ID','NOMBRE','ESTADO','CELULA','MARCA','PRODUCTO','CUENTA','SKU_PRODUCTO','SKU_MARCA','PRIORIDAD','ASIGNADO','FECHA_PUBLICADO','FECHA_PLANEADO','FECHA_GRABADO','FECHA_EDITADO','FECHA_ACTUALIZACION','URL'];
   const rows=filtered.map(r=>h.map(k=>`"${String(r[k]||'').replace(/"/g,'""')}"`).join(','));
   const csv='\ufeff'+[h.join(','),...rows].join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download=`scalify_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB CONTRATOS
+// ═══════════════════════════════════════════════════════
+async function loadContratos(){
+  const url=document.getElementById('csvurl-contratos').value.trim();
+  if(!url){setMsg('msgcfg','Pegá la URL de CONTRATOS_PUB','warn');document.getElementById('cfgpanel').style.display='';return;}
+  saveUrls();
+  try{
+    const text=await fetchCSV(url);
+    contratosData=parseCSVGeneric(text);
+    document.getElementById('ct-no-data').classList.add('hidden');
+    document.getElementById('ct-content').classList.remove('hidden');
+    document.getElementById('badge-ct').textContent=contratosData.length;
+    renderContratos();
+  }catch(e){setMsg('msgcfg','Error cargando contratos: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
+}
+
+function filtrarContratos(filtro,btn){
+  document.querySelectorAll('[data-cf]').forEach(b=>b.className='spill');
+  btn.className='spill on';filtroContratos=filtro;renderContratos();
+}
+
+function renderContratos(){
+  if(!contratosData.length) return;
+  const srch=(document.getElementById('ct-srch').value||'').toLowerCase().trim();
+
+  let datos=contratosData.filter(c=>{
+    if(filtroContratos!=='todos'&&(c.SEMAFORO||'').toLowerCase()!==filtroContratos) return false;
+    if(srch){const hay=(c.MARCA_NOMBRE||'').toLowerCase().includes(srch)||(c.PRODUCTO||'').toLowerCase().includes(srch)||(c.SKU||'').toLowerCase().includes(srch);if(!hay) return false;}
+    return true;
+  });
+
+  // Ordenar: vencido > urgente > en_curso > completado > pausado > finalizado
+  const ord={vencido:0,urgente:1,en_curso:2,pendiente:3,completado:4,pausado:5,finalizado:6};
+  datos.sort((a,b)=>{
+    const oa=ord[(a.SEMAFORO||'').toLowerCase()]??9;const ob=ord[(b.SEMAFORO||'').toLowerCase()]??9;
+    if(oa!==ob) return oa-ob;
+    return (a.CELULA_ID||'').localeCompare(b.CELULA_ID||'');
+  });
+
+  // Tarjetas
+  const grid=document.getElementById('ct-grid');
+  grid.innerHTML=datos.map(c=>buildContratoCard(c)).join('');
+
+  // Tabla
+  const tbody=document.getElementById('ct-tbody');
+  tbody.innerHTML=datos.map(c=>{
+    const sem=c.SEMAFORO||'';
+    const st=semColorClass(sem);
+    const pct=parseFloat(c.PCT_COMPLETADO||0);
+    const diasR=c.DIAS_RESTANTES!==''?parseInt(c.DIAS_RESTANTES):'';
+    const diasStr=diasR===''?'—':diasR<0?`Vencido ${Math.abs(diasR)}d`:diasR===0?'Hoy':diasR+' días';
+    const diasCls=diasR<0?'style="color:var(--red);font-weight:700"':diasR<=7?'style="color:var(--amber);font-weight:700"':'';
+    return`<tr>
+      <td>${c.CELULA_ID||'—'}</td>
+      <td title="${c.MARCA_NOMBRE||''}">${c.MARCA_NOMBRE||'—'}</td>
+      <td title="${c.PRODUCTO||''}">${(c.PRODUCTO||'—').slice(0,22)}</td>
+      <td style="text-align:center"><span class="ccard-chip ciclo">Ciclo ${c.CICLO_NUM||1}</span></td>
+      <td><div style="display:flex;align-items:center;gap:6px"><div class="progress-bar-bg" style="flex:1;height:6px"><div class="progress-bar-fill fill-${sem}" style="width:${Math.round(pct*100)}%"></div></div><span style="font-size:10px;font-weight:600;color:var(--text2)">${Math.round(pct*100)}%</span></div></td>
+      <td style="text-align:center">${c.POSTEADOS_CICLO||0}/${c.VIDEOS_MES||0}</td>
+      <td><span class="ccard-semaforo sem-badge-${sem}">${semLabel(sem)}</span></td>
+      <td ${diasCls}>${diasStr}</td>
+      <td style="font-size:11px">${c.FECHA_INICIO_PROG||'—'}</td>
+      <td style="font-size:11px">${c.FECHA_FIN_PROG||'—'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="10" class="nodata">Sin contratos con ese filtro</td></tr>';
+
+  // Sidebar
+  renderContratosSidebar(datos);
+}
+
+function buildContratoCard(c){
+  const sem=(c.SEMAFORO||'en_curso').toLowerCase();
+  const pct=parseFloat(c.PCT_COMPLETADO||0);
+  const pctPct=Math.min(100,Math.round(pct*100));
+  const posteados=parseInt(c.POSTEADOS_CICLO||0);
+  const total=parseInt(c.VIDEOS_MES||0);
+  const diasR=c.DIAS_RESTANTES!==''&&c.DIAS_RESTANTES!==undefined?parseInt(c.DIAS_RESTANTES):'';
+  const diasStr=diasR===''?'':(diasR<0?`<span class="ccard-dias vencido">Vencido hace ${Math.abs(diasR)} días</span>`:diasR===0?`<span class="ccard-dias urgente">Vence hoy</span>`:`<span class="ccard-dias ${diasR<=7?'urgente':'ok'}">${diasR} días restantes</span>`);
+  const cicloNum=parseInt(c.CICLO_NUM||1);
+  const cicloOffset=parseInt(c.CICLO_OFFSET||0);
+  const videoDesde=cicloOffset+1;
+  const videoHasta=cicloOffset+total;
+  return`<div class="ccard sem-${sem}">
+    <div class="ccard-top">
+      <div>
+        <div class="ccard-marca">${c.MARCA_NOMBRE||'—'}</div>
+        <div class="ccard-producto">${c.PRODUCTO||'—'}</div>
+      </div>
+      <span class="ccard-semaforo sem-badge-${sem}">${semLabel(sem)}</span>
+    </div>
+    <div class="ccard-meta">
+      <span class="ccard-chip celula">${c.CELULA_ID||'—'}</span>
+      ${cicloNum>1?`<span class="ccard-chip ciclo">Ciclo ${cicloNum} · videos ${videoDesde}-${videoHasta}</span>`:`<span class="ccard-chip ciclo">Ciclo 1 · videos 1-${videoHasta}</span>`}
+      <span class="ccard-chip">${c.TIPO_COMERCIAL==='A'?'Tipo A':'Tipo B'}</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <div><span class="progress-count">${posteados}</span><span class="progress-total"> / ${total} videos</span></div>
+        <span class="progress-pct">${pctPct}%</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill fill-${sem}" style="width:${pctPct}%"></div></div>
+    </div>
+    <div class="ccard-footer">
+      <div>${diasStr}</div>
+      <div class="ccard-fechas">
+        ${c.FECHA_INICIO_PROG?`<span>Inicio: ${c.FECHA_INICIO_PROG}</span>`:''}
+        ${c.FECHA_FIN_PROG?`<span>Fin: ${c.FECHA_FIN_PROG}</span>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderContratosSidebar(datos){
+  const total=datos.length;
+  const porSem={};
+  datos.forEach(c=>{const s=(c.SEMAFORO||'otro').toLowerCase();porSem[s]=(porSem[s]||0)+1;});
+  const completados=datos.filter(c=>c.VIDEOS_MES&&c.POSTEADOS_CICLO&&parseInt(c.POSTEADOS_CICLO)>=parseInt(c.VIDEOS_MES)).length;
+  const videosTotales=datos.reduce((a,c)=>a+parseInt(c.VIDEOS_MES||0),0);
+  const videosPosteados=datos.reduce((a,c)=>a+parseInt(c.POSTEADOS_CICLO||0),0);
+  const ingresoTotal=datos.reduce((a,c)=>a+parseFloat(c.INGRESO_FIJO_USD||0),0);
+  const semOrden=['vencido','urgente','en_curso','completado','pausado','pendiente'];
+  const semNombres={vencido:'🔴 Vencidos',urgente:'⚠ Urgentes',en_curso:'🔵 En curso',completado:'✅ Completados',pausado:'⏸ Pausados',pendiente:'🟣 Pendientes'};
+  const semColors={vencido:'var(--red)',urgente:'var(--amber)',en_curso:'var(--blue)',completado:'var(--green)',pausado:'#94A3B8',pendiente:'var(--purple)'};
+
+  let html=`
+    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Total contratos</span><span class="sidebar-kpi-val" style="color:var(--blue)">${total}</span></div>
+    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Videos comprometidos</span><span class="sidebar-kpi-val">${videosTotales}</span></div>
+    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Videos posteados</span><span class="sidebar-kpi-val" style="color:var(--green)">${videosPosteados}</span></div>
+    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">% completado global</span><span class="sidebar-kpi-val" style="color:${videosPosteados/Math.max(1,videosTotales)>0.8?'var(--green)':'var(--amber)'}">${videosTotales?Math.round(videosPosteados/videosTotales*100):0}%</span></div>
+    ${ingresoTotal>0?`<div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Ingreso contratos</span><span class="sidebar-kpi-val" style="color:var(--teal)">$${ingresoTotal.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0})}</span></div>`:''}
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-title">Por estado</div>`;
+
+  semOrden.forEach(s=>{
+    if(porSem[s]){html+=`<div class="sidebar-kpi"><span class="sidebar-kpi-lbl">${semNombres[s]||s}</span><span class="sidebar-kpi-val" style="color:${semColors[s]||'var(--text)'}">${porSem[s]}</span></div>`;}
+  });
+
+  document.getElementById('ct-sidebar').innerHTML=html;
+}
+
+function semLabel(s){
+  const m={en_curso:'En curso',completado:'Completado',vencido:'Vencido',urgente:'Urgente',pausado:'Pausado',finalizado:'Finalizado',pendiente:'Pendiente'};
+  return m[s]||s;
+}
+function semColorClass(s){return s;}
+
+// ═══════════════════════════════════════════════════════
+// TAB VENTAS
+// ═══════════════════════════════════════════════════════
+async function loadVentas(){
+  const url=document.getElementById('csvurl-ventas').value.trim();
+  if(!url){setMsg('msgcfg','Pegá la URL de Ventas TikTok','warn');document.getElementById('cfgpanel').style.display='';return;}
+  saveUrls();
+  try{
+    const text=await fetchCSV(url);
+    ventasData=parseCSVGeneric(text);
+    document.getElementById('vt-no-data').classList.add('hidden');
+    document.getElementById('vt-content').classList.remove('hidden');
+    document.getElementById('badge-vt').textContent=ventasData.length;
+    renderVentas();
+  }catch(e){setMsg('msgcfg','Error cargando ventas: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
+}
+
+function filtrarVentas(p,btn){
+  document.querySelectorAll('[data-vp]').forEach(b=>b.className='spill');
+  btn.className='spill on';filtroVentas=p;renderVentas();
+}
+
+function ventasFiltradas(){
+  if(filtroVentas==='todo') return ventasData;
+  const now=new Date();const hoy=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  return ventasData.filter(v=>{
+    const f=parseDate(v.FECHA_ARCHIVO||v.DAY||'');
+    if(!f) return true;
+    if(filtroVentas==='semana'){const lun=new Date(hoy.getTime()-(hoy.getDay()===0?6:hoy.getDay()-1)*864e5);return f>=lun;}
+    if(filtroVentas==='mes') return f.getFullYear()===now.getFullYear()&&f.getMonth()===now.getMonth();
+    if(filtroVentas==='mes_pasado'){const mp=new Date(now.getFullYear(),now.getMonth()-1,1);const fin=new Date(now.getFullYear(),now.getMonth(),0);return f>=mp&&f<=fin;}
+    return true;
+  });
+}
+
+function renderVentas(){
+  if(!ventasData.length) return;
+  const datos=ventasFiltradas();
+
+  // KPIs
+  const totalUnidades=datos.reduce((a,v)=>a+parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0),0);
+  const totalIngresos=datos.reduce((a,v)=>a+parseFloat(v.PRICE||0)*parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0),0);
+  const totalOrdenes=new Set(datos.map(v=>v.ORDER_ID||v['ORDER ID']||'')).size;
+  const totalProductos=new Set(datos.map(v=>v.SKU_SCALIFY||v.SKU_ID||'')).size;
+
+  document.getElementById('vt-kpis').innerHTML=`
+    <div class="kpi" style="color:var(--teal)"><div class="kpi-l">Unidades vendidas</div><div class="kpi-v kv-teal">${totalUnidades.toLocaleString()}</div><div class="kpi-s">${datos.length} registros</div></div>
+    <div class="kpi" style="color:var(--green)"><div class="kpi-l">Ingresos USD</div><div class="kpi-v kv-green">$${totalIngresos.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="kpi-s">estimado</div></div>
+    <div class="kpi" style="color:var(--blue)"><div class="kpi-l">Órdenes únicas</div><div class="kpi-v kv-blue">${totalOrdenes.toLocaleString()}</div><div class="kpi-s"></div></div>
+    <div class="kpi" style="color:var(--purple)"><div class="kpi-l">Productos distintos</div><div class="kpi-v kv-purple">${totalProductos}</div><div class="kpi-s"></div></div>`;
+
+  // Agrupar por marca (usando columna MARCA_SCALIFY si existe, si no SHOP_NAME)
+  const porMarca={};const porMarcaUsd={};
+  datos.forEach(v=>{
+    const marca=v.MARCA_SCALIFY||v['SHOP NAME']||v.SHOP_NAME||'Sin marca';
+    const units=parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0);
+    const usd=parseFloat(v.PRICE||0)*units;
+    porMarca[marca]=(porMarca[marca]||0)+units;
+    porMarcaUsd[marca]=(porMarcaUsd[marca]||0)+usd;
+  });
+  renderVentaPanel('vt-por-marca',porMarca,'unidades',false);
+  renderVentaPanel('vt-por-marca-usd',porMarcaUsd,'USD',true);
+
+  // Por semana
+  const porSemana={};
+  datos.forEach(v=>{const s=v.SEMANA_ARCHIVO||v.WEEK||v.SEMANA||'Sin semana';const units=parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0);porSemana[s]=(porSemana[s]||0)+units;});
+  const semSorted=Object.entries(porSemana).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
+  const maxSem=semSorted.length?semSorted[0][1]:1;
+  document.getElementById('vt-por-semana').innerHTML=semSorted.map(([s,n])=>`<div class="venta-row"><span class="venta-marca">${s}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(n/maxSem*100)}%"></div></div><span class="venta-val">${n}</span></div>`).join('')||'<div class="nodata-seg">Sin datos</div>';
+
+  // Por cuenta
+  const porCuenta={};
+  datos.forEach(v=>{const c=v.CUENTA_ARCHIVO||v.CELULA||'Sin cuenta';const units=parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0);porCuenta[c]=(porCuenta[c]||0)+units;});
+  renderVentaPanel('vt-por-cuenta',porCuenta,'unidades',false);
+
+  // Tabla cruzada con contratos
+  renderVentasTabla(datos);
+}
+
+function renderVentaPanel(elId,map,unit,isUsd){
+  const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const max=sorted.length?sorted[0][1]:1;
+  document.getElementById(elId).innerHTML=sorted.map(([k,v])=>`<div class="venta-row"><span class="venta-marca" title="${k}">${k.length>22?k.slice(0,21)+'…':k}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(v/max*100)}%"></div></div><span class="venta-val">${isUsd?'$'+v.toFixed(0):v}</span></div>`).join('')||'<div class="nodata-seg">Sin datos</div>';
+}
+
+function renderVentasTabla(datos){
+  // Agrupar por SKU_Scalify + semana
+  const map={};
+  datos.forEach(v=>{
+    const sku=v.SKU_SCALIFY||v.SKU_ID||'';
+    const marca=v.MARCA_SCALIFY||v['SHOP NAME']||v.SHOP_NAME||'';
+    const prod=v.PRODUCTO_SCALIFY||v['PRODUCT NAME']||v.PRODUCT_NAME||v['PRODUCT NAM']||'';
+    const semana=v.SEMANA_ARCHIVO||v.WEEK||'';
+    const units=parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0);
+    const usd=parseFloat(v.PRICE||0)*units;
+    const key=sku+'||'+semana;
+    if(!map[key]) map[key]={sku,marca,prod,semana,units:0,usd:0};
+    map[key].units+=units;map[key].usd+=usd;
+  });
+
+  // Cruzar con contratos para ver si está en ciclo activo
+  const contratosBySku={};
+  contratosData.forEach(c=>{
+    const sku=(c.SKU||'').trim();
+    if(!sku) return;
+    if(!contratosBySku[sku]) contratosBySku[sku]=[];
+    contratosBySku[sku].push(c);
+  });
+
+  const filas=Object.values(map).sort((a,b)=>b.units-a.units).slice(0,50);
+  const tbody=document.getElementById('vt-tbody');
+  tbody.innerHTML=filas.map(f=>{
+    const contratos=contratosBySku[f.sku]||[];
+    const activos=contratos.filter(c=>(c.SEMAFORO||'').toLowerCase()==='en_curso'||(c.SEMAFORO||'').toLowerCase()==='urgente');
+    const enCiclo=activos.length>0;
+    const posteados=activos.length?activos[0].POSTEADOS_CICLO||'—':'—';
+    const videos=activos.length?activos[0].VIDEOS_MES||'—':'—';
+    const cls=enCiclo?'ciclo-match':'ciclo-nomatch';
+    return`<tr class="${cls}">
+      <td title="${f.marca}">${f.marca.slice(0,18)||'—'}</td>
+      <td title="${f.prod}">${(f.prod||'—').slice(0,20)}</td>
+      <td style="font-size:10px">${f.sku||'—'}</td>
+      <td style="text-align:center;font-weight:600">${f.units}</td>
+      <td style="text-align:right;font-weight:600;color:var(--teal)">$${f.usd.toFixed(2)}</td>
+      <td style="font-size:11px">${f.semana||'—'}</td>
+      <td style="text-align:center">${enCiclo?'<span style="color:var(--green);font-weight:700">✅ Sí</span>':'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="text-align:center">${enCiclo?`${posteados}/${videos}`:'—'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="8" class="nodata">Sin datos de ventas</td></tr>';
 }
 </script>
 </body>
