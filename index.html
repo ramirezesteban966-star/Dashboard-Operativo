@@ -458,14 +458,25 @@ tr:hover td{background:var(--blue-light)}
     <div id="ct-content" class="hidden">
       <!-- Filtros de contratos -->
       <div class="contratos-header">
-        <div class="contratos-filtros">
-          <span class="strip-lbl">Estado:</span>
-          <button class="spill on" data-cf="todos" onclick="filtrarContratos('todos',this)">Todos</button>
-          <button class="spill" data-cf="en_curso" onclick="filtrarContratos('en_curso',this)">En curso</button>
-          <button class="spill" data-cf="urgente" onclick="filtrarContratos('urgente',this)">⚠ Urgente</button>
-          <button class="spill" data-cf="vencido" onclick="filtrarContratos('vencido',this)">🔴 Vencido</button>
-          <button class="spill" data-cf="completado" onclick="filtrarContratos('completado',this)">✅ Completado</button>
-          <button class="spill" data-cf="pausado" onclick="filtrarContratos('pausado',this)">Pausado</button>
+        <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+          <div class="contratos-filtros">
+            <span class="strip-lbl">Estado:</span>
+            <button class="spill on" data-cf="todos" onclick="filtrarContratos('todos',this)">Todos</button>
+            <button class="spill" data-cf="en_curso" onclick="filtrarContratos('en_curso',this)">En curso</button>
+            <button class="spill" data-cf="urgente" onclick="filtrarContratos('urgente',this)">⚠ Urgente</button>
+            <button class="spill" data-cf="vencido" onclick="filtrarContratos('vencido',this)">🔴 Vencido</button>
+            <button class="spill" data-cf="completado" onclick="filtrarContratos('completado',this)">✅ Completado</button>
+            <button class="spill" data-cf="pausado" onclick="filtrarContratos('pausado',this)">Pausado</button>
+          </div>
+          <div class="contratos-filtros">
+            <span class="strip-lbl">Célula:</span>
+            <button class="spill on" data-ccel="todas" onclick="filtrarCelula('todas',this)">Todas</button>
+            <button class="spill" data-ccel="Celula 1" onclick="filtrarCelula('Celula 1',this)">Célula 1</button>
+            <button class="spill" data-ccel="Celula 2" onclick="filtrarCelula('Celula 2',this)">Célula 2</button>
+            <button class="spill" data-ccel="Celula 3" onclick="filtrarCelula('Celula 3',this)">Célula 3</button>
+            <button class="spill" data-ccel="Celula 4" onclick="filtrarCelula('Celula 4',this)">Célula 4</button>
+            <button class="spill" data-ccel="Celula 5" onclick="filtrarCelula('Celula 5',this)">Célula 5</button>
+          </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <input class="srch" id="ct-srch" placeholder="Buscar marca o producto..." oninput="renderContratos()" style="max-width:220px;font-size:12px;padding:6px 12px">
@@ -618,7 +629,7 @@ const getDimColor=(dim,val)=>{const k=dim+':'+val;if(!CMAP[k]){const n=Object.ke
 // Estado global
 let allData=[],filtered=[],pg=1,sortCol='_fd',sortAsc=false;
 let period='todo',fechaMode='FECHA_ACTUALIZACION',csvUrl='';
-let contratosData=[],filtroContratos='todos';
+let contratosData=[],filtroContratos='todos',filtroCtCelula='todas';
 let ventasData=[],filtroVentas='todo';
 
 const DIMS=['CELULA','ESTADO','MARCA','PRODUCTO','CUENTA','LISTA'];
@@ -742,7 +753,11 @@ function parseCSVGeneric(text){
     const v=parseCSVLine(line);const r={};
     hdrs.forEach((h,i)=>{r[h]=(v[i]||'').trim();});
     return r;
-  }).filter(r=>Object.values(r).some(v=>v));
+  }).filter(r=>{
+    // Filter out truly empty rows (the 1000-row pre-filled table bug)
+    const vals=Object.values(r).map(v=>String(v||'').trim()).filter(v=>v!=='');
+    return vals.length>=3; // at least 3 non-empty fields
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -965,6 +980,10 @@ async function loadContratos(){
   }catch(e){setMsg('msgcfg','Error cargando contratos: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
 }
 
+function filtrarCelula(cel,btn){
+  document.querySelectorAll('[data-ccel]').forEach(b=>b.className='spill');
+  btn.className='spill on';filtroCtCelula=cel;renderContratos();
+}
 function filtrarContratos(filtro,btn){
   document.querySelectorAll('[data-cf]').forEach(b=>b.className='spill');
   btn.className='spill on';filtroContratos=filtro;renderContratos();
@@ -976,6 +995,7 @@ function renderContratos(){
 
   let datos=contratosData.filter(c=>{
     if(filtroContratos!=='todos'&&(c.SEMAFORO||'').toLowerCase()!==filtroContratos) return false;
+    if(filtroCtCelula!=='todas'&&(c.CELULA_ID||'').trim()!==filtroCtCelula) return false;
     if(srch){const hay=(c.MARCA_NOMBRE||'').toLowerCase().includes(srch)||(c.PRODUCTO||'').toLowerCase().includes(srch)||(c.SKU||'').toLowerCase().includes(srch);if(!hay) return false;}
     return true;
   });
@@ -997,8 +1017,8 @@ function renderContratos(){
   tbody.innerHTML=datos.map(c=>{
     const sem=c.SEMAFORO||'';
     const st=semColorClass(sem);
-    const pct=parseFloat(c.PCT_COMPLETADO||0);
-    const diasR=c.DIAS_RESTANTES!==''?parseInt(c.DIAS_RESTANTES):'';
+    const pct=parseFloat(String(c.PCT_COMPLETADO||'0').replace('%',''))||0;
+    const _dr=String(c.DIAS_RESTANTES||'');const diasR=_dr!==''&&_dr!=='null'?parseInt(_dr):'';
     const diasStr=diasR===''?'—':diasR<0?`Vencido ${Math.abs(diasR)}d`:diasR===0?'Hoy':diasR+' días';
     const diasCls=diasR<0?'style="color:var(--red);font-weight:700"':diasR<=7?'style="color:var(--amber);font-weight:700"':'';
     return`<tr>
@@ -1021,11 +1041,11 @@ function renderContratos(){
 
 function buildContratoCard(c){
   const sem=(c.SEMAFORO||'en_curso').toLowerCase();
-  const pct=parseFloat(c.PCT_COMPLETADO||0);
+  const pct=parseFloat(String(c.PCT_COMPLETADO||'0').replace('%',''))||0;
   const pctPct=Math.min(100,Math.round(pct*100));
   const posteados=parseInt(c.POSTEADOS_CICLO||0);
   const total=parseInt(c.VIDEOS_MES||0);
-  const diasR=c.DIAS_RESTANTES!==''&&c.DIAS_RESTANTES!==undefined?parseInt(c.DIAS_RESTANTES):'';
+  const dr=String(c.DIAS_RESTANTES||'');const diasR=dr!==''&&dr!==undefined&&dr!=='null'?parseInt(dr):'';
   const diasStr=diasR===''?'':(diasR<0?`<span class="ccard-dias vencido">Vencido hace ${Math.abs(diasR)} días</span>`:diasR===0?`<span class="ccard-dias urgente">Vence hoy</span>`:`<span class="ccard-dias ${diasR<=7?'urgente':'ok'}">${diasR} días restantes</span>`);
   const cicloNum=parseInt(c.CICLO_NUM||1);
   const cicloOffset=parseInt(c.CICLO_OFFSET||0);
@@ -1066,9 +1086,9 @@ function renderContratosSidebar(datos){
   const porSem={};
   datos.forEach(c=>{const s=(c.SEMAFORO||'otro').toLowerCase();porSem[s]=(porSem[s]||0)+1;});
   const completados=datos.filter(c=>c.VIDEOS_MES&&c.POSTEADOS_CICLO&&parseInt(c.POSTEADOS_CICLO)>=parseInt(c.VIDEOS_MES)).length;
-  const videosTotales=datos.reduce((a,c)=>a+parseInt(c.VIDEOS_MES||0),0);
-  const videosPosteados=datos.reduce((a,c)=>a+parseInt(c.POSTEADOS_CICLO||0),0);
-  const ingresoTotal=datos.reduce((a,c)=>a+parseFloat(c.INGRESO_FIJO_USD||0),0);
+  const videosTotales=datos.reduce((a,c)=>a+parseInt(String(c.VIDEOS_MES||'0'))||0,0);
+  const videosPosteados=datos.reduce((a,c)=>a+parseInt(String(c.POSTEADOS_CICLO||'0'))||0,0);
+  const ingresoTotal=datos.reduce((a,c)=>a+parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,'')||0),0);
   const semOrden=['vencido','urgente','en_curso','completado','pausado','pendiente'];
   const semNombres={vencido:'🔴 Vencidos',urgente:'⚠ Urgentes',en_curso:'🔵 En curso',completado:'✅ Completados',pausado:'⏸ Pausados',pendiente:'🟣 Pendientes'};
   const semColors={vencido:'var(--red)',urgente:'var(--amber)',en_curso:'var(--blue)',completado:'var(--green)',pausado:'#94A3B8',pendiente:'var(--purple)'};
