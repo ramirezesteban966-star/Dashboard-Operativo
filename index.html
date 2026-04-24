@@ -1053,9 +1053,19 @@ function cruzarContratosConClickUp(contratos){
   // Contar por SKU+Célula los estados que cuentan, ordenados por fecha publicado
   const conteoBySKUCel={};
   
+  // Normalizar formato de célula: "CELULA#1" → "Celula 1"
+  function normCelCruce(c){
+    if(!c) return '';
+    const m = String(c).match(/#?(\d+)$/);
+    if(m) return 'Celula '+parseInt(m[1]);
+    const m2 = String(c).toLowerCase().match(/celula\s*(\d+)/);
+    if(m2) return 'Celula '+parseInt(m2[1]);
+    return c;
+  }
+  
   allData.forEach(r=>{
     const sku=(r.SKU_PRODUCTO||'').trim();
-    const cel=(r.CELULA||'').trim();
+    const cel=normCelCruce((r.CELULA||'').trim());
     const estado=(r.ESTADO||'').toLowerCase().replace(/ /g,'_');
     if(!sku||!cel) return;
     if(!estadosQueCuentan.has(estado)) return;
@@ -1077,7 +1087,7 @@ function cruzarContratosConClickUp(contratos){
   // Asignar a cada contrato su conteo basado en el ciclo_offset
   return contratos.map(c=>{
     const sku=(c.SKU||'').trim();
-    const cel=(c.CELULA_ID||'').trim();
+    const cel=(c.CELULA_ID||'').trim(); // ya viene como "Celula 1"
     const clave=cel+'||'+sku;
     const videosMes=parseInt(String(c.VIDEOS_MES||'0'))||0;
     const cicloOffset=parseInt(String(c.CICLO_OFFSET||'0'))||0;
