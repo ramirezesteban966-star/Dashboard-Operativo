@@ -473,10 +473,12 @@ tr:hover td{background:var(--blue-light)}
           <div class="contratos-filtros">
             <span class="strip-lbl">Estado:</span>
             <button class="spill on" data-cf="todos" onclick="filtrarContratos('todos',this)">Todos</button>
+            <button class="spill" data-cf="activos" onclick="filtrarContratos('activos',this)">Activos</button>
             <button class="spill" data-cf="en_curso" onclick="filtrarContratos('en_curso',this)">En curso</button>
             <button class="spill" data-cf="urgente" onclick="filtrarContratos('urgente',this)">⚠ Urgente</button>
             <button class="spill" data-cf="vencido" onclick="filtrarContratos('vencido',this)">🔴 Vencido</button>
             <button class="spill" data-cf="completado" onclick="filtrarContratos('completado',this)">✅ Completado</button>
+            <button class="spill" data-cf="finalizado" onclick="filtrarContratos('finalizado',this)">📁 Finalizado</button>
             <button class="spill" data-cf="pausado" onclick="filtrarContratos('pausado',this)">Pausado</button>
           </div>
           <div class="contratos-filtros">
@@ -490,8 +492,13 @@ tr:hover td{background:var(--blue-light)}
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input class="srch" id="ct-srch" placeholder="Buscar marca o producto..." oninput="renderContratos()" style="max-width:200px;font-size:12px;padding:6px 12px">
-          <button class="btn btn-sm" onclick="abrirFiltroEstadosCt()">⚙ Estados que cuentan</button>
+          <select id="ct-sel-marca" onchange="onMarcaCambia()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);min-width:140px">
+            <option value="">Todas las marcas</option>
+          </select>
+          <select id="ct-sel-producto" onchange="renderContratos()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);min-width:160px">
+            <option value="">Todos los productos</option>
+          </select>
+          <button class="btn btn-sm" onclick="abrirFiltroEstadosCt()">⚙ Estados</button>
           <button class="btn btn-sm" onclick="loadContratos()">↻ Actualizar</button>
         </div>
       </div>
@@ -746,6 +753,10 @@ async function loadData(){
     if(contratosData.length){
       contratosData=cruzarContratosConClickUp(contratosData);
       document.getElementById('badge-ct').textContent=contratosData.length;
+      if(document.getElementById('ct-content')&&!document.getElementById('ct-content').classList.contains('hidden')){
+        poblarSelectoresMarcaProducto();
+        renderContratos();
+      }
     }
   }catch(e){hideL();setMsg('msgcfg','Error: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
 }
@@ -1137,8 +1148,31 @@ async function loadContratos(){
     document.getElementById('ct-no-data').classList.add('hidden');
     document.getElementById('ct-content').classList.remove('hidden');
     document.getElementById('badge-ct').textContent=contratosData.length;
+    poblarSelectoresMarcaProducto();
     renderContratos();
   }catch(e){setMsg('msgcfg','Error cargando contratos: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
+}
+
+function poblarSelectoresMarcaProducto(){
+  const marcas=[...new Set(contratosData.map(c=>(c.MARCA_NOMBRE||'').trim()).filter(Boolean))].sort();
+  const selM=document.getElementById('ct-sel-marca');
+  const curM=selM.value;
+  selM.innerHTML='<option value="">Todas las marcas</option>'+marcas.map(m=>`<option value="${m}"${m===curM?' selected':''}>${m}</option>`).join('');
+  onMarcaCambia();
+}
+
+function onMarcaCambia(){
+  const selM=document.getElementById('ct-sel-marca').value;
+  const selP=document.getElementById('ct-sel-producto');
+  const curP=selP.value;
+  const prods=[...new Set(
+    contratosData
+      .filter(c=>!selM||(c.MARCA_NOMBRE||'').trim()===selM)
+      .map(c=>(c.PRODUCTO||'').trim())
+      .filter(Boolean)
+  )].sort();
+  selP.innerHTML='<option value="">Todos los productos</option>'+prods.map(p=>`<option value="${p}"${p===curP?' selected':''}>${p}</option>`).join('');
+  renderContratos();
 }
 
 function filtrarCelula(cel,btn){
@@ -1152,12 +1186,22 @@ function filtrarContratos(filtro,btn){
 
 function renderContratos(){
   if(!contratosData.length) return;
-  const srch=(document.getElementById('ct-srch').value||'').toLowerCase().trim();
+  const srch=''; // búsqueda ahora por selectores de marca/producto
+
+  const selMarca=(document.getElementById('ct-sel-marca').value||'').trim();
+  const selProd=(document.getElementById('ct-sel-producto').value||'').trim();
 
   let datos=contratosData.filter(c=>{
-    if(filtroContratos!=='todos'&&(c.SEMAFORO||'').toLowerCase()!==filtroContratos) return false;
+    const sem=(c.SEMAFORO||'').toLowerCase();
+    const estado=(c.ESTADO||'').toLowerCase();
+    if(filtroContratos==='activos'){
+      if(sem==='finalizado'||estado==='finalizado') return false;
+    } else if(filtroContratos!=='todos'){
+      if(sem!==filtroContratos) return false;
+    }
     if(filtroCtCelula!=='todas'&&(c.CELULA_ID||'').trim()!==filtroCtCelula) return false;
-    if(srch){const hay=(c.MARCA_NOMBRE||'').toLowerCase().includes(srch)||(c.PRODUCTO||'').toLowerCase().includes(srch)||(c.SKU||'').toLowerCase().includes(srch);if(!hay) return false;}
+    if(selMarca&&(c.MARCA_NOMBRE||'').trim()!==selMarca) return false;
+    if(selProd&&(c.PRODUCTO||'').trim()!==selProd) return false;
     return true;
   });
 
@@ -1212,6 +1256,13 @@ function buildContratoCard(c){
   const cicloOffset=parseInt(c.CICLO_OFFSET||0);
   const videoDesde=cicloOffset+1;
   const videoHasta=cicloOffset+total;
+  
+  // Info de análisis para finalizados
+  const esFinalizado=sem==='finalizado'||(c.ESTADO||'').toLowerCase()==='finalizado';
+  const diasProgFin=c.DIAS_PROG_A_FIN!==undefined&&c.DIAS_PROG_A_FIN!==''?parseInt(c.DIAS_PROG_A_FIN||0):'';
+  const diasFinPago=c.DIAS_FIN_A_PAGO!==undefined&&c.DIAS_FIN_A_PAGO!==''?parseInt(c.DIAS_FIN_A_PAGO||0):'';
+  const pagado=(c.PAGADO||'').toLowerCase()==='si';
+  
   return`<div class="ccard sem-${sem}">
     <div class="ccard-top">
       <div>
@@ -1233,10 +1284,18 @@ function buildContratoCard(c){
       <div class="progress-bar-bg"><div class="progress-bar-fill fill-${sem}" style="width:${pctPct}%"></div></div>
     </div>
     <div class="ccard-footer">
-      <div>${diasStr}</div>
+      <div>
+        ${esFinalizado
+          ? `<span style="display:flex;flex-direction:column;gap:3px">
+              ${pagado?'<span style="color:var(--green);font-weight:700;font-size:11px">✅ Pagado</span>':'<span style="color:var(--amber);font-weight:700;font-size:11px">⏳ Pago pendiente</span>'}
+              ${diasProgFin!==''?`<span style="font-size:10px;color:var(--text3)">Duración: ${diasProgFin} días</span>`:''}
+              ${diasFinPago!==''?`<span style="font-size:10px;color:${diasFinPago>30?'var(--red)':diasFinPago>15?'var(--amber)':'var(--text3)'}">Cobro: ${diasFinPago}d desde fin</span>`:''}
+            </span>`
+          : diasStr}
+      </div>
       <div class="ccard-fechas">
         ${c.FECHA_INICIO_PROG?`<span>Inicio: ${c.FECHA_INICIO_PROG}</span>`:''}
-        ${c.FECHA_FIN_PROG?`<span>Fin: ${c.FECHA_FIN_PROG}</span>`:''}
+        ${esFinalizado&&c.FECHA_FIN_REAL?`<span style="color:var(--green)">Fin real: ${c.FECHA_FIN_REAL}</span>`:c.FECHA_FIN_PROG?`<span>Fin est: ${c.FECHA_FIN_PROG}</span>`:''}
       </div>
     </div>
   </div>`;
