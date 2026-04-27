@@ -770,18 +770,31 @@ const SEL=Object.fromEntries(DIMS.map(d=>[d,new Set()]));
 // ═══════════════════════════════════════════════════════
 // PERSISTENCIA — localStorage para URLs
 // ═══════════════════════════════════════════════════════
+function fixCsvUrl(u){
+  if(!u) return u;
+  u=u.replace('pubhtml','pub');
+  if(!u.includes('output=csv')) u=u+(u.includes('?')?'&':'?')+'output=csv';
+  u=u.replace('output=csvcsv','output=csv');
+  return u;
+}
 function saveUrls(){
   try{
-    localStorage.setItem('scalify_csv_clickup', document.getElementById('csvurl').value.trim());
-    localStorage.setItem('scalify_csv_contratos', document.getElementById('csvurl-contratos').value.trim());
-    localStorage.setItem('scalify_csv_ventas', document.getElementById('csvurl-ventas').value.trim());
+    const u1=fixCsvUrl(document.getElementById('csvurl').value.trim());
+    const u2=fixCsvUrl(document.getElementById('csvurl-contratos').value.trim());
+    const u3=fixCsvUrl(document.getElementById('csvurl-ventas').value.trim());
+    if(u1) document.getElementById('csvurl').value=u1;
+    if(u2) document.getElementById('csvurl-contratos').value=u2;
+    if(u3) document.getElementById('csvurl-ventas').value=u3;
+    localStorage.setItem('scalify_csv_clickup', u1);
+    localStorage.setItem('scalify_csv_contratos', u2);
+    localStorage.setItem('scalify_csv_ventas', u3);
   }catch(e){}
 }
 function loadUrls(){
   try{
-    const cu=localStorage.getItem('scalify_csv_clickup')||'';
-    const cc=localStorage.getItem('scalify_csv_contratos')||'';
-    const cv=localStorage.getItem('scalify_csv_ventas')||'';
+    const cu=fixCsvUrl(localStorage.getItem('scalify_csv_clickup')||'');
+    const cc=fixCsvUrl(localStorage.getItem('scalify_csv_contratos')||'');
+    const cv=fixCsvUrl(localStorage.getItem('scalify_csv_ventas')||'');
     if(cu) document.getElementById('csvurl').value=cu;
     if(cc) document.getElementById('csvurl-contratos').value=cc;
     if(cv) document.getElementById('csvurl-ventas').value=cv;
@@ -820,15 +833,14 @@ async function fetchCSV(url){
 }
 
 async function connectCSV(){
+  saveUrls(); // aplica fix de URL antes de leer
   csvUrl=document.getElementById('csvurl').value.trim();
   if(!csvUrl){setMsg('msgcfg','Pegá la URL de ClickUp primero','err');return;}
-  saveUrls();
   await loadData();
-  // También cargar contratos y ventas si tienen URL
   const cu=document.getElementById('csvurl-contratos').value.trim();
   const cv=document.getElementById('csvurl-ventas').value.trim();
-  if(cu) loadContratos();
-  if(cv) loadVentas();
+  if(cu) await loadContratos();
+  if(cv) await loadVentas();
 }
 async function reloadData(){if(!csvUrl){toggleCfg();return;}await loadData();}
 
@@ -1486,48 +1498,88 @@ function ventasFiltradas(){
   });
 }
 
+// Helpers para extraer campos de TikTok con nombres variables
+function vtGet(v, ...keys){
+  for(const k of keys){
+    // Exact match
+    if(v[k]!==undefined&&v[k]!=='') return v[k];
+    // Upper
+    if(v[k.toUpperCase()]!==undefined&&v[k.toUpperCase()]!=='') return v[k.toUpperCase()];
+    // Case-insensitive search
+    const kl=k.toLowerCase();
+    for(const vk of Object.keys(v)){
+      if(vk.toLowerCase().replace(/[_ ]/g,'')===kl.replace(/[_ ]/g,'')&&v[vk]!=='') return v[vk];
+    }
+  }
+  return '';
+}
+
 function renderVentas(){
   if(!ventasData.length) return;
   const datos=ventasFiltradas();
 
+  // Detectar columnas disponibles en primera fila
+  const sample=datos[0]||{};
+  const cols=Object.keys(sample);
+
+  // GMV: columna de ingresos reales de TikTok
+  const getGMV=v=>{
+    const gmv=vtGet(v,'GMV','GMV(USD)','Revenue','Revenue USD','Gmv','gmv');
+    if(gmv) return parseFloat(String(gmv).replace(/[$,]/g,''))||0;
+    // fallback: Price * Items Sold
+    const price=parseFloat(String(vtGet(v,'Price','PRICE','price')||'0').replace(/[$,]/g,''))||0;
+    const items=parseInt(vtGet(v,'Items Sold','ITEMS_SOLD','Items sold','items_sold')||'0')||0;
+    return price*items;
+  };
+  const getUnits=v=>parseInt(vtGet(v,'Items Sold','ITEMS_SOLD','Items sold','Qty','QTY','Units')||'0')||0;
+  const getComision=v=>parseFloat(String(vtGet(v,'Commission','COMMISSION','Affiliate Commission','commission')||'0').replace(/[$,]/g,''))||0;
+  const getOrderId=v=>vtGet(v,'Order ID','ORDER_ID','Order Id','order_id')||'';
+  const getMarca=v=>vtGet(v,'MARCA_SCALIFY','Marca_Scalify','marca_scalify')||vtGet(v,'Shop Name','SHOP_NAME','Shop name')||'Sin marca';
+  const getProducto=v=>vtGet(v,'PRODUCTO_SCALIFY','Producto_Scalify','producto_scalify')||vtGet(v,'Product Name','PRODUCT_NAME','Product name')||'';
+  const getSku=v=>vtGet(v,'SKU_SCALIFY','Sku_Scalify','sku_scalify')||vtGet(v,'SKU ID','SKU_ID','sku_id')||'';
+  const getSemana=v=>vtGet(v,'Semana_Archivo','SEMANA_ARCHIVO','Week','WEEK','Semana')||'';
+  const getCuenta=v=>vtGet(v,'Cuenta_Archivo','CUENTA_ARCHIVO','Celula','CELULA','Account')||'';
+
   // KPIs
-  const totalUnidades=datos.reduce((a,v)=>a+parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0),0);
-  const totalIngresos=datos.reduce((a,v)=>a+parseFloat(v.PRICE||0)*parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0),0);
-  const totalOrdenes=new Set(datos.map(v=>v.ORDER_ID||v['ORDER ID']||'')).size;
-  const totalProductos=new Set(datos.map(v=>v.SKU_SCALIFY||v.SKU_ID||'')).size;
+  const totalUnidades=datos.reduce((a,v)=>a+getUnits(v),0);
+  const totalGMV=datos.reduce((a,v)=>a+getGMV(v),0);
+  const totalComision=datos.reduce((a,v)=>a+getComision(v),0);
+  const totalOrdenes=new Set(datos.map(v=>getOrderId(v)).filter(Boolean)).size;
+  const totalProductos=new Set(datos.map(v=>getSku(v)).filter(Boolean)).size;
+  const tieneSKUScalify=datos.some(v=>vtGet(v,'SKU_SCALIFY','Sku_Scalify','sku_scalify'));
 
   document.getElementById('vt-kpis').innerHTML=`
-    <div class="kpi" style="color:var(--teal)"><div class="kpi-l">Unidades vendidas</div><div class="kpi-v kv-teal">${totalUnidades.toLocaleString()}</div><div class="kpi-s">${datos.length} registros</div></div>
-    <div class="kpi" style="color:var(--green)"><div class="kpi-l">Ingresos USD</div><div class="kpi-v kv-green">$${totalIngresos.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="kpi-s">estimado</div></div>
+    <div class="kpi" style="color:var(--teal)"><div class="kpi-l">Unidades vendidas</div><div class="kpi-v kv-teal">${totalUnidades.toLocaleString()}</div><div class="kpi-s">${datos.length} líneas</div></div>
+    <div class="kpi" style="color:var(--green)"><div class="kpi-l">GMV (ingresos)</div><div class="kpi-v kv-green">$${totalGMV.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="kpi-s">USD</div></div>
+    ${totalComision>0?`<div class="kpi" style="color:var(--purple)"><div class="kpi-l">Comisiones</div><div class="kpi-v kv-purple">$${totalComision.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="kpi-s">afiliados</div></div>`:''}
     <div class="kpi" style="color:var(--blue)"><div class="kpi-l">Órdenes únicas</div><div class="kpi-v kv-blue">${totalOrdenes.toLocaleString()}</div><div class="kpi-s"></div></div>
-    <div class="kpi" style="color:var(--purple)"><div class="kpi-l">Productos distintos</div><div class="kpi-v kv-purple">${totalProductos}</div><div class="kpi-s"></div></div>`;
+    <div class="kpi" style="color:var(--amber)"><div class="kpi-l">SKUs distintos</div><div class="kpi-v kv-amber">${totalProductos}</div><div class="kpi-s">${tieneSKUScalify?'con SKU Scalify':'sin SKU asignado'}</div></div>`;
 
-  // Agrupar por marca (usando columna MARCA_SCALIFY si existe, si no SHOP_NAME)
+  // Por marca (GMV)
   const porMarca={};const porMarcaUsd={};
   datos.forEach(v=>{
-    const marca=v.MARCA_SCALIFY||v['SHOP NAME']||v.SHOP_NAME||'Sin marca';
-    const units=parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0);
-    const usd=parseFloat(v.PRICE||0)*units;
+    const marca=getMarca(v);
+    const units=getUnits(v);
+    const gmv=getGMV(v);
     porMarca[marca]=(porMarca[marca]||0)+units;
-    porMarcaUsd[marca]=(porMarcaUsd[marca]||0)+usd;
+    porMarcaUsd[marca]=(porMarcaUsd[marca]||0)+gmv;
   });
-  renderVentaPanel('vt-por-marca',porMarca,'unidades',false);
+  renderVentaPanel('vt-por-marca',porMarca,'uds',false);
   renderVentaPanel('vt-por-marca-usd',porMarcaUsd,'USD',true);
 
   // Por semana
   const porSemana={};
-  datos.forEach(v=>{const s=v.SEMANA_ARCHIVO||v.WEEK||v.SEMANA||'Sin semana';const units=parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0);porSemana[s]=(porSemana[s]||0)+units;});
+  datos.forEach(v=>{const s=getSemana(v)||'Sin semana';const gmv=getGMV(v);porSemana[s]=(porSemana[s]||0)+gmv;});
   const semSorted=Object.entries(porSemana).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
   const maxSem=semSorted.length?semSorted[0][1]:1;
-  document.getElementById('vt-por-semana').innerHTML=semSorted.map(([s,n])=>`<div class="venta-row"><span class="venta-marca">${s}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(n/maxSem*100)}%"></div></div><span class="venta-val">${n}</span></div>`).join('')||'<div class="nodata-seg">Sin datos</div>';
+  document.getElementById('vt-por-semana').innerHTML=semSorted.map(([s,n])=>`<div class="venta-row"><span class="venta-marca">${s}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(n/maxSem*100)}%"></div></div><span class="venta-val">$${n.toFixed(0)}</span></div>`).join('')||'<div class="nodata-seg">Sin datos</div>';
 
-  // Por cuenta
+  // Por cuenta/célula
   const porCuenta={};
-  datos.forEach(v=>{const c=v.CUENTA_ARCHIVO||v.CELULA||'Sin cuenta';const units=parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0);porCuenta[c]=(porCuenta[c]||0)+units;});
-  renderVentaPanel('vt-por-cuenta',porCuenta,'unidades',false);
+  datos.forEach(v=>{const c=getCuenta(v)||'Sin cuenta';const gmv=getGMV(v);porCuenta[c]=(porCuenta[c]||0)+gmv;});
+  renderVentaPanel('vt-por-cuenta',porCuenta,'USD',true);
 
-  // Tabla cruzada con contratos
-  renderVentasTabla(datos);
+  renderVentasTabla(datos, {getGMV,getUnits,getComision,getMarca,getProducto,getSku,getSemana});
 }
 
 function renderVentaPanel(elId,map,unit,isUsd){
@@ -1536,22 +1588,36 @@ function renderVentaPanel(elId,map,unit,isUsd){
   document.getElementById(elId).innerHTML=sorted.map(([k,v])=>`<div class="venta-row"><span class="venta-marca" title="${k}">${k.length>22?k.slice(0,21)+'…':k}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(v/max*100)}%"></div></div><span class="venta-val">${isUsd?'$'+v.toFixed(0):v}</span></div>`).join('')||'<div class="nodata-seg">Sin datos</div>';
 }
 
-function renderVentasTabla(datos){
+function renderVentasTabla(datos, helpers){
+  if(!helpers){
+    helpers={
+      getGMV:v=>parseFloat(String(v.GMV||v.PRICE||'0').replace(/[$,]/g,''))||0,
+      getUnits:v=>parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0)||0,
+      getComision:v=>parseFloat(String(v.COMMISSION||'0').replace(/[$,]/g,''))||0,
+      getMarca:v=>v.MARCA_SCALIFY||v['SHOP NAME']||v.SHOP_NAME||'',
+      getProducto:v=>v.PRODUCTO_SCALIFY||v['PRODUCT NAME']||'',
+      getSku:v=>v.SKU_SCALIFY||v.SKU_ID||'',
+      getSemana:v=>v.SEMANA_ARCHIVO||v.WEEK||''
+    };
+  }
+  const {getGMV,getUnits,getComision,getMarca,getProducto,getSku,getSemana}=helpers;
+
   // Agrupar por SKU_Scalify + semana
   const map={};
   datos.forEach(v=>{
-    const sku=v.SKU_SCALIFY||v.SKU_ID||'';
-    const marca=v.MARCA_SCALIFY||v['SHOP NAME']||v.SHOP_NAME||'';
-    const prod=v.PRODUCTO_SCALIFY||v['PRODUCT NAME']||v.PRODUCT_NAME||v['PRODUCT NAM']||'';
-    const semana=v.SEMANA_ARCHIVO||v.WEEK||'';
-    const units=parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0);
-    const usd=parseFloat(v.PRICE||0)*units;
-    const key=sku+'||'+semana;
-    if(!map[key]) map[key]={sku,marca,prod,semana,units:0,usd:0};
-    map[key].units+=units;map[key].usd+=usd;
+    const sku=getSku(v);
+    const marca=getMarca(v);
+    const prod=getProducto(v);
+    const semana=getSemana(v)||'Sin semana';
+    const units=getUnits(v);
+    const gmv=getGMV(v);
+    const comision=getComision(v);
+    const key=(sku||marca)+'||'+semana;
+    if(!map[key]) map[key]={sku,marca,prod,semana,units:0,gmv:0,comision:0};
+    map[key].units+=units;map[key].gmv+=gmv;map[key].comision+=comision;
   });
 
-  // Cruzar con contratos para ver si está en ciclo activo
+  // Cruzar con contratos por SKU
   const contratosBySku={};
   contratosData.forEach(c=>{
     const sku=(c.SKU||'').trim();
@@ -1560,26 +1626,37 @@ function renderVentasTabla(datos){
     contratosBySku[sku].push(c);
   });
 
-  const filas=Object.values(map).sort((a,b)=>b.units-a.units).slice(0,50);
+  const filas=Object.values(map).sort((a,b)=>b.gmv-a.gmv).slice(0,60);
+  const hayComision=filas.some(f=>f.comision>0);
+
   const tbody=document.getElementById('vt-tbody');
+  // Actualizar encabezados si hay comisión
+  const thead=document.querySelector('#vt-tbody')?.closest('table')?.querySelector('thead tr');
+  if(thead&&hayComision&&!thead.querySelector('.col-comision')){
+    const th=document.createElement('th');th.className='col-comision';th.style.width='90px';th.textContent='Comisión';
+    thead.insertBefore(th,thead.children[5]);
+  }
+
   tbody.innerHTML=filas.map(f=>{
     const contratos=contratosBySku[f.sku]||[];
-    const activos=contratos.filter(c=>(c.SEMAFORO||'').toLowerCase()==='en_curso'||(c.SEMAFORO||'').toLowerCase()==='urgente');
-    const enCiclo=activos.length>0;
+    const activos=contratos.filter(c=>{const s=(c.SEMAFORO||'').toLowerCase();return s==='en_curso'||s==='urgente'||s==='completado';});
+    const enCiclo=f.sku&&activos.length>0;
     const posteados=activos.length?activos[0].POSTEADOS_CICLO||'—':'—';
     const videos=activos.length?activos[0].VIDEOS_MES||'—':'—';
-    const cls=enCiclo?'ciclo-match':'ciclo-nomatch';
+    const ingContr=activos.length?parseFloat(String(activos[0].INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0:0;
+    const cls=enCiclo?'ciclo-match':'';
     return`<tr class="${cls}">
       <td title="${f.marca}">${f.marca.slice(0,18)||'—'}</td>
-      <td title="${f.prod}">${(f.prod||'—').slice(0,20)}</td>
-      <td style="font-size:10px">${f.sku||'—'}</td>
+      <td title="${f.prod}">${(f.prod||'—').slice(0,22)}</td>
+      <td style="font-size:10px;color:var(--text3)">${f.sku||'—'}</td>
       <td style="text-align:center;font-weight:600">${f.units}</td>
-      <td style="text-align:right;font-weight:600;color:var(--teal)">$${f.usd.toFixed(2)}</td>
+      <td style="text-align:right;font-weight:700;color:var(--teal)">$${f.gmv.toFixed(0)}</td>
+      ${hayComision?`<td style="text-align:right;color:var(--purple)">$${f.comision.toFixed(0)}</td>`:''}
       <td style="font-size:11px">${f.semana||'—'}</td>
-      <td style="text-align:center">${enCiclo?'<span style="color:var(--green);font-weight:700">✅ Sí</span>':'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="text-align:center">${enCiclo?'<span style="color:var(--green);font-weight:700">✅</span>':'<span style="color:var(--text3)">—</span>'}</td>
       <td style="text-align:center">${enCiclo?`${posteados}/${videos}`:'—'}</td>
-    </tr>`;
-  }).join('')||'<tr><td colspan="8" class="nodata">Sin datos de ventas</td></tr>';
+      ${ingContr>0?`<td style="text-align:right;font-size:11px;color:var(--text3)">$${ingContr.toFixed(0)}</td>`:''}</tr>`;
+  }).join('')||'<tr><td colspan="9" class="nodata">Sin datos de ventas</td></tr>';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1794,7 +1871,8 @@ function exportAnCSV(){
     c.PAGADO||'',c.FECHA_INICIO_PROG||'',c.FECHA_FIN_PROG||'',
     c.FECHA_INICIO_REAL||'',c.FECHA_FIN_REAL||'',c.FECHA_PAGADO||''
   ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
-  const csv='﻿'+[h.join(','),...rows].join('\n');
+  const csv='﻿'+[h.join(','),...rows].join('
+');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download=`analisis_contratos_${new Date().toISOString().slice(0,10)}.csv`;a.click();
