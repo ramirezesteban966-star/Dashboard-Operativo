@@ -361,6 +361,9 @@ tr:hover td{background:var(--blue-light)}
     <button class="main-tab" onclick="switchTab('ventas',this)">
       💰 Ventas <span class="tab-badge" id="badge-vt">—</span>
     </button>
+    <button class="main-tab" id="tab-btn-analisis" onclick="switchTab('analisis',this)" style="display:none">
+      📈 Análisis <span class="tab-badge" id="badge-an">—</span>
+    </button>
   </div>
 
   <!-- ═══ TAB: VISTA OPERATIVA ═══ -->
@@ -603,6 +606,103 @@ tr:hover td{background:var(--blue-light)}
     </div>
   </div><!-- /tab-ventas -->
 
+
+  <!-- ═══ TAB: ANÁLISIS DE CONTRATOS ═══ -->
+  <div id="tab-analisis" class="tab-pane">
+    <div id="an-no-data" class="alert alert-info">
+      Cargá los contratos primero desde el tab de Contratos.
+    </div>
+    <div id="an-content" class="hidden">
+      <!-- Filtros reutilizados -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+        <div class="contratos-filtros">
+          <span class="strip-lbl">Estado:</span>
+          <button class="spill on" data-an="todos" onclick="filtrarAnalisis('todos',this)">Todos</button>
+          <button class="spill" data-an="finalizado" onclick="filtrarAnalisis('finalizado',this)">📁 Finalizados</button>
+          <button class="spill" data-an="en_curso" onclick="filtrarAnalisis('en_curso',this)">En curso</button>
+          <button class="spill" data-an="completado" onclick="filtrarAnalisis('completado',this)">✅ Completado</button>
+          <button class="spill" data-an="vencido" onclick="filtrarAnalisis('vencido',this)">🔴 Vencido</button>
+        </div>
+        <div class="contratos-filtros">
+          <span class="strip-lbl">Célula:</span>
+          <button class="spill on" data-ancelula="todas" onclick="filtrarAnCelula('todas',this)">Todas</button>
+          <button class="spill" data-ancelula="Celula 1" onclick="filtrarAnCelula('Celula 1',this)">Célula 1</button>
+          <button class="spill" data-ancelula="Celula 2" onclick="filtrarAnCelula('Celula 2',this)">Célula 2</button>
+          <button class="spill" data-ancelula="Celula 3" onclick="filtrarAnCelula('Celula 3',this)">Célula 3</button>
+          <button class="spill" data-ancelula="Celula 4" onclick="filtrarAnCelula('Celula 4',this)">Célula 4</button>
+          <button class="spill" data-ancelula="Celula 5" onclick="filtrarAnCelula('Celula 5',this)">Célula 5</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="an-sel-marca" onchange="onAnMarcaCambia()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:140px">
+            <option value="">Todas las marcas</option>
+          </select>
+          <select id="an-sel-producto" onchange="renderAnalisis()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:160px">
+            <option value="">Todos los productos</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- KPIs de análisis -->
+      <div class="kpis" id="an-kpis"></div>
+
+      <!-- Tabla de análisis detallado -->
+      <div class="tpanel">
+        <div class="thdr">
+          <span class="ttitle">Análisis por contrato <span class="cbadge" id="an-count">0</span></span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-size:11px;color:var(--text3)">Ordenar por columna →</span>
+            <button class="btn btn-sm" onclick="exportAnCSV()">Exportar CSV</button>
+          </div>
+        </div>
+        <div class="twrap">
+          <table>
+            <thead><tr>
+              <th style="width:80px"  onclick="sbAn('CELULA_ID')">Célula</th>
+              <th style="width:110px" onclick="sbAn('MARCA_NOMBRE')">Marca</th>
+              <th style="width:130px" onclick="sbAn('PRODUCTO')">Producto</th>
+              <th style="width:55px"  onclick="sbAn('CICLO_NUM')">Ciclo</th>
+              <th style="width:90px"  onclick="sbAn('SEMAFORO')">Estado</th>
+              <th style="width:70px"  onclick="sbAn('VIDEOS_MES')">Videos</th>
+              <th style="width:70px"  onclick="sbAn('INGRESO_FIJO_USD')">Ingreso</th>
+              <th style="width:80px"  onclick="sbAn('DIAS_CICLO_TOTAL')">Dur. prog.</th>
+              <th style="width:80px"  onclick="sbAn('DIAS_DURACION')">Dur. real</th>
+              <th style="width:80px"  onclick="sbAn('DIAS_RETRASO')">Retraso</th>
+              <th style="width:80px"  onclick="sbAn('DIAS_COBRO')">Días cobro</th>
+              <th style="width:80px"  onclick="sbAn('PAGADO')">Pago</th>
+              <th style="width:90px"  onclick="sbAn('FECHA_FIN_REAL')">Fin real</th>
+            </tr></thead>
+            <tbody id="an-tbody"></tbody>
+          </table>
+        </div>
+        <div class="pg">
+          <button class="pg-btn" id="an-pgprev" onclick="anPg--;renderAnalisis()">← Anterior</button>
+          <span id="an-pginfo"></span>
+          <button class="pg-btn" id="an-pgnext" onclick="anPg++;renderAnalisis()">Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- Gráficos simples de distribución -->
+      <div class="ventas-grid" style="margin-top:0">
+        <div class="ventas-panel">
+          <div class="ventas-panel-title">Ingreso por marca</div>
+          <div id="an-ingreso-marca"></div>
+        </div>
+        <div class="ventas-panel">
+          <div class="ventas-panel-title">Días promedio de cobro por marca</div>
+          <div id="an-cobro-marca"></div>
+        </div>
+        <div class="ventas-panel">
+          <div class="ventas-panel-title">Retraso promedio por marca (días)</div>
+          <div id="an-retraso-marca"></div>
+        </div>
+        <div class="ventas-panel">
+          <div class="ventas-panel-title">Contratos por estado</div>
+          <div id="an-por-estado"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-analisis -->
+
 </div><!-- /dash -->
 
 <!-- Modal Vista por Célula -->
@@ -756,6 +856,7 @@ async function loadData(){
       if(document.getElementById('ct-content')&&!document.getElementById('ct-content').classList.contains('hidden')){
         poblarSelectoresMarcaProducto();
         renderContratos();
+        mostrarTabAnalisis();
       }
     }
   }catch(e){hideL();setMsg('msgcfg','Error: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
@@ -1137,8 +1238,12 @@ function cruzarContratosConClickUp(contratos){
 }
 
 async function loadContratos(){
-  const url=document.getElementById('csvurl-contratos').value.trim();
+  let url=document.getElementById('csvurl-contratos').value.trim();
   if(!url){setMsg('msgcfg','Pegá la URL de CONTRATOS_PUB','warn');document.getElementById('cfgpanel').style.display='';return;}
+  // Auto-fix: convertir pubhtml a CSV si es necesario
+  url=url.replace('pubhtml','pub').replace(/output=[^&]*/, 'output=csv');
+  if(!url.includes('output=csv')) url+=(url.includes('?')?'&':'?')+'output=csv';
+  document.getElementById('csvurl-contratos').value=url;
   saveUrls();
   try{
     const text=await fetchCSV(url);
@@ -1150,6 +1255,7 @@ async function loadContratos(){
     document.getElementById('badge-ct').textContent=contratosData.length;
     poblarSelectoresMarcaProducto();
     renderContratos();
+    mostrarTabAnalisis();
   }catch(e){setMsg('msgcfg','Error cargando contratos: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
 }
 
@@ -1475,6 +1581,230 @@ function renderVentasTabla(datos){
     </tr>`;
   }).join('')||'<tr><td colspan="8" class="nodata">Sin datos de ventas</td></tr>';
 }
+
+// ═══════════════════════════════════════════════════════
+// TAB ANÁLISIS
+// ═══════════════════════════════════════════════════════
+let filtroAnalisis='todos', filtroAnCelula='todas';
+let anData=[], anSortCol='MARCA_NOMBRE', anSortAsc=true, anPg=1;
+
+function mostrarTabAnalisis(){
+  if(!contratosData.length) return;
+  document.getElementById('tab-btn-analisis').style.display='';
+  document.getElementById('badge-an').textContent=contratosData.length;
+  document.getElementById('an-no-data').classList.add('hidden');
+  document.getElementById('an-content').classList.remove('hidden');
+  poblarSelectoresAnalisis();
+  renderAnalisis();
+}
+
+function poblarSelectoresAnalisis(){
+  const marcas=[...new Set(contratosData.map(c=>(c.MARCA_NOMBRE||'').trim()).filter(Boolean))].sort();
+  const selM=document.getElementById('an-sel-marca');
+  selM.innerHTML='<option value="">Todas las marcas</option>'+marcas.map(m=>`<option value="${m}">${m}</option>`).join('');
+  onAnMarcaCambia();
+}
+
+function onAnMarcaCambia(){
+  const selM=document.getElementById('an-sel-marca').value;
+  const selP=document.getElementById('an-sel-producto');
+  const prods=[...new Set(
+    contratosData.filter(c=>!selM||(c.MARCA_NOMBRE||'').trim()===selM)
+      .map(c=>(c.PRODUCTO||'').trim()).filter(Boolean)
+  )].sort();
+  selP.innerHTML='<option value="">Todos los productos</option>'+prods.map(p=>`<option value="${p}">${p}</option>`).join('');
+  renderAnalisis();
+}
+
+function filtrarAnalisis(f,btn){
+  document.querySelectorAll('[data-an]').forEach(b=>b.className='spill');
+  btn.className='spill on';filtroAnalisis=f;anPg=1;renderAnalisis();
+}
+
+function filtrarAnCelula(c,btn){
+  document.querySelectorAll('[data-ancelula]').forEach(b=>b.className='spill');
+  btn.className='spill on';filtroAnCelula=c;anPg=1;renderAnalisis();
+}
+
+function sbAn(col){
+  if(anSortCol===col)anSortAsc=!anSortAsc;else{anSortCol=col;anSortAsc=true;}
+  renderAnalisis();
+}
+
+function renderAnalisis(){
+  if(!contratosData.length) return;
+  const selMarca=(document.getElementById('an-sel-marca').value||'').trim();
+  const selProd=(document.getElementById('an-sel-producto').value||'').trim();
+
+  let datos=contratosData.filter(c=>{
+    const sem=(c.SEMAFORO||'').toLowerCase();
+    if(filtroAnalisis!=='todos'&&sem!==filtroAnalisis) return false;
+    if(filtroAnCelula!=='todas'&&(c.CELULA_ID||'').trim()!==filtroAnCelula) return false;
+    if(selMarca&&(c.MARCA_NOMBRE||'').trim()!==selMarca) return false;
+    if(selProd&&(c.PRODUCTO||'').trim()!==selProd) return false;
+    return true;
+  });
+
+  // Ordenar
+  datos.sort((a,b)=>{
+    let av=a[anSortCol]??'', bv=b[anSortCol]??'';
+    const an=parseFloat(String(av).replace(/[^0-9.\-]/g,'')), bn=parseFloat(String(bv).replace(/[^0-9.\-]/g,''));
+    if(!isNaN(an)&&!isNaN(bn)){av=an;bv=bn;}
+    if(av<bv) return anSortAsc?-1:1;
+    if(av>bv) return anSortAsc?1:-1;
+    return 0;
+  });
+
+  anData=datos;
+  renderAnKPIs(datos);
+  renderAnTabla(datos);
+  renderAnGraficos(datos);
+}
+
+function renderAnKPIs(datos){
+  const n=datos.length;
+  const ingresoTotal=datos.reduce((a,c)=>a+parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0,0);
+  const pagados=datos.filter(c=>(c.PAGADO||'').toLowerCase()==='si');
+  const ingresoCobrado=pagados.reduce((a,c)=>a+parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0,0);
+  const cartPend=ingresoTotal-ingresoCobrado;
+
+  const nums=f=>datos.map(c=>parseFloat(String(c[f]||'').replace(/[^0-9.\-]/g,''))).filter(v=>!isNaN(v)&&v!==0);
+  const avg=arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):null;
+
+  const avgDur=avg(nums('DIAS_DURACION'));
+  const avgCobro=avg(nums('DIAS_COBRO').filter(v=>v>=0));
+  const avgRetraso=avg(nums('DIAS_RETRASO'));
+  const finalizados=datos.filter(c=>(c.SEMAFORO||'').toLowerCase()==='finalizado').length;
+
+  document.getElementById('an-kpis').innerHTML=`
+    <div class="kpi" style="color:var(--blue)"><div class="kpi-l">Contratos</div><div class="kpi-v kv-blue">${n}</div><div class="kpi-s">${finalizados} finalizados</div></div>
+    <div class="kpi" style="color:var(--teal)"><div class="kpi-l">Ingreso total</div><div class="kpi-v kv-teal">$${ingresoTotal.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="kpi-s">${datos.reduce((a,c)=>a+parseInt(c.VIDEOS_MES||0),0)} videos</div></div>
+    <div class="kpi" style="color:var(--green)"><div class="kpi-l">Cobrado</div><div class="kpi-v kv-green">$${ingresoCobrado.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="kpi-s">${pagados.length} contratos</div></div>
+    <div class="kpi" style="color:${cartPend>0?'var(--amber)':'var(--green)'}"><div class="kpi-l">Cartera pendiente</div><div class="kpi-v" style="color:${cartPend>0?'var(--amber)':'var(--green)'}">$${cartPend.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="kpi-s">${n-pagados.length} contratos</div></div>
+    <div class="kpi" style="color:var(--purple)"><div class="kpi-l">Duración prom.</div><div class="kpi-v kv-purple">${avgDur!==null?avgDur+'d':'—'}</div><div class="kpi-s">días reales</div></div>
+    <div class="kpi" style="color:${avgCobro!==null&&avgCobro>30?'var(--red)':avgCobro!==null&&avgCobro>15?'var(--amber)':'var(--green)'}"><div class="kpi-l">Días cobro prom.</div><div class="kpi-v" style="color:${avgCobro!==null&&avgCobro>30?'var(--red)':avgCobro!==null&&avgCobro>15?'var(--amber)':'var(--green)'}">${avgCobro!==null?avgCobro+'d':'—'}</div><div class="kpi-s">fin → pago</div></div>
+    <div class="kpi" style="color:${avgRetraso!==null&&avgRetraso>0?'var(--red)':'var(--green)'}"><div class="kpi-l">Retraso prom.</div><div class="kpi-v" style="color:${avgRetraso!==null&&avgRetraso>0?'var(--red)':'var(--green)'}">${avgRetraso!==null?(avgRetraso>0?'+':'')+avgRetraso+'d':'—'}</div><div class="kpi-s">vs fecha prog.</div></div>`;
+}
+
+function renderAnTabla(datos){
+  const rpp=20;const total=datos.length,pages=Math.max(1,Math.ceil(total/rpp));
+  if(anPg>pages)anPg=pages;if(anPg<1)anPg=1;
+  const slice=datos.slice((anPg-1)*rpp,anPg*rpp);
+
+  const tbody=document.getElementById('an-tbody');
+  if(!slice.length){tbody.innerHTML='<tr><td colspan="13" class="nodata">Sin contratos con esos filtros</td></tr>';return;}
+
+  tbody.innerHTML=slice.map(c=>{
+    const sem=(c.SEMAFORO||'').toLowerCase();
+    const pag=(c.PAGADO||'').toLowerCase()==='si';
+    const ingreso=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+    const dur=c.DIAS_DURACION!==undefined&&c.DIAS_DURACION!==''?parseInt(c.DIAS_DURACION):'';
+    const retraso=c.DIAS_RETRASO!==undefined&&c.DIAS_RETRASO!==''?parseInt(c.DIAS_RETRASO):'';
+    const cobro=c.DIAS_COBRO!==undefined&&c.DIAS_COBRO!==''?parseInt(c.DIAS_COBRO):'';
+    const cicloTotal=c.DIAS_CICLO_TOTAL!==undefined&&c.DIAS_CICLO_TOTAL!==''?parseInt(c.DIAS_CICLO_TOTAL):'';
+
+    // Colores semáforo para retraso
+    const retrasoColor=retraso===''?'':retraso>7?'var(--red)':retraso>0?'var(--amber)':retraso<0?'var(--green)':'var(--text2)';
+    const cobroColor=cobro===''?'':cobro>30?'var(--red)':cobro>15?'var(--amber)':'var(--green)';
+
+    return`<tr>
+      <td>${c.CELULA_ID||'—'}</td>
+      <td title="${c.MARCA_NOMBRE||''}">${(c.MARCA_NOMBRE||'—').slice(0,16)}</td>
+      <td title="${c.PRODUCTO||''}">${(c.PRODUCTO||'—').slice(0,20)}</td>
+      <td style="text-align:center"><span class="ccard-chip ciclo">C${c.CICLO_NUM||1}</span></td>
+      <td><span class="ccard-semaforo sem-badge-${sem}">${semLabel(sem)}</span></td>
+      <td style="text-align:center;font-weight:600">${c.VIDEOS_MES||'—'}</td>
+      <td style="text-align:right;font-weight:700;color:var(--teal)">$${ingreso.toLocaleString('en-US',{maximumFractionDigits:0})}</td>
+      <td style="text-align:center;color:var(--text3)">${cicloTotal!==''?cicloTotal+'d':'—'}</td>
+      <td style="text-align:center;font-weight:600">${dur!==''?dur+'d':'—'}</td>
+      <td style="text-align:center;font-weight:700;color:${retrasoColor}">${retraso!==''?(retraso>0?'+':'')+retraso+'d':'—'}</td>
+      <td style="text-align:center;font-weight:700;color:${cobroColor}">${cobro!==''?cobro+'d':'—'}</td>
+      <td style="text-align:center"><span style="font-size:11px;font-weight:700;color:${pag?'var(--green)':'var(--amber)'}">${pag?'✅':'⏳'}</span></td>
+      <td style="font-size:11px;color:var(--text3)">${c.FECHA_FIN_REAL||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('an-count').textContent=total;
+  document.getElementById('an-pginfo').textContent=`Pág. ${anPg} de ${pages}`;
+  document.getElementById('an-pgprev').disabled=anPg<=1;
+  document.getElementById('an-pgnext').disabled=anPg>=pages;
+}
+
+function renderAnGraficos(datos){
+  // Ingreso por marca
+  const ingM={};
+  datos.forEach(c=>{
+    const m=(c.MARCA_NOMBRE||'Sin marca').trim();
+    const v=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+    ingM[m]=(ingM[m]||0)+v;
+  });
+  const ingTop=Object.entries(ingM).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxIng=ingTop.length?ingTop[0][1]:1;
+  document.getElementById('an-ingreso-marca').innerHTML=ingTop.map(([m,v])=>
+    `<div class="venta-row"><span class="venta-marca" title="${m}">${m.slice(0,20)}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(v/maxIng*100)}%;background:var(--teal)"></div></div><span class="venta-val">$${v.toLocaleString('en-US',{maximumFractionDigits:0})}</span></div>`
+  ).join('')||'<div class="nodata-seg">Sin datos</div>';
+
+  // Días cobro por marca
+  const cobroM={};const cobroN={};
+  datos.filter(c=>c.DIAS_COBRO!==undefined&&c.DIAS_COBRO!=='').forEach(c=>{
+    const m=(c.MARCA_NOMBRE||'Sin marca').trim();
+    const v=parseInt(c.DIAS_COBRO||0);
+    if(isNaN(v)||v<0) return;
+    cobroM[m]=(cobroM[m]||0)+v;cobroN[m]=(cobroN[m]||0)+1;
+  });
+  const cobroAvg=Object.keys(cobroM).map(m=>([m,Math.round(cobroM[m]/cobroN[m])])).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxCobro=cobroAvg.length?cobroAvg[0][1]:1;
+  document.getElementById('an-cobro-marca').innerHTML=cobroAvg.map(([m,v])=>{
+    const col=v>30?'var(--red)':v>15?'var(--amber)':'var(--teal)';
+    return`<div class="venta-row"><span class="venta-marca" title="${m}">${m.slice(0,20)}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(v/maxCobro*100)}%;background:${col}"></div></div><span class="venta-val" style="color:${col}">${v}d</span></div>`;
+  }).join('')||'<div class="nodata-seg">Sin datos de cobro</div>';
+
+  // Retraso por marca
+  const retM={};const retN={};
+  datos.filter(c=>c.DIAS_RETRASO!==undefined&&c.DIAS_RETRASO!=='').forEach(c=>{
+    const m=(c.MARCA_NOMBRE||'Sin marca').trim();
+    const v=parseInt(c.DIAS_RETRASO||0);
+    if(isNaN(v)) return;
+    retM[m]=(retM[m]||0)+v;retN[m]=(retN[m]||0)+1;
+  });
+  const retAvg=Object.keys(retM).map(m=>([m,Math.round(retM[m]/retN[m])])).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxRet=retAvg.length?Math.max(...retAvg.map(x=>Math.abs(x[1]))):1;
+  document.getElementById('an-retraso-marca').innerHTML=retAvg.map(([m,v])=>{
+    const col=v>7?'var(--red)':v>0?'var(--amber)':'var(--green)';
+    return`<div class="venta-row"><span class="venta-marca" title="${m}">${m.slice(0,20)}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(Math.abs(v)/maxRet*100)}%;background:${col}"></div></div><span class="venta-val" style="color:${col}">${v>0?'+':''}${v}d</span></div>`;
+  }).join('')||'<div class="nodata-seg">Sin datos de retraso</div>';
+
+  // Por estado
+  const estM={};
+  datos.forEach(c=>{const s=semLabel((c.SEMAFORO||'').toLowerCase());estM[s]=(estM[s]||0)+1;});
+  const estArr=Object.entries(estM).sort((a,b)=>b[1]-a[1]);
+  const maxEst=estArr.length?estArr[0][1]:1;
+  const estColors={'Finalizado':'#94A3B8','Completado':'var(--green)','En curso':'var(--blue)','Vencido':'var(--red)','Urgente':'var(--amber)','Pausado':'#94A3B8','Pendiente':'var(--purple)'};
+  document.getElementById('an-por-estado').innerHTML=estArr.map(([s,n])=>
+    `<div class="venta-row"><span class="venta-marca">${s}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(n/maxEst*100)}%;background:${estColors[s]||'var(--blue)'}"></div></div><span class="venta-val" style="color:${estColors[s]||'var(--blue)'};font-size:13px;font-weight:700">${n}</span></div>`
+  ).join('')||'<div class="nodata-seg">Sin datos</div>';
+}
+
+function exportAnCSV(){
+  const h=['Celula','Marca','Producto','Ciclo','Estado','Videos','Ingreso_USD','Dur_Prog_d','Dur_Real_d','Retraso_d','Cobro_d','Pagado','Inicio_Prog','Fin_Prog','Inicio_Real','Fin_Real','Fecha_Pago'];
+  const rows=anData.map(c=>[
+    c.CELULA_ID||'',c.MARCA_NOMBRE||'',c.PRODUCTO||'',c.CICLO_NUM||'',
+    c.SEMAFORO||'',c.VIDEOS_MES||'',c.INGRESO_FIJO_USD||'',
+    c.DIAS_CICLO_TOTAL||'',c.DIAS_DURACION||'',c.DIAS_RETRASO||'',c.DIAS_COBRO||'',
+    c.PAGADO||'',c.FECHA_INICIO_PROG||'',c.FECHA_FIN_PROG||'',
+    c.FECHA_INICIO_REAL||'',c.FECHA_FIN_REAL||'',c.FECHA_PAGADO||''
+  ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv='﻿'+[h.join(','),...rows].join('
+');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`analisis_contratos_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+// Hook: mostrar tab Análisis cuando se carguen contratos
+const _origLoadCt = loadContratos;
+// Inyectar mostrarTabAnalisis después de cargar contratos
+
 </script>
 </body>
 </html>
