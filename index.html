@@ -930,7 +930,6 @@ let allData=[],filtered=[],pg=1,sortCol='_fd',sortAsc=false;
 let period='todo',fechaMode='FECHA_ACTUALIZACION',csvUrl='';
 let contratosData=[],filtroContratos='todos',filtroCtCelula='todas';
 let ventasData=[],filtroVentas='todo';
-
 const DIMS=['CELULA','ESTADO','MARCA','PRODUCTO','CUENTA','LISTA'];
 const DIM_LBL={CELULA:'Célula',ESTADO:'Estado',MARCA:'Marca',PRODUCTO:'Producto',CUENTA:'Cuenta',LISTA:'Lista'};
 const SEL=Object.fromEntries(DIMS.map(d=>[d,new Set()]));
@@ -1288,8 +1287,7 @@ function exportCSV(){
 // TAB CONTRATOS v2 — filtros potentes + sin asignar + cobros
 // ═══════════════════════════════════════════════════════
 
-// Estado global contratos
-let contratosData=[], filtroContratos='todos', filtroCtCelula='todas';
+// Estado adicional contratos (contratosData ya declarado en estado global)
 let filtroCtMesPago=''; // mes de pago seleccionado
 
 // Estados que cuentan para posteados — configurables
