@@ -1871,16 +1871,13 @@ function exportAnCSV(){
     c.PAGADO||'',c.FECHA_INICIO_PROG||'',c.FECHA_FIN_PROG||'',
     c.FECHA_INICIO_REAL||'',c.FECHA_FIN_REAL||'',c.FECHA_PAGADO||''
   ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
-  const csv='﻿'+[h.join(','),...rows].join('
-');
+  const csv='\ufeff'+[h.join(','),...rows].join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download=`analisis_contratos_${new Date().toISOString().slice(0,10)}.csv`;a.click();
 }
 
-// Hook: mostrar tab Análisis cuando se carguen contratos
-const _origLoadCt = loadContratos;
-// Inyectar mostrarTabAnalisis después de cargar contratos
+// Tab Análisis se activa automáticamente en loadContratos y cruzarContratosConClickUp
 
 </script>
 </body>
