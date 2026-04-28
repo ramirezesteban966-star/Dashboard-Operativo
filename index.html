@@ -1290,6 +1290,18 @@ function exportCSV(){
 // Estado adicional contratos (contratosData ya declarado en estado global)
 let filtroCtMesPago=''; // mes de pago seleccionado
 
+// Configuración de estados que pueden contar como publicados
+const ESTADOS_CONFIG=[
+  {key:'publicado',             label:'Publicado',              bg:'#D1FAE5',tc:'#065F46'},
+  {key:'en_proceso_publicacion',label:'En proceso publicación', bg:'#CCFBF1',tc:'#134E4A'},
+  {key:'complete',              label:'Complete',               bg:'#D1FAE5',tc:'#065F46'},
+  {key:'active',                label:'Active',                 bg:'#D1FAE5',tc:'#065F46'},
+  {key:'pendiente_publicacion', label:'Pendiente publicación',  bg:'#FEF3C7',tc:'#92400E'},
+  {key:'edicion',               label:'Edición',                bg:'#DBEAFE',tc:'#1E3A8A'},
+  {key:'grabacion',             label:'Grabación',              bg:'#FEE2E2',tc:'#7F1D1D'},
+  {key:'planeacion',            label:'Planeación',             bg:'#EDE9FE',tc:'#4C1D95'},
+];
+
 // Estados que cuentan para posteados — configurables
 let estadosQueCuentan=new Set(['publicado','en_proceso_publicacion','complete','active']);
 
