@@ -190,6 +190,71 @@ tr:hover td{background:var(--blue-light)}
 .celula-stat-v{font-size:22px;font-weight:700}
 .celula-stat-l{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.05em}
 
+/* ══════════════════════════════════════════
+   TAB VENTAS v2
+══════════════════════════════════════════ */
+.vt-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.vt-filtros-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.vt-filtros-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;margin-bottom:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+
+/* KPI cards grandes */
+.vt-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.vt-kpi{background:var(--surface);border-radius:var(--radius-lg);padding:14px 16px;border:1px solid var(--border);box-shadow:var(--shadow);border-top:3px solid currentColor}
+.vt-kpi-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:4px}
+.vt-kpi-v{font-size:24px;font-weight:700;line-height:1.1}
+.vt-kpi-s{font-size:10px;color:var(--text3);margin-top:3px}
+
+/* Layout principal ventas */
+.vt-layout{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:1100px){.vt-layout{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.vt-layout{grid-template-columns:1fr}}
+.vt-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)}
+.vt-panel-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.vt-panel-title span{font-weight:700;font-size:12px;color:var(--teal)}
+
+/* Bar chart rows */
+.vt-bar-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.vt-bar-row:last-child{border-bottom:none}
+.vt-bar-label{font-size:11px;color:var(--text);flex:0 0 110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:color .1s}
+.vt-bar-label:hover{color:var(--blue)}
+.vt-bar-label.selected{color:var(--blue);font-weight:700}
+.vt-bar-wrap{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;min-width:40px}
+.vt-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.vt-bar-val{font-size:11px;font-weight:700;min-width:64px;text-align:right;color:var(--text2)}
+.vt-bar-sub{font-size:10px;color:var(--text3);min-width:36px;text-align:right}
+
+/* Ciclos por contrato */
+.ciclo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.ciclo-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.ciclo-card-marca{font-size:13px;font-weight:700;color:var(--text)}
+.ciclo-card-prod{font-size:11px;color:var(--text3)}
+.ciclo-stats{display:flex;gap:16px;flex-wrap:wrap}
+.ciclo-stat{display:flex;flex-direction:column;align-items:center;min-width:80px;padding:8px 12px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border)}
+.ciclo-stat-v{font-size:18px;font-weight:700}
+.ciclo-stat-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-top:2px}
+.ciclo-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+
+/* Tabla ventas mejorada */
+.vt-tabla-wrap{overflow-x:auto}
+.vt-sortable{cursor:pointer;user-select:none}
+.vt-sortable:hover{color:var(--blue)}
+.vt-row-contrato{background:rgba(16,185,129,.06);border-left:3px solid var(--green)!important}
+.vt-row-nocontrato{opacity:.75}
+
+/* Selector de vista */
+.vt-vista-tabs{display:flex;gap:4px;margin-bottom:12px}
+.vt-vista-tab{font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s}
+.vt-vista-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* Chips de filtro activos */
+.vt-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:28px;margin-bottom:10px}
+.vt-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--blue-light);color:var(--blue);border:1px solid #BFDBFE;cursor:pointer}
+.vt-chip:hover{opacity:.75}
+
+/* ══════════════════════════════════════════
+   TAB VENTAS v2 END
+══════════════════════════════════════════ */
+
 /* ── Modal estados que cuentan ── */
 .estados-modal{position:fixed;inset:0;background:rgba(15,23,41,.5);z-index:2000;display:flex;align-items:center;justify-content:center}
 .estados-box{background:#fff;border-radius:12px;padding:24px;width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
@@ -200,6 +265,37 @@ tr:hover td{background:var(--blue-light)}
 .estado-chk-row input{width:16px;height:16px;cursor:pointer;accent-color:var(--blue)}
 .estado-chk-row label{font-size:12px;color:var(--text);cursor:pointer;flex:1}
 .estado-chk-row .est-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+
+/* ══════════════════════════════════════════
+   TAB CONTRATOS v2
+══════════════════════════════════════════ */
+/* Tarjeta sin asignar */
+.ccard.sem-sin_asignar::before{background:var(--amber)}
+.sem-badge-sin_asignar{background:var(--amber-bg);color:var(--amber)}
+.fill-sin_asignar{background:var(--amber)}
+
+/* Panel de cobro */
+.cobro-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow);margin-bottom:16px}
+.cobro-panel-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.cobro-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius);background:var(--bg);margin-bottom:6px;border:1px solid var(--border)}
+.cobro-row.urgente{background:#FEF3C7;border-color:#FDE68A}
+.cobro-row.muy-urgente{background:#FEE2E2;border-color:#FECACA}
+.cobro-row.ok{background:var(--green-bg);border-color:#A7F3D0}
+.cobro-marca{font-size:12px;font-weight:700;color:var(--text);flex:1}
+.cobro-prod{font-size:11px;color:var(--text3)}
+.cobro-dias{font-size:20px;font-weight:700;min-width:50px;text-align:center}
+.cobro-ingreso{font-size:13px;font-weight:700;color:var(--teal);min-width:70px;text-align:right}
+.cobro-fecha{font-size:10px;color:var(--text3);min-width:80px;text-align:right}
+
+/* Filtro de fechas en contratos */
+.ct-fecha-chips{display:flex;gap:5px;flex-wrap:wrap}
+.ct-fecha-chip{font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s;white-space:nowrap}
+.ct-fecha-chip:hover{border-color:var(--border2)}
+.ct-fecha-chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ══════════════════════════════════════════
+   TAB CONTRATOS v2 END
+══════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════
    TAB CONTRATOS
@@ -470,38 +566,44 @@ tr:hover td{background:var(--blue-light)}
       En Gerencia Comercial: ejecutá "Generar CONTRATOS_PUB" → publicá esa hoja como CSV → pegá la URL arriba.
     </div>
     <div id="ct-content" class="hidden">
-      <!-- Filtros de contratos -->
-      <div class="contratos-header">
-        <div style="display:flex;flex-direction:column;gap:8px;flex:1">
-          <div class="contratos-filtros">
-            <span class="strip-lbl">Estado:</span>
-            <button class="spill on" data-cf="todos" onclick="filtrarContratos('todos',this)">Todos</button>
-            <button class="spill" data-cf="activos" onclick="filtrarContratos('activos',this)">Activos</button>
-            <button class="spill" data-cf="en_curso" onclick="filtrarContratos('en_curso',this)">En curso</button>
-            <button class="spill" data-cf="urgente" onclick="filtrarContratos('urgente',this)">⚠ Urgente</button>
-            <button class="spill" data-cf="vencido" onclick="filtrarContratos('vencido',this)">🔴 Vencido</button>
-            <button class="spill" data-cf="completado" onclick="filtrarContratos('completado',this)">✅ Completado</button>
-            <button class="spill" data-cf="finalizado" onclick="filtrarContratos('finalizado',this)">📁 Finalizado</button>
-            <button class="spill" data-cf="pausado" onclick="filtrarContratos('pausado',this)">Pausado</button>
-          </div>
-          <div class="contratos-filtros">
-            <span class="strip-lbl">Célula:</span>
-            <button class="spill on" data-ccel="todas" onclick="filtrarCelula('todas',this)">Todas</button>
-            <button class="spill" data-ccel="Celula 1" onclick="filtrarCelula('Celula 1',this)">Célula 1</button>
-            <button class="spill" data-ccel="Celula 2" onclick="filtrarCelula('Celula 2',this)">Célula 2</button>
-            <button class="spill" data-ccel="Celula 3" onclick="filtrarCelula('Celula 3',this)">Célula 3</button>
-            <button class="spill" data-ccel="Celula 4" onclick="filtrarCelula('Celula 4',this)">Célula 4</button>
-            <button class="spill" data-ccel="Celula 5" onclick="filtrarCelula('Celula 5',this)">Célula 5</button>
-          </div>
+      <!-- Filtros de contratos v2 -->
+      <div style="display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:14px;box-shadow:var(--shadow)">
+        <!-- Fila 1: Estado -->
+        <div class="contratos-filtros">
+          <span class="strip-lbl">Estado:</span>
+          <button class="spill on" data-cf="todos"       onclick="filtrarContratos('todos',this)">Todos</button>
+          <button class="spill" data-cf="activos"        onclick="filtrarContratos('activos',this)">Activos</button>
+          <button class="spill" data-cf="en_curso"       onclick="filtrarContratos('en_curso',this)">En curso</button>
+          <button class="spill" data-cf="urgente"        onclick="filtrarContratos('urgente',this)">⚠ Urgente</button>
+          <button class="spill" data-cf="vencido"        onclick="filtrarContratos('vencido',this)">🔴 Vencido</button>
+          <button class="spill" data-cf="completado"     onclick="filtrarContratos('completado',this)">✅ Completado</button>
+          <button class="spill" data-cf="sin_pagar"      onclick="filtrarContratos('sin_pagar',this)">💳 Sin pagar</button>
+          <button class="spill" data-cf="pagados"        onclick="filtrarContratos('pagados',this)">✅ Pagados</button>
+          <button class="spill" data-cf="finalizado"     onclick="filtrarContratos('finalizado',this)">📁 Finalizado</button>
+          <button class="spill" data-cf="sin_asignar"    onclick="filtrarContratos('sin_asignar',this)">⬜ Sin asignar</button>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <select id="ct-sel-marca" onchange="onMarcaCambia()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);min-width:140px">
-            <option value="">Todas las marcas</option>
+        <!-- Fila 2: Célula + Marca + Producto -->
+        <div class="contratos-filtros">
+          <span class="strip-lbl">Célula:</span>
+          <button class="spill on" data-ccel="todas" onclick="filtrarCelula('todas',this)">Todas</button>
+          <button class="spill" data-ccel="Celula 1" onclick="filtrarCelula('Celula 1',this)">C1</button>
+          <button class="spill" data-ccel="Celula 2" onclick="filtrarCelula('Celula 2',this)">C2</button>
+          <button class="spill" data-ccel="Celula 3" onclick="filtrarCelula('Celula 3',this)">C3</button>
+          <button class="spill" data-ccel="Celula 4" onclick="filtrarCelula('Celula 4',this)">C4</button>
+          <button class="spill" data-ccel="Celula 5" onclick="filtrarCelula('Celula 5',this)">C5</button>
+          <span class="strip-lbl" style="margin-left:8px">Marca:</span>
+          <select id="ct-sel-marca" onchange="onMarcaCambia()" style="font-size:12px;padding:4px 9px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:130px">
+            <option value="">Todas</option>
           </select>
-          <select id="ct-sel-producto" onchange="renderContratos()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);min-width:160px">
+          <select id="ct-sel-producto" onchange="renderContratos()" style="font-size:12px;padding:4px 9px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:150px">
             <option value="">Todos los productos</option>
           </select>
-          <button class="btn btn-sm" onclick="abrirFiltroEstadosCt()">⚙ Estados</button>
+        </div>
+        <!-- Fila 3: Filtros de fecha -->
+        <div class="contratos-filtros" id="ct-fechas-row">
+          <span class="strip-lbl">Pagado en:</span>
+          <div class="ct-fecha-chips" id="ct-fecha-chips"></div>
+          <button class="btn btn-sm" onclick="abrirFiltroEstadosCt()" style="margin-left:8px">⚙ Estados</button>
           <button class="btn btn-sm" onclick="loadContratos()">↻ Actualizar</button>
         </div>
       </div>
@@ -516,16 +618,18 @@ tr:hover td{background:var(--blue-light)}
               <div class="twrap">
                 <table>
                   <thead><tr>
-                    <th style="width:110px">Célula</th>
-                    <th style="width:120px">Marca</th>
-                    <th style="width:140px">Producto</th>
-                    <th style="width:60px">Ciclo</th>
-                    <th style="width:90px">Progreso</th>
-                    <th style="width:70px">Videos</th>
-                    <th style="width:90px">Semáforo</th>
-                    <th style="width:90px">Días rest.</th>
-                    <th style="width:100px">Inicio prog.</th>
-                    <th style="width:100px">Fin prog.</th>
+                    <th style="width:90px">Célula</th>
+                    <th style="width:110px">Marca</th>
+                    <th style="width:130px">Producto</th>
+                    <th style="width:55px">Ciclo</th>
+                    <th style="width:100px">Progreso</th>
+                    <th style="width:65px">Videos</th>
+                    <th style="width:85px">Estado</th>
+                    <th style="width:80px">Días/Retraso</th>
+                    <th style="width:70px">Pago</th>
+                    <th style="width:75px">Días cobro</th>
+                    <th style="width:95px">Fin real</th>
+                    <th style="width:75px">Ingreso</th>
                   </tr></thead>
                   <tbody id="ct-tbody"></tbody>
                 </table>
@@ -546,63 +650,127 @@ tr:hover td{background:var(--blue-light)}
   <!-- ═══ TAB: VENTAS ═══ -->
   <div id="tab-ventas" class="tab-pane">
     <div id="vt-no-data" class="alert alert-info">
-      Cargá la URL de <strong>Ventas TikTok</strong> en "Configurar fuente" para ver el análisis de ventas.<br>
-      En TikTok Shop base: asegurate de agregar la columna <strong>SKU_Scalify</strong> en MAESTRO_PRODUCTOS para cruzar con los contratos. Luego publicá la hoja como CSV.
+      Cargá la URL de <strong>Ventas TikTok (CONSOLIDADO_PUB)</strong> en "Configurar fuente".<br>
+      En TikTok Shop base → menú Scalify TikTok → Ejecutar todo → publicar CONSOLIDADO_PUB como CSV.
     </div>
     <div id="vt-content" class="hidden">
-      <div class="strip" style="margin-bottom:10px">
-        <span class="strip-lbl">Período:</span>
-        <button class="spill on" data-vp="todo" onclick="filtrarVentas('todo',this)">Todo</button>
-        <button class="spill" data-vp="semana" onclick="filtrarVentas('semana',this)">Esta semana</button>
-        <button class="spill" data-vp="mes" onclick="filtrarVentas('mes',this)">Este mes</button>
-        <button class="spill" data-vp="mes_pasado" onclick="filtrarVentas('mes_pasado',this)">Mes pasado</button>
+
+      <!-- ── FILTROS ── -->
+      <div class="vt-filtros-block">
+        <div class="vt-filtros-row">
+          <span class="strip-lbl">Período:</span>
+          <button class="spill on" data-vp="todo"        onclick="vtFiltrarPeriodo('todo',this)">Todo</button>
+          <button class="spill"    data-vp="semana"      onclick="vtFiltrarPeriodo('semana',this)">Esta semana</button>
+          <button class="spill"    data-vp="semana_ant"  onclick="vtFiltrarPeriodo('semana_ant',this)">Sem. pasada</button>
+          <button class="spill"    data-vp="mes"         onclick="vtFiltrarPeriodo('mes',this)">Este mes</button>
+          <button class="spill"    data-vp="mes_pasado"  onclick="vtFiltrarPeriodo('mes_pasado',this)">Mes pasado</button>
+          <button class="spill"    data-vp="custom"      onclick="vtFiltrarPeriodo('custom',this)">Personalizado</button>
+          <div class="dr hidden" id="vt-custom-range">
+            <input type="date" id="vt-dfrom" onchange="vtRenderAll()">
+            <span style="color:var(--border2)">—</span>
+            <input type="date" id="vt-dto"   onchange="vtRenderAll()">
+          </div>
+        </div>
+        <div class="vt-filtros-row">
+          <span class="strip-lbl">Marca:</span>
+          <select id="vt-sel-marca" onchange="vtOnMarcaCambia()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:140px">
+            <option value="">Todas</option>
+          </select>
+          <select id="vt-sel-producto" onchange="vtRenderAll()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:160px">
+            <option value="">Todos los productos</option>
+          </select>
+          <select id="vt-sel-cuenta" onchange="vtRenderAll()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:140px">
+            <option value="">Todas las cuentas</option>
+          </select>
+          <button class="btn btn-sm" onclick="vtLimpiarFiltros()">Limpiar</button>
+          <button class="btn btn-sm" onclick="vtExportarCSV()">Exportar CSV</button>
+        </div>
+        <!-- Chips de filtros activos -->
+        <div class="vt-chips" id="vt-chips" style="display:none"></div>
       </div>
 
-      <!-- KPIs de ventas -->
-      <div class="ventas-kpis" id="vt-kpis"></div>
+      <!-- ── KPIs ── -->
+      <div class="vt-kpi-grid" id="vt-kpis"></div>
 
-      <!-- Grid de análisis -->
-      <div class="ventas-grid">
-        <div class="ventas-panel">
-          <div class="ventas-panel-title">Ventas por marca (unidades)</div>
-          <div id="vt-por-marca"></div>
-        </div>
-        <div class="ventas-panel">
-          <div class="ventas-panel-title">Ventas por marca (ingresos USD)</div>
-          <div id="vt-por-marca-usd"></div>
-        </div>
-        <div class="ventas-panel">
-          <div class="ventas-panel-title">Ventas por semana</div>
-          <div id="vt-por-semana"></div>
-        </div>
-        <div class="ventas-panel">
-          <div class="ventas-panel-title">Ventas por cuenta</div>
-          <div id="vt-por-cuenta"></div>
+      <!-- ── SELECTOR DE VISTA ── -->
+      <div class="vt-vista-tabs">
+        <button class="vt-vista-tab active" data-vista="resumen" onclick="vtCambiarVista('resumen',this)">📊 Resumen</button>
+        <button class="vt-vista-tab" data-vista="ciclos"  onclick="vtCambiarVista('ciclos',this)">🔄 Por ciclo de contrato</button>
+        <button class="vt-vista-tab" data-vista="detalle" onclick="vtCambiarVista('detalle',this)">📋 Detalle completo</button>
+      </div>
+
+      <!-- ── VISTA: RESUMEN ── -->
+      <div id="vt-vista-resumen">
+        <div class="vt-layout">
+          <div class="vt-panel">
+            <div class="vt-panel-title">GMV por marca <span id="vt-gmv-total-lbl"></span></div>
+            <div id="vt-por-marca-gmv"></div>
+          </div>
+          <div class="vt-panel">
+            <div class="vt-panel-title">Unidades por marca</div>
+            <div id="vt-por-marca-uds"></div>
+          </div>
+          <div class="vt-panel">
+            <div class="vt-panel-title">GMV por semana</div>
+            <div id="vt-por-semana-gmv"></div>
+          </div>
+          <div class="vt-panel">
+            <div class="vt-panel-title">GMV por producto (top 10)</div>
+            <div id="vt-por-producto-gmv"></div>
+          </div>
+          <div class="vt-panel">
+            <div class="vt-panel-title">Comisiones por marca</div>
+            <div id="vt-por-marca-comm"></div>
+          </div>
+          <div class="vt-panel">
+            <div class="vt-panel-title">GMV por cuenta</div>
+            <div id="vt-por-cuenta-gmv"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Tabla ventas vs ciclos -->
-      <div class="tpanel">
-        <div class="thdr">
-          <span class="ttitle">Ventas cruzadas con ciclos de contrato</span>
-          <span style="font-size:11px;color:var(--text3)">🟢 = dentro del ciclo activo</span>
+      <!-- ── VISTA: CICLOS DE CONTRATO ── -->
+      <div id="vt-vista-ciclos" class="hidden">
+        <div class="alert alert-info" style="margin-bottom:12px">
+          Muestra el GMV generado durante cada ciclo de contrato. <strong>Verde</strong> = ciclo activo en Gerencia Comercial. <strong>Gris</strong> = sin contrato asociado.
         </div>
-        <div class="twrap">
-          <table>
-            <thead><tr>
-              <th style="width:120px">Marca</th>
-              <th style="width:140px">Producto (Scalify)</th>
-              <th style="width:80px">SKU</th>
-              <th style="width:70px">Unidades</th>
-              <th style="width:90px">Ingresos USD</th>
-              <th style="width:90px">Semana</th>
-              <th style="width:80px">Ciclo activo</th>
-              <th style="width:90px">Videos post.</th>
-            </tr></thead>
-            <tbody id="vt-tbody"></tbody>
-          </table>
+        <div id="vt-ciclos-content"></div>
+      </div>
+
+      <!-- ── VISTA: DETALLE ── -->
+      <div id="vt-vista-detalle" class="hidden">
+        <div class="tpanel">
+          <div class="thdr">
+            <span class="ttitle">Detalle de ventas <span class="cbadge" id="vt-det-count">0</span></span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select id="vt-det-agrupar" onchange="vtRenderDetalle()" style="font-size:12px;padding:5px 9px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+                <option value="orden">Por orden (sin agrupar)</option>
+                <option value="sku_semana" selected>Por SKU + semana</option>
+                <option value="sku_mes">Por SKU + mes</option>
+                <option value="marca_semana">Por marca + semana</option>
+                <option value="marca_mes">Por marca + mes</option>
+              </select>
+              <select id="vt-rpp" onchange="vtPg=1;vtRenderDetalle()" style="font-size:12px;padding:5px 9px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+                <option value="25">25 filas</option>
+                <option value="50" selected>50 filas</option>
+                <option value="100">100 filas</option>
+              </select>
+            </div>
+          </div>
+          <div class="vt-tabla-wrap">
+            <table>
+              <thead id="vt-det-thead"></thead>
+              <tbody id="vt-det-tbody"></tbody>
+            </table>
+          </div>
+          <div class="pg">
+            <button class="pg-btn" id="vt-pgprev" onclick="vtPg--;vtRenderDetalle()">← Anterior</button>
+            <span id="vt-pginfo"></span>
+            <button class="pg-btn" id="vt-pgnext" onclick="vtPg++;vtRenderDetalle()">Siguiente →</button>
+          </div>
         </div>
       </div>
+
     </div>
   </div><!-- /tab-ventas -->
 
@@ -1117,160 +1285,67 @@ function exportCSV(){
 }
 
 // ═══════════════════════════════════════════════════════
-// TAB CONTRATOS — con cruce ClickUp en browser
+// TAB CONTRATOS v2 — filtros potentes + sin asignar + cobros
 // ═══════════════════════════════════════════════════════
 
-// Estados que cuentan — configurables por el usuario
-// Por defecto: publicado + en_proceso_publicacion
+// Estado global contratos
+let contratosData=[], filtroContratos='todos', filtroCtCelula='todas';
+let filtroCtMesPago=''; // mes de pago seleccionado
+
+// Estados que cuentan para posteados — configurables
 let estadosQueCuentan=new Set(['publicado','en_proceso_publicacion','complete','active']);
 
-// Todos los estados disponibles en el CSV de ClickUp (se llenan al cargar)
-const ESTADOS_CONFIG=[
-  {key:'publicado',          label:'Publicado',             bg:'#D1FAE5',tc:'#065F46'},
-  {key:'en_proceso_publicacion',label:'En proceso publicación',bg:'#CCFBF1',tc:'#134E4A'},
-  {key:'complete',           label:'Complete',              bg:'#D1FAE5',tc:'#065F46'},
-  {key:'active',             label:'Active',                bg:'#D1FAE5',tc:'#065F46'},
-  {key:'pendiente_publicacion',label:'Pendiente publicación',bg:'#FEF3C7',tc:'#92400E'},
-  {key:'edicion',            label:'Edición',               bg:'#DBEAFE',tc:'#1E3A8A'},
-  {key:'grabacion',          label:'Grabación',             bg:'#FEE2E2',tc:'#7F1D1D'},
-  {key:'planeacion',         label:'Planeación',            bg:'#EDE9FE',tc:'#4C1D95'},
-];
-
-function abrirFiltroEstadosCt(){
-  // Construir lista dinámica con todos los estados presentes en el CSV
-  const estadosPresentes=new Set(allData.map(r=>(r.ESTADO||'').toLowerCase().replace(/ /g,'_')));
-  const modal=document.getElementById('modal-estados-ct');
-  const list=document.getElementById('estados-ct-list');
-  
-  // Combinar estados config + los que aparecen en el CSV
-  const todos=[...ESTADOS_CONFIG];
-  estadosPresentes.forEach(e=>{
-    if(e&&!todos.find(x=>x.key===e)) todos.push({key:e,label:e.replace(/_/g,' '),bg:'#F8FAFC',tc:'#475569'});
-  });
-  
-  list.innerHTML=todos.filter(e=>e.key).map(e=>`
-    <div class="estado-chk-row">
-      <input type="checkbox" id="ect-${e.key}" value="${e.key}" ${estadosQueCuentan.has(e.key)?'checked':''}>
-      <label for="ect-${e.key}"><span class="est-badge" style="background:${e.bg};color:${e.tc}">${e.label}</span></label>
-    </div>`).join('');
-  modal.classList.remove('hidden');
-}
-
-function cerrarFiltroEstadosCt(){document.getElementById('modal-estados-ct').classList.add('hidden');}
-
-function aplicarFiltroEstadosCt(){
-  estadosQueCuentan.clear();
-  document.querySelectorAll('#estados-ct-list input:checked').forEach(cb=>estadosQueCuentan.add(cb.value));
-  cerrarFiltroEstadosCt();
-  // Recalcular conteos desde ClickUp y re-renderizar
-  contratosData=cruzarContratosConClickUp(contratosData);
-  renderContratos();
-}
-
-/**
- * Cruza contratos con allData (ClickUp) para calcular posteados por ciclo.
- * Usa estadosQueCuentan para determinar qué estados suman.
- */
-function cruzarContratosConClickUp(contratos){
-  if(!contratos.length||!allData.length) return contratos;
-  
-  // Contar por SKU+Célula los estados que cuentan, ordenados por fecha publicado
-  const conteoBySKUCel={};
-  
-  // Normalizar formato de célula: "CELULA#1" → "Celula 1"
-  function normCelCruce(c){
-    if(!c) return '';
-    const m = String(c).match(/#?(\d+)$/);
-    if(m) return 'Celula '+parseInt(m[1]);
-    const m2 = String(c).toLowerCase().match(/celula\s*(\d+)/);
-    if(m2) return 'Celula '+parseInt(m2[1]);
-    return c;
+// ── Parseo robusto de números que vienen como fechas de Excel ──────
+// Gerencia guarda los días como fechas (ej: "06/01/1900" = 6 días)
+function parsearDias(v){
+  if(v===undefined||v===''||v===null) return '';
+  const n=parseFloat(String(v));
+  if(!isNaN(n)&&n===Math.floor(n)&&n>=0&&n<10000) return n; // ya es número
+  // Viene como fecha dd/MM/yyyy — extraer día del año desde 1900
+  const m=String(v).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m){
+    const d=new Date(+m[3],+m[2]-1,+m[1]);
+    const base=new Date(1899,11,30);
+    return Math.round((d-base)/86400000);
   }
-  
-  allData.forEach(r=>{
-    const sku=(r.SKU_PRODUCTO||'').trim();
-    const cel=normCelCruce((r.CELULA||'').trim());
-    const estado=(r.ESTADO||'').toLowerCase().replace(/ /g,'_');
-    if(!sku||!cel) return;
-    if(!estadosQueCuentan.has(estado)) return;
-    
-    const clave=cel+'||'+sku;
-    if(!conteoBySKUCel[clave]) conteoBySKUCel[clave]=[];
-    // Guardar la fecha para ordenar y asignar a ciclos
-    conteoBySKUCel[clave].push({
-      fecha:parseDate(r.FECHA_PUBLICADO||r.FECHA_ACTUALIZACION||'')||new Date(0),
-      estado:estado
-    });
-  });
-  
-  // Ordenar por fecha dentro de cada SKU+Cel
-  Object.keys(conteoBySKUCel).forEach(k=>{
-    conteoBySKUCel[k].sort((a,b)=>a.fecha-b.fecha);
-  });
-  
-  // Asignar a cada contrato su conteo basado en el ciclo_offset
-  return contratos.map(c=>{
-    const sku=(c.SKU||'').trim();
-    const cel=(c.CELULA_ID||'').trim(); // ya viene como "Celula 1"
-    const clave=cel+'||'+sku;
-    const videosMes=parseInt(String(c.VIDEOS_MES||'0'))||0;
-    const cicloOffset=parseInt(String(c.CICLO_OFFSET||'0'))||0;
-    
-    const items=conteoBySKUCel[clave]||[];
-    const totalSKU=items.length;
-    
-    // Videos de este ciclo = los que caen entre offset y offset+videosMes
-    const posteadosCiclo=Math.min(
-      Math.max(0, totalSKU-cicloOffset),
-      videosMes
-    );
-    const pct=videosMes>0?posteadosCiclo/videosMes:0;
-    const restantes=Math.max(0,videosMes-posteadosCiclo);
-    
-    // Recalcular semáforo
-    const diasR=c.DIAS_RESTANTES!==''&&c.DIAS_RESTANTES!==undefined&&c.DIAS_RESTANTES!=='null'?parseInt(c.DIAS_RESTANTES):'';
-    let semaforo=c.SEMAFORO||'en_curso';
-    // Solo recalcular si el contrato está activo
-    const estado=(c.ESTADO||'').toLowerCase();
-    if(estado!=='finalizado'&&estado!=='pausado'&&estado!=='pendiente'){
-      if(videosMes>0&&posteadosCiclo>=videosMes) semaforo='completado';
-      else if(diasR!==''&&diasR<0) semaforo='vencido';
-      else if(diasR!==''&&diasR<=7) semaforo='urgente';
-      else semaforo='en_curso';
-    }
-    
-    return {...c,
-      POSTEADOS_CICLO:posteadosCiclo,
-      POSTEADOS_TOTAL_SKU:totalSKU,
-      PCT_COMPLETADO:pct,
-      VIDEOS_RESTANTES:restantes,
-      SEMAFORO:semaforo
-    };
-  });
+  return '';
 }
 
+// ── Cargar contratos ───────────────────────────────────────────────
 async function loadContratos(){
   let url=document.getElementById('csvurl-contratos').value.trim();
   if(!url){setMsg('msgcfg','Pegá la URL de CONTRATOS_PUB','warn');document.getElementById('cfgpanel').style.display='';return;}
-  // Auto-fix: convertir pubhtml a CSV si es necesario
-  url=url.replace('pubhtml','pub').replace(/output=[^&]*/, 'output=csv');
-  if(!url.includes('output=csv')) url+=(url.includes('?')?'&':'?')+'output=csv';
-  document.getElementById('csvurl-contratos').value=url;
   saveUrls();
   try{
     const text=await fetchCSV(url);
     contratosData=parseCSVGeneric(text);
-    // Cruzar con allData de ClickUp para calcular posteados reales
+    // Normalizar campos de días y cruzar con ClickUp
+    contratosData=normalizarContratos_(contratosData);
     if(allData.length) contratosData=cruzarContratosConClickUp(contratosData);
     document.getElementById('ct-no-data').classList.add('hidden');
     document.getElementById('ct-content').classList.remove('hidden');
     document.getElementById('badge-ct').textContent=contratosData.length;
     poblarSelectoresMarcaProducto();
+    poblarFiltroFechas();
     renderContratos();
     mostrarTabAnalisis();
   }catch(e){setMsg('msgcfg','Error cargando contratos: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
 }
 
+// Normaliza campos de días que vienen como fechas de Excel
+function normalizarContratos_(contratos){
+  return contratos.map(c=>{
+    const nc={...c};
+    ['DIAS_RESTANTES','DIAS_DURACION','DIAS_RETRASO','DIAS_COBRO','DIAS_CICLO_TOTAL'].forEach(k=>{
+      nc[k]=parsearDias(c[k]);
+    });
+    // Videos sin asignar = posteados totales del SKU - suma de todos los ciclos del SKU+Célula
+    nc._sinAsignar=0; // se calcula abajo después de agrupar
+    return nc;
+  });
+}
+
+// ── Poblar selectores ──────────────────────────────────────────────
 function poblarSelectoresMarcaProducto(){
   const marcas=[...new Set(contratosData.map(c=>(c.MARCA_NOMBRE||'').trim()).filter(Boolean))].sort();
   const selM=document.getElementById('ct-sel-marca');
@@ -1284,103 +1359,188 @@ function onMarcaCambia(){
   const selP=document.getElementById('ct-sel-producto');
   const curP=selP.value;
   const prods=[...new Set(
-    contratosData
-      .filter(c=>!selM||(c.MARCA_NOMBRE||'').trim()===selM)
-      .map(c=>(c.PRODUCTO||'').trim())
-      .filter(Boolean)
+    contratosData.filter(c=>!selM||(c.MARCA_NOMBRE||'').trim()===selM)
+      .map(c=>(c.PRODUCTO||'').trim()).filter(Boolean)
   )].sort();
   selP.innerHTML='<option value="">Todos los productos</option>'+prods.map(p=>`<option value="${p}"${p===curP?' selected':''}>${p}</option>`).join('');
   renderContratos();
 }
 
-function filtrarCelula(cel,btn){
-  document.querySelectorAll('[data-ccel]').forEach(b=>b.className='spill');
-  btn.className='spill on';filtroCtCelula=cel;renderContratos();
+// ── Filtros de fecha de pago ────────────────────────────────────────
+function poblarFiltroFechas(){
+  const chipsEl=document.getElementById('ct-fecha-chips');
+  if(!chipsEl) return;
+  // Extraer meses únicos de Fecha_Pagado
+  const mesesSet=new Set();
+  contratosData.forEach(c=>{
+    const f=(c.FECHA_PAGADO||'').trim();
+    if(f&&f.length>=7){
+      // Viene como dd/MM/yyyy → extraer MM/yyyy → formato YYYY-MM
+      const m=f.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if(m) mesesSet.add(m[3]+'-'+m[2]);
+    }
+  });
+  const meses=[...mesesSet].sort().reverse(); // más reciente primero
+  const etiquetas={'01':'Ene','02':'Feb','03':'Mar','04':'Abr','05':'May','06':'Jun','07':'Jul','08':'Ago','09':'Sep','10':'Oct','11':'Nov','12':'Dic'};
+  chipsEl.innerHTML=meses.map(mes=>{
+    const [a,m]=mes.split('-');
+    const lbl=(etiquetas[m]||m)+' '+a.slice(2);
+    return`<button class="ct-fecha-chip${filtroCtMesPago===mes?' on':''}" onclick="filtrarMesPago('${mes}',this)">${lbl}</button>`;
+  }).join('');
 }
+
+function filtrarMesPago(mes, btn){
+  if(filtroCtMesPago===mes){
+    // Deseleccionar
+    filtroCtMesPago='';
+    document.querySelectorAll('.ct-fecha-chip').forEach(b=>b.classList.remove('on'));
+  } else {
+    filtroCtMesPago=mes;
+    document.querySelectorAll('.ct-fecha-chip').forEach(b=>b.classList.remove('on'));
+    if(btn) btn.classList.add('on');
+  }
+  renderContratos();
+}
+
+// ── Filtrado principal ──────────────────────────────────────────────
 function filtrarContratos(filtro,btn){
   document.querySelectorAll('[data-cf]').forEach(b=>b.className='spill');
-  btn.className='spill on';filtroContratos=filtro;renderContratos();
+  if(btn) btn.className='spill on';
+  filtroContratos=filtro;
+  renderContratos();
 }
 
-function renderContratos(){
-  if(!contratosData.length) return;
-  const srch=''; // búsqueda ahora por selectores de marca/producto
+function filtrarCelula(cel,btn){
+  document.querySelectorAll('[data-ccel]').forEach(b=>b.className='spill');
+  if(btn) btn.className='spill on';
+  filtroCtCelula=cel;
+  renderContratos();
+}
 
+function aplicarFiltrosContratos(datos){
   const selMarca=(document.getElementById('ct-sel-marca').value||'').trim();
   const selProd=(document.getElementById('ct-sel-producto').value||'').trim();
 
-  let datos=contratosData.filter(c=>{
+  return datos.filter(c=>{
     const sem=(c.SEMAFORO||'').toLowerCase();
     const estado=(c.ESTADO||'').toLowerCase();
-    if(filtroContratos==='activos'){
-      if(sem==='finalizado'||estado==='finalizado') return false;
-    } else if(filtroContratos!=='todos'){
-      if(sem!==filtroContratos) return false;
+    const pagado=(c.PAGADO||'').toLowerCase()==='si';
+    const esFin=sem==='finalizado'||estado==='finalizado';
+
+    // Filtro de estado/semáforo
+    switch(filtroContratos){
+      case 'activos':   if(esFin) return false; break;
+      case 'sin_pagar': if(!(esFin&&!pagado)) return false; break;
+      case 'pagados':   if(!pagado) return false; break;
+      case 'sin_asignar': if(!(c._sinAsignar>0)) return false; break;
+      case 'todos':     break;
+      default:          if(sem!==filtroContratos) return false;
     }
+
+    // Filtro célula
     if(filtroCtCelula!=='todas'&&(c.CELULA_ID||'').trim()!==filtroCtCelula) return false;
+
+    // Filtro marca/producto
     if(selMarca&&(c.MARCA_NOMBRE||'').trim()!==selMarca) return false;
     if(selProd&&(c.PRODUCTO||'').trim()!==selProd) return false;
+
+    // Filtro mes de pago
+    if(filtroCtMesPago){
+      const f=(c.FECHA_PAGADO||'').trim();
+      const m=f.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      const mesPago=m?(m[3]+'-'+m[2]):'';
+      if(mesPago!==filtroCtMesPago) return false;
+    }
+
     return true;
   });
+}
 
-  // Ordenar: vencido > urgente > en_curso > completado > pausado > finalizado
-  const ord={vencido:0,urgente:1,en_curso:2,pendiente:3,completado:4,pausado:5,finalizado:6};
+// ── Calcular videos sin asignar ─────────────────────────────────────
+// Para cada SKU+Célula: totalPosteados - suma de todos los ciclos
+function calcularSinAsignar(contratos){
+  // Agrupar por SKU+Célula
+  const grupos={};
+  contratos.forEach(c=>{
+    const k=(c.SKU||'')+'||'+(c.CELULA_ID||'');
+    if(!grupos[k]) grupos[k]=[];
+    grupos[k].push(c);
+  });
+  // Para cada grupo calcular sin asignar
+  return contratos.map(c=>{
+    const k=(c.SKU||'')+'||'+(c.CELULA_ID||'');
+    const grupo=grupos[k];
+    const totalPosteados=parseInt(c.POSTEADOS_TOTAL_SKU||0)||0;
+    const totalComprom=grupo.reduce((a,x)=>a+parseInt(x.VIDEOS_MES||0),0);
+    const sinAsignar=Math.max(0,totalPosteados-totalComprom);
+    return{...c, _sinAsignar:sinAsignar, _totalComprom:totalComprom, _totalPosteados:totalPosteados};
+  });
+}
+
+// ── Render principal ────────────────────────────────────────────────
+function renderContratos(){
+  if(!contratosData.length) return;
+
+  // Calcular sin asignar para todos
+  const conSinAsignar=calcularSinAsignar(contratosData);
+
+  // Aplicar filtros
+  let datos=aplicarFiltrosContratos(conSinAsignar);
+
+  // Ordenar: prioridad por estado
+  const ord={vencido:0,urgente:1,sin_pagar:1.5,en_curso:2,pendiente:3,completado:4,finalizado:5,pausado:6};
   datos.sort((a,b)=>{
-    const oa=ord[(a.SEMAFORO||'').toLowerCase()]??9;const ob=ord[(b.SEMAFORO||'').toLowerCase()]??9;
+    const sa=(a.SEMAFORO||'').toLowerCase(), sb=(b.SEMAFORO||'').toLowerCase();
+    const oa=ord[sa]??9, ob=ord[sb]??9;
     if(oa!==ob) return oa-ob;
     return (a.CELULA_ID||'').localeCompare(b.CELULA_ID||'');
   });
 
-  // Tarjetas
+  // ── VISTA: tarjetas ──
   const grid=document.getElementById('ct-grid');
-  grid.innerHTML=datos.map(c=>buildContratoCard(c)).join('');
+  grid.innerHTML='';
 
-  // Tabla
+  // Tarjetas normales
+  datos.filter(c=>!c._sinAsignar||c._sinAsignar===0).forEach(c=>{
+    grid.insertAdjacentHTML('beforeend', buildContratoCard(c));
+  });
+
+  // Tarjetas "sin asignar" — agregar una por cada SKU+Célula que tenga excedente
+  const skusCelVistas=new Set();
+  datos.filter(c=>c._sinAsignar>0).forEach(c=>{
+    const k=(c.SKU||'')+'|'+(c.CELULA_ID||'');
+    if(!skusCelVistas.has(k)){
+      skusCelVistas.add(k);
+      grid.insertAdjacentHTML('beforeend', buildSinAsignarCard(c));
+    }
+  });
+
+  // ── VISTA: tabla ──
   const tbody=document.getElementById('ct-tbody');
-  tbody.innerHTML=datos.map(c=>{
-    const sem=c.SEMAFORO||'';
-    const st=semColorClass(sem);
-    const pct=parseFloat(String(c.PCT_COMPLETADO||'0').replace('%',''))||0;
-    const _dr=String(c.DIAS_RESTANTES||'');const diasR=_dr!==''&&_dr!=='null'?parseInt(_dr):'';
-    const diasStr=diasR===''?'—':diasR<0?`Vencido ${Math.abs(diasR)}d`:diasR===0?'Hoy':diasR+' días';
-    const diasCls=diasR<0?'style="color:var(--red);font-weight:700"':diasR<=7?'style="color:var(--amber);font-weight:700"':'';
-    return`<tr>
-      <td>${c.CELULA_ID||'—'}</td>
-      <td title="${c.MARCA_NOMBRE||''}">${c.MARCA_NOMBRE||'—'}</td>
-      <td title="${c.PRODUCTO||''}">${(c.PRODUCTO||'—').slice(0,22)}</td>
-      <td style="text-align:center"><span class="ccard-chip ciclo">Ciclo ${c.CICLO_NUM||1}</span></td>
-      <td><div style="display:flex;align-items:center;gap:6px"><div class="progress-bar-bg" style="flex:1;height:6px"><div class="progress-bar-fill fill-${sem}" style="width:${Math.round(pct*100)}%"></div></div><span style="font-size:10px;font-weight:600;color:var(--text2)">${Math.round(pct*100)}%</span></div></td>
-      <td style="text-align:center">${c.POSTEADOS_CICLO||0}/${c.VIDEOS_MES||0}</td>
-      <td><span class="ccard-semaforo sem-badge-${sem}">${semLabel(sem)}</span></td>
-      <td ${diasCls}>${diasStr}</td>
-      <td style="font-size:11px">${c.FECHA_INICIO_PROG||'—'}</td>
-      <td style="font-size:11px">${c.FECHA_FIN_PROG||'—'}</td>
-    </tr>`;
-  }).join('')||'<tr><td colspan="10" class="nodata">Sin contratos con ese filtro</td></tr>';
+  tbody.innerHTML=datos.map(c=>buildContratoRow(c)).join('');
 
-  // Sidebar
-  renderContratosSidebar(datos);
+  // ── Sidebar ──
+  renderContratosSidebar(conSinAsignar, datos);
 }
 
+// ── Tarjeta normal ──────────────────────────────────────────────────
 function buildContratoCard(c){
   const sem=(c.SEMAFORO||'en_curso').toLowerCase();
-  const pct=parseFloat(String(c.PCT_COMPLETADO||'0').replace('%',''))||0;
-  const pctPct=Math.min(100,Math.round(pct*100));
+  const pct=parseFloat(String(c.PCT_COMPLETADO||0).replace('%',''))||0;
+  const pctPct=Math.min(100,Math.round(pct*100>1?pct:pct*100));
   const posteados=parseInt(c.POSTEADOS_CICLO||0);
   const total=parseInt(c.VIDEOS_MES||0);
-  const dr=String(c.DIAS_RESTANTES||'');const diasR=dr!==''&&dr!==undefined&&dr!=='null'?parseInt(dr):'';
-  const diasStr=diasR===''?'':(diasR<0?`<span class="ccard-dias vencido">Vencido hace ${Math.abs(diasR)} días</span>`:diasR===0?`<span class="ccard-dias urgente">Vence hoy</span>`:`<span class="ccard-dias ${diasR<=7?'urgente':'ok'}">${diasR} días restantes</span>`);
+  const dr=c.DIAS_RESTANTES;
+  const diasR=dr!==''&&dr!==undefined&&!isNaN(dr)?parseInt(dr):'';
+  const diasStr=diasR===''?'':(diasR<0?`<span class="ccard-dias vencido">Vencido hace ${Math.abs(diasR)}d</span>`:diasR===0?`<span class="ccard-dias urgente">Vence hoy</span>`:`<span class="ccard-dias ${diasR<=7?'urgente':'ok'}">${diasR}d restantes</span>`);
+  const esFin=sem==='finalizado'||(c.ESTADO||'').toLowerCase()==='finalizado';
+  const pagado=(c.PAGADO||'').toLowerCase()==='si';
+  const diasCobro=parsearDias(c.DIAS_COBRO);
+  const diasRetraso=parsearDias(c.DIAS_RETRASO);
   const cicloNum=parseInt(c.CICLO_NUM||1);
   const cicloOffset=parseInt(c.CICLO_OFFSET||0);
-  const videoDesde=cicloOffset+1;
-  const videoHasta=cicloOffset+total;
-  
-  // Info de análisis para finalizados
-  const esFinalizado=sem==='finalizado'||(c.ESTADO||'').toLowerCase()==='finalizado';
-  const diasProgFin=c.DIAS_PROG_A_FIN!==undefined&&c.DIAS_PROG_A_FIN!==''?parseInt(c.DIAS_PROG_A_FIN||0):'';
-  const diasFinPago=c.DIAS_FIN_A_PAGO!==undefined&&c.DIAS_FIN_A_PAGO!==''?parseInt(c.DIAS_FIN_A_PAGO||0):'';
-  const pagado=(c.PAGADO||'').toLowerCase()==='si';
-  
+  const ingreso=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+
   return`<div class="ccard sem-${sem}">
     <div class="ccard-top">
       <div>
@@ -1391,8 +1551,8 @@ function buildContratoCard(c){
     </div>
     <div class="ccard-meta">
       <span class="ccard-chip celula">${c.CELULA_ID||'—'}</span>
-      ${cicloNum>1?`<span class="ccard-chip ciclo">Ciclo ${cicloNum} · videos ${videoDesde}-${videoHasta}</span>`:`<span class="ccard-chip ciclo">Ciclo 1 · videos 1-${videoHasta}</span>`}
-      <span class="ccard-chip">${c.TIPO_COMERCIAL==='A'?'Tipo A':'Tipo B'}</span>
+      <span class="ccard-chip ciclo">Ciclo ${cicloNum} · v${cicloOffset+1}-${cicloOffset+total}</span>
+      ${esFin?`<span class="ccard-chip" style="${pagado?'background:var(--green-bg);border-color:#A7F3D0;color:var(--green)':'background:var(--amber-bg);border-color:#FDE68A;color:var(--amber)'}">${pagado?'✅ Pagado':'⏳ Sin pagar'}</span>`:''}
     </div>
     <div class="progress-wrap">
       <div class="progress-label">
@@ -1402,72 +1562,263 @@ function buildContratoCard(c){
       <div class="progress-bar-bg"><div class="progress-bar-fill fill-${sem}" style="width:${pctPct}%"></div></div>
     </div>
     <div class="ccard-footer">
-      <div>
-        ${esFinalizado
-          ? `<span style="display:flex;flex-direction:column;gap:3px">
-              ${pagado?'<span style="color:var(--green);font-weight:700;font-size:11px">✅ Pagado</span>':'<span style="color:var(--amber);font-weight:700;font-size:11px">⏳ Pago pendiente</span>'}
-              ${diasProgFin!==''?`<span style="font-size:10px;color:var(--text3)">Duración: ${diasProgFin} días</span>`:''}
-              ${diasFinPago!==''?`<span style="font-size:10px;color:${diasFinPago>30?'var(--red)':diasFinPago>15?'var(--amber)':'var(--text3)'}">Cobro: ${diasFinPago}d desde fin</span>`:''}
-            </span>`
-          : diasStr}
+      <div style="display:flex;flex-direction:column;gap:3px">
+        ${esFin
+          ?`${diasCobro!==''?`<span style="font-size:10px;color:${diasCobro>30?'var(--red)':diasCobro>15?'var(--amber)':'var(--text3)'}">Cobro: ${diasCobro}d</span>`:''} ${diasRetraso!==''?`<span style="font-size:10px;color:${diasRetraso>0?'var(--amber)':'var(--green)'}">Retraso: ${diasRetraso>0?'+':''}${diasRetraso}d</span>`:''}`
+          :diasStr}
       </div>
       <div class="ccard-fechas">
-        ${c.FECHA_INICIO_PROG?`<span>Inicio: ${c.FECHA_INICIO_PROG}</span>`:''}
-        ${esFinalizado&&c.FECHA_FIN_REAL?`<span style="color:var(--green)">Fin real: ${c.FECHA_FIN_REAL}</span>`:c.FECHA_FIN_PROG?`<span>Fin est: ${c.FECHA_FIN_PROG}</span>`:''}
+        ${ingreso>0?`<span style="font-size:11px;font-weight:700;color:var(--teal)">$${ingreso.toLocaleString('en-US',{maximumFractionDigits:0})}</span>`:''}
+        ${esFin&&c.FECHA_FIN_REAL?`<span style="color:var(--green)">Fin: ${c.FECHA_FIN_REAL}</span>`:c.FECHA_FIN_PROG?`<span>Fin: ${c.FECHA_FIN_PROG}</span>`:''}
       </div>
     </div>
   </div>`;
 }
 
-function renderContratosSidebar(datos){
-  const total=datos.length;
+// ── Tarjeta "Sin asignar" ───────────────────────────────────────────
+function buildSinAsignarCard(c){
+  const sinAsignar=c._sinAsignar;
+  const totalComprom=c._totalComprom;
+  const totalPosteados=c._totalPosteados;
+  return`<div class="ccard sem-sin_asignar">
+    <div class="ccard-top">
+      <div>
+        <div class="ccard-marca">${c.MARCA_NOMBRE||'—'}</div>
+        <div class="ccard-producto">${c.PRODUCTO||'—'}</div>
+      </div>
+      <span class="ccard-semaforo sem-badge-sin_asignar">Sin asignar</span>
+    </div>
+    <div class="ccard-meta">
+      <span class="ccard-chip celula">${c.CELULA_ID||'—'}</span>
+      <span class="ccard-chip" style="background:var(--amber-bg);border-color:#FDE68A;color:var(--amber)">+${sinAsignar} videos excedente</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <div><span class="progress-count" style="color:var(--amber)">${sinAsignar}</span><span class="progress-total"> videos sin ciclo asignado</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">
+        ${totalPosteados} publicados · ${totalComprom} comprometidos en contratos
+      </div>
+    </div>
+    <div class="ccard-footer" style="margin-top:8px">
+      <span style="font-size:11px;color:var(--amber)">⚠ Estos videos no pertenecen a ningún ciclo registrado</span>
+    </div>
+  </div>`;
+}
+
+// ── Fila de tabla ───────────────────────────────────────────────────
+function buildContratoRow(c){
+  const sem=(c.SEMAFORO||'').toLowerCase();
+  const pct=parseFloat(String(c.PCT_COMPLETADO||0).replace('%',''))||0;
+  const pctPct=Math.min(100,Math.round(pct*100>1?pct:pct*100));
+  const dr=c.DIAS_RESTANTES;
+  const diasR=dr!==''&&dr!==undefined&&!isNaN(dr)?parseInt(dr):'';
+  const diasCobro=parsearDias(c.DIAS_COBRO);
+  const diasRetraso=parsearDias(c.DIAS_RETRASO);
+  const esFin=sem==='finalizado'||(c.ESTADO||'').toLowerCase()==='finalizado';
+  const pagado=(c.PAGADO||'').toLowerCase()==='si';
+  const ingreso=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+
+  const diasStr=esFin
+    ?(diasRetraso!==''?(diasRetraso>0?`<span style="color:var(--amber)">+${diasRetraso}d</span>`:`<span style="color:var(--green)">${diasRetraso}d</span>`):'—')
+    :(diasR===''?'—':diasR<0?`<span style="color:var(--red);font-weight:700">Vencido ${Math.abs(diasR)}d</span>`:diasR<=7?`<span style="color:var(--amber);font-weight:700">${diasR}d</span>`:diasR+'d');
+
+  return`<tr>
+    <td>${c.CELULA_ID||'—'}</td>
+    <td title="${c.MARCA_NOMBRE||''}">${(c.MARCA_NOMBRE||'—').slice(0,14)}</td>
+    <td title="${c.PRODUCTO||''}">${(c.PRODUCTO||'—').slice(0,18)}</td>
+    <td style="text-align:center"><span class="ccard-chip ciclo" style="font-size:9px">C${c.CICLO_NUM||1}</span></td>
+    <td><div style="display:flex;align-items:center;gap:5px"><div class="progress-bar-bg" style="flex:1;height:5px"><div class="progress-bar-fill fill-${sem}" style="width:${pctPct}%"></div></div><span style="font-size:10px">${pctPct}%</span></div></td>
+    <td style="text-align:center;font-size:11px">${c.POSTEADOS_CICLO||0}/${c.VIDEOS_MES||0}</td>
+    <td><span class="ccard-semaforo sem-badge-${sem}" style="font-size:9px">${semLabel(sem)}</span></td>
+    <td>${diasStr}</td>
+    <td style="text-align:center"><span style="font-size:11px;font-weight:700;color:${pagado?'var(--green)':'var(--amber)'}">${pagado?'✅':'⏳'}</span></td>
+    <td style="text-align:center;font-size:11px;color:${diasCobro!==''&&diasCobro>30?'var(--red)':diasCobro>15?'var(--amber)':'var(--text3)'}">${diasCobro!==''?diasCobro+'d':'—'}</td>
+    <td style="font-size:10px;color:${esFin?'var(--green)':'var(--text3)'}">${esFin&&c.FECHA_FIN_REAL?c.FECHA_FIN_REAL:c.FECHA_FIN_PROG||'—'}</td>
+    <td style="text-align:right;font-size:11px;font-weight:600;color:var(--teal)">${ingreso>0?'$'+ingreso.toFixed(0):'—'}</td>
+  </tr>`;
+}
+
+// ── Sidebar ─────────────────────────────────────────────────────────
+function renderContratosSidebar(todos, filtrados){
+  const pagados=filtrados.filter(c=>(c.PAGADO||'').toLowerCase()==='si');
+  const sinPagar=filtrados.filter(c=>{const s=(c.SEMAFORO||'').toLowerCase();const e=(c.ESTADO||'').toLowerCase();return (s==='finalizado'||e==='finalizado')&&(c.PAGADO||'').toLowerCase()!=='si';});
+  const videosTotales=filtrados.reduce((a,c)=>a+parseInt(c.VIDEOS_MES||0),0);
+  const videosPosteados=filtrados.reduce((a,c)=>a+parseInt(c.POSTEADOS_CICLO||0),0);
+  const ingresoTotal=filtrados.reduce((a,c)=>a+parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0,0);
+  const ingresoCobrado=pagados.reduce((a,c)=>a+parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0,0);
+  const ingresoSinCobrar=sinPagar.reduce((a,c)=>a+parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0,0);
   const porSem={};
-  datos.forEach(c=>{const s=(c.SEMAFORO||'otro').toLowerCase();porSem[s]=(porSem[s]||0)+1;});
-  const completados=datos.filter(c=>c.VIDEOS_MES&&c.POSTEADOS_CICLO&&parseInt(c.POSTEADOS_CICLO)>=parseInt(c.VIDEOS_MES)).length;
-  const videosTotales=datos.reduce((a,c)=>a+parseInt(String(c.VIDEOS_MES||'0'))||0,0);
-  const videosPosteados=datos.reduce((a,c)=>a+parseInt(String(c.POSTEADOS_CICLO||'0'))||0,0);
-  const ingresoTotal=datos.reduce((a,c)=>a+parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,'')||0),0);
-  const semOrden=['vencido','urgente','en_curso','completado','pausado','pendiente'];
-  const semNombres={vencido:'🔴 Vencidos',urgente:'⚠ Urgentes',en_curso:'🔵 En curso',completado:'✅ Completados',pausado:'⏸ Pausados',pendiente:'🟣 Pendientes'};
-  const semColors={vencido:'var(--red)',urgente:'var(--amber)',en_curso:'var(--blue)',completado:'var(--green)',pausado:'#94A3B8',pendiente:'var(--purple)'};
+  filtrados.forEach(c=>{const s=(c.SEMAFORO||'otro').toLowerCase();porSem[s]=(porSem[s]||0)+1;});
+  const sinAsignarTotal=todos.reduce((a,c)=>a+Math.max(0,c._sinAsignar||0),0);
+  const semOrden=['vencido','urgente','en_curso','completado','finalizado','pausado','pendiente'];
+  const semNombres={vencido:'🔴 Vencidos',urgente:'⚠ Urgentes',en_curso:'🔵 En curso',completado:'✅ Completados',finalizado:'📁 Finalizados',pausado:'⏸ Pausados',pendiente:'🟣 Pendientes'};
+  const semColors={vencido:'var(--red)',urgente:'var(--amber)',en_curso:'var(--blue)',completado:'var(--green)',finalizado:'#94A3B8',pausado:'#94A3B8',pendiente:'var(--purple)'};
 
   let html=`
-    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Total contratos</span><span class="sidebar-kpi-val" style="color:var(--blue)">${total}</span></div>
+    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Contratos (filtro)</span><span class="sidebar-kpi-val" style="color:var(--blue)">${filtrados.length}</span></div>
     <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Videos comprometidos</span><span class="sidebar-kpi-val">${videosTotales}</span></div>
     <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Videos posteados</span><span class="sidebar-kpi-val" style="color:var(--green)">${videosPosteados}</span></div>
-    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">% completado global</span><span class="sidebar-kpi-val" style="color:${videosPosteados/Math.max(1,videosTotales)>0.8?'var(--green)':'var(--amber)'}">${videosTotales?Math.round(videosPosteados/videosTotales*100):0}%</span></div>
-    ${ingresoTotal>0?`<div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Ingreso contratos</span><span class="sidebar-kpi-val" style="color:var(--teal)">$${ingresoTotal.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0})}</span></div>`:''}
+    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">% completado</span><span class="sidebar-kpi-val" style="color:${videosPosteados/Math.max(1,videosTotales)>.8?'var(--green)':'var(--amber)'}">${videosTotales?Math.round(videosPosteados/videosTotales*100):0}%</span></div>
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-title">Cobros</div>
+    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">Ingreso total</span><span class="sidebar-kpi-val" style="color:var(--teal)">$${ingresoTotal.toLocaleString('en-US',{maximumFractionDigits:0})}</span></div>
+    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl">✅ Cobrado</span><span class="sidebar-kpi-val" style="color:var(--green)">$${ingresoCobrado.toLocaleString('en-US',{maximumFractionDigits:0})}</span></div>
+    <div class="sidebar-kpi"><span class="sidebar-kpi-lbl" style="color:var(--amber)">⏳ Sin cobrar</span><span class="sidebar-kpi-val" style="color:var(--amber)">$${ingresoSinCobrar.toLocaleString('en-US',{maximumFractionDigits:0})}</span></div>
+    ${sinPagar.length?`<button class="btn btn-sm" onclick="filtrarContratos('sin_pagar',null)" style="width:100%;margin-top:4px;background:var(--amber-bg);border-color:#FDE68A;color:var(--amber)">Ver ${sinPagar.length} sin cobrar →</button>`:''}
+    ${sinAsignarTotal>0?`<div class="sidebar-sep"></div><div class="sidebar-kpi"><span class="sidebar-kpi-lbl" style="color:var(--amber)">⬜ Videos sin asignar</span><span class="sidebar-kpi-val" style="color:var(--amber)">${sinAsignarTotal}</span></div>`:''}
     <div class="sidebar-sep"></div>
     <div class="sidebar-title">Por estado</div>`;
 
   semOrden.forEach(s=>{
-    if(porSem[s]){html+=`<div class="sidebar-kpi"><span class="sidebar-kpi-lbl">${semNombres[s]||s}</span><span class="sidebar-kpi-val" style="color:${semColors[s]||'var(--text)'}">${porSem[s]}</span></div>`;}
+    if(porSem[s]) html+=`<div class="sidebar-kpi"><span class="sidebar-kpi-lbl">${semNombres[s]||s}</span><span class="sidebar-kpi-val" style="color:${semColors[s]||'var(--text)'}">${porSem[s]}</span></div>`;
   });
 
-  // Agregar sección de estados que cuentan
-  const estLabels=[...estadosQueCuentan].map(e=>{
-    const cfg=ESTADOS_CONFIG.find(x=>x.key===e);
-    return cfg?`<span class="est-badge" style="background:${cfg.bg};color:${cfg.tc};font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px">${cfg.label}</span>`:e;
-  }).join(' ');
+  // Estado de lo que cuentan
+  const estLabels=[...estadosQueCuentan].map(e=>{const cfg=ESTADOS_CONFIG.find(x=>x.key===e);return cfg?`<span class="est-badge" style="background:${cfg.bg};color:${cfg.tc};font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px">${cfg.label}</span>`:e;}).join(' ');
   html+=`<div class="sidebar-sep"></div>
     <div class="sidebar-title">Estados contando</div>
     <div style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 0">${estLabels||'Ninguno'}</div>
     <button class="btn btn-sm" onclick="abrirFiltroEstadosCt()" style="margin-top:8px;width:100%">⚙ Cambiar estados</button>`;
-  
+
   document.getElementById('ct-sidebar').innerHTML=html;
 }
 
+// ── Cruce con ClickUp ───────────────────────────────────────────────
+function cruzarContratosConClickUp(contratos){
+  if(!contratos.length||!allData.length) return contratos;
+  const conteoBySKUCel={};
+  function normCelCruce(c){if(!c)return'';const m=String(c).match(/#?(\d+)$/);return m?'Celula '+parseInt(m[1]):c;}
+  allData.forEach(r=>{
+    const sku=(r.SKU_PRODUCTO||'').trim();
+    const cel=normCelCruce((r.CELULA||'').trim());
+    const estado=(r.ESTADO||'').toLowerCase().replace(/ /g,'_');
+    if(!sku||!cel||!estadosQueCuentan.has(estado)) return;
+    const clave=cel+'||'+sku;
+    if(!conteoBySKUCel[clave]) conteoBySKUCel[clave]=[];
+    conteoBySKUCel[clave].push({fecha:parseDate(r.FECHA_PUBLICADO||r.FECHA_ACTUALIZACION||'')||new Date(0)});
+  });
+  Object.keys(conteoBySKUCel).forEach(k=>conteoBySKUCel[k].sort((a,b)=>a.fecha-b.fecha));
+  return contratos.map(c=>{
+    const sku=(c.SKU||'').trim();
+    const cel=(c.CELULA_ID||'').trim();
+    if(!sku||!cel) return c;
+    const clave=cel+'||'+sku;
+    const videosMes=parseInt(String(c.VIDEOS_MES||'0'))||0;
+    const cicloOffset=parseInt(String(c.CICLO_OFFSET||'0'))||0;
+    const items=conteoBySKUCel[clave]||[];
+    const totalSKU=items.length;
+    const posteadosCiclo=Math.min(Math.max(0,totalSKU-cicloOffset),videosMes);
+    const pct=videosMes>0?posteadosCiclo/videosMes:0;
+    const restantes=Math.max(0,videosMes-posteadosCiclo);
+    const dr=c.DIAS_RESTANTES;
+    const diasR=dr!==''&&dr!==undefined&&!isNaN(dr)?parseInt(dr):'';
+    const estado=(c.ESTADO||'').toLowerCase();
+    let semaforo=c.SEMAFORO||'en_curso';
+    if(estado!=='finalizado'&&estado!=='pausado'&&estado!=='pendiente'){
+      if(videosMes>0&&posteadosCiclo>=videosMes) semaforo='completado';
+      else if(diasR!==''&&diasR<0) semaforo='vencido';
+      else if(diasR!==''&&diasR<=7) semaforo='urgente';
+      else semaforo='en_curso';
+    }
+    return{...c,POSTEADOS_CICLO:posteadosCiclo,POSTEADOS_TOTAL_SKU:totalSKU,PCT_COMPLETADO:pct,VIDEOS_RESTANTES:restantes,SEMAFORO:semaforo};
+  });
+}
+
+// ── Modal estados que cuentan ────────────────────────────────────────
+function abrirFiltroEstadosCt(){
+  const estadosPresentes=new Set(allData.map(r=>(r.ESTADO||'').toLowerCase().replace(/ /g,'_')));
+  const modal=document.getElementById('modal-estados-ct');
+  const list=document.getElementById('estados-ct-list');
+  const todos=[...ESTADOS_CONFIG];
+  estadosPresentes.forEach(e=>{if(e&&!todos.find(x=>x.key===e))todos.push({key:e,label:e.replace(/_/g,' '),bg:'#F8FAFC',tc:'#475569'});});
+  list.innerHTML=todos.filter(e=>e.key).map(e=>`
+    <div class="estado-chk-row">
+      <input type="checkbox" id="ect-${e.key}" value="${e.key}" ${estadosQueCuentan.has(e.key)?'checked':''}>
+      <label for="ect-${e.key}"><span class="est-badge" style="background:${e.bg};color:${e.tc}">${e.label}</span></label>
+    </div>`).join('');
+  modal.classList.remove('hidden');
+}
+function cerrarFiltroEstadosCt(){document.getElementById('modal-estados-ct').classList.add('hidden');}
+function aplicarFiltroEstadosCt(){
+  estadosQueCuentan.clear();
+  document.querySelectorAll('#estados-ct-list input:checked').forEach(cb=>estadosQueCuentan.add(cb.value));
+  cerrarFiltroEstadosCt();
+  contratosData=cruzarContratosConClickUp(contratosData);
+  renderContratos();
+}
+
 function semLabel(s){
-  const m={en_curso:'En curso',completado:'Completado',vencido:'Vencido',urgente:'Urgente',pausado:'Pausado',finalizado:'Finalizado',pendiente:'Pendiente'};
+  const m={en_curso:'En curso',completado:'Completado',vencido:'Vencido',urgente:'Urgente',pausado:'Pausado',finalizado:'Finalizado',pendiente:'Pendiente',sin_asignar:'Sin asignar'};
   return m[s]||s;
 }
-function semColorClass(s){return s;}
+
 
 // ═══════════════════════════════════════════════════════
-// TAB VENTAS
+// TAB VENTAS v2 — análisis completo con filtros potentes
 // ═══════════════════════════════════════════════════════
+
+// Estado global ventas
+let vtPeriodo='todo', vtVista='resumen', vtPg=1;
+let vtFiltroMarca='', vtFiltroProd='', vtFiltroCuenta='';
+
+// Helpers para leer campos con nombres variables de TikTok
+function vg(v,...keys){
+  for(const k of keys){
+    if(v[k]!==undefined&&String(v[k]).trim()!=='') return v[k];
+    const ku=k.toUpperCase();
+    if(v[ku]!==undefined&&String(v[ku]).trim()!=='') return v[ku];
+    const kn=k.toLowerCase().replace(/[_ ]/g,'');
+    for(const vk of Object.keys(v)){
+      if(vk.toLowerCase().replace(/[_ ]/g,'')==kn&&String(v[vk]).trim()!=='') return v[vk];
+    }
+  }
+  return '';
+}
+const vtGMV    = v=>parseFloat(String(vg(v,'GMV','gmv','Revenue')||'0').replace(/[$,\s]/g,''))||0;
+const vtUnits  = v=>parseInt(String(vg(v,'Items_Sold','Items Sold','Qty')||'0').replace(/[^\d]/g,''))||0;
+const vtComm   = v=>parseFloat(String(vg(v,'Commission','commission','Affiliate Commission')||'0').replace(/[$,\s]/g,''))||0;
+const vtMarca  = v=>vg(v,'Marca_Scalify','Marca_scalify')||vg(v,'Shop_Name','Shop Name')||'Sin marca';
+const vtProd   = v=>vg(v,'Producto_Scalify','Producto_scalify')||vg(v,'Product_Name','Product Name')||'';
+const vtSKU    = v=>vg(v,'SKU_Scalify','Sku_Scalify')||vg(v,'SKU_ID','SKU ID')||'';
+const vtSemana = v=>vg(v,'Semana_Scalify','Semana_scalify')||vg(v,'Semana_Archivo','Semana Archivo')||'';
+const vtMes    = v=>{const s=vtSemana(v); return s?s.slice(0,7):vg(v,'Fecha_Archivo','Fecha Archivo','Date','fecha_archivo').slice?String(vg(v,'Fecha_Archivo')||'').slice(0,7):'';};
+const vtCuenta = v=>vg(v,'Cuenta_Archivo','Cuenta Archivo','Account')||'';
+const vtFecha  = v=>{const raw=vg(v,'Fecha_Archivo','Fecha Archivo','Date','fecha_archivo');if(!raw) return null;if(raw instanceof Date) return raw;const d=new Date(String(raw));return isNaN(d)?null:d;};
+
+// Calcular rango de período
+function vtGetRango(){
+  const now=new Date(), hoy=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const p=vtPeriodo;
+  if(p==='todo') return null;
+  if(p==='semana'){const d=hoy.getDay(),m=new Date(hoy.getTime()-(d===0?6:d-1)*864e5);return[m,now];}
+  if(p==='semana_ant'){const d=hoy.getDay(),m=new Date(hoy.getTime()-(d===0?6:d-1)*864e5);return[new Date(m.getTime()-7*864e5),new Date(m.getTime()-1)];}
+  if(p==='mes') return[new Date(now.getFullYear(),now.getMonth(),1),now];
+  if(p==='mes_pasado') return[new Date(now.getFullYear(),now.getMonth()-1,1),new Date(now.getFullYear(),now.getMonth(),0,23,59,59)];
+  if(p==='custom'){
+    const f=document.getElementById('vt-dfrom').value, t=document.getElementById('vt-dto').value;
+    if(!f&&!t) return null;
+    return[f?new Date(f):new Date(0), t?new Date(t+'T23:59:59'):new Date()];
+  }
+  return null;
+}
+
+function vtFiltrar(){
+  const rango=vtGetRango();
+  const marca=vtFiltroMarca.toLowerCase();
+  const prod=vtFiltroProd.toLowerCase();
+  const cuenta=vtFiltroCuenta.toLowerCase();
+  return ventasData.filter(v=>{
+    if(rango){const f=vtFecha(v);if(!f||f<rango[0]||f>rango[1]) return false;}
+    if(marca&&vtMarca(v).toLowerCase()!==marca) return false;
+    if(prod&&vtProd(v).toLowerCase()!==prod) return false;
+    if(cuenta&&vtCuenta(v).toLowerCase()!==cuenta) return false;
+    return true;
+  });
+}
+
 async function loadVentas(){
-  const url=document.getElementById('csvurl-ventas').value.trim();
+  let url=document.getElementById('csvurl-ventas').value.trim();
   if(!url){setMsg('msgcfg','Pegá la URL de Ventas TikTok','warn');document.getElementById('cfgpanel').style.display='';return;}
   saveUrls();
   try{
@@ -1475,188 +1826,385 @@ async function loadVentas(){
     ventasData=parseCSVGeneric(text);
     document.getElementById('vt-no-data').classList.add('hidden');
     document.getElementById('vt-content').classList.remove('hidden');
-    document.getElementById('badge-vt').textContent=ventasData.length;
-    renderVentas();
+    document.getElementById('badge-vt').textContent=ventasData.length.toLocaleString();
+    vtPoblarSelectores();
+    vtRenderAll();
   }catch(e){setMsg('msgcfg','Error cargando ventas: '+e.message,'err');document.getElementById('cfgpanel').style.display='';}
 }
 
-function filtrarVentas(p,btn){
+function filtrarVentas(p,btn){ vtFiltrarPeriodo(p,btn); } // alias compatibilidad
+
+function vtFiltrarPeriodo(p,btn){
   document.querySelectorAll('[data-vp]').forEach(b=>b.className='spill');
-  btn.className='spill on';filtroVentas=p;renderVentas();
+  if(btn) btn.className='spill on';
+  vtPeriodo=p;
+  document.getElementById('vt-custom-range').classList[p==='custom'?'remove':'add']('hidden');
+  vtRenderAll();
 }
 
-function ventasFiltradas(){
-  if(filtroVentas==='todo') return ventasData;
-  const now=new Date();const hoy=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  return ventasData.filter(v=>{
-    const f=parseDate(v.FECHA_ARCHIVO||v.DAY||'');
-    if(!f) return true;
-    if(filtroVentas==='semana'){const lun=new Date(hoy.getTime()-(hoy.getDay()===0?6:hoy.getDay()-1)*864e5);return f>=lun;}
-    if(filtroVentas==='mes') return f.getFullYear()===now.getFullYear()&&f.getMonth()===now.getMonth();
-    if(filtroVentas==='mes_pasado'){const mp=new Date(now.getFullYear(),now.getMonth()-1,1);const fin=new Date(now.getFullYear(),now.getMonth(),0);return f>=mp&&f<=fin;}
-    return true;
-  });
+function vtOnMarcaCambia(){
+  vtFiltroMarca=document.getElementById('vt-sel-marca').value;
+  // Re-poblar productos filtrados por esa marca
+  const selP=document.getElementById('vt-sel-producto');
+  const curP=selP.value;
+  const prods=[...new Set(ventasData.filter(v=>!vtFiltroMarca||vtMarca(v).toLowerCase()===vtFiltroMarca.toLowerCase()).map(v=>vtProd(v)).filter(Boolean))].sort();
+  selP.innerHTML='<option value="">Todos los productos</option>'+prods.map(p=>`<option value="${p}"${p===curP?' selected':''}>${p}</option>`).join('');
+  vtFiltroProd=selP.value;
+  vtRenderAll();
 }
 
-// Helpers para extraer campos de TikTok con nombres variables
-function vtGet(v, ...keys){
-  for(const k of keys){
-    // Exact match
-    if(v[k]!==undefined&&v[k]!=='') return v[k];
-    // Upper
-    if(v[k.toUpperCase()]!==undefined&&v[k.toUpperCase()]!=='') return v[k.toUpperCase()];
-    // Case-insensitive search
-    const kl=k.toLowerCase();
-    for(const vk of Object.keys(v)){
-      if(vk.toLowerCase().replace(/[_ ]/g,'')===kl.replace(/[_ ]/g,'')&&v[vk]!=='') return v[vk];
-    }
-  }
-  return '';
-}
-
-function renderVentas(){
+function vtPoblarSelectores(){
   if(!ventasData.length) return;
-  const datos=ventasFiltradas();
+  // Marcas
+  const marcas=[...new Set(ventasData.map(v=>vtMarca(v)).filter(Boolean))].sort();
+  document.getElementById('vt-sel-marca').innerHTML='<option value="">Todas las marcas</option>'+marcas.map(m=>`<option value="${m}">${m}</option>`).join('');
+  // Productos
+  const prods=[...new Set(ventasData.map(v=>vtProd(v)).filter(Boolean))].sort();
+  document.getElementById('vt-sel-producto').innerHTML='<option value="">Todos los productos</option>'+prods.map(p=>`<option value="${p}">${p}</option>`).join('');
+  // Cuentas
+  const cuentas=[...new Set(ventasData.map(v=>vtCuenta(v)).filter(Boolean))].sort();
+  document.getElementById('vt-sel-cuenta').innerHTML='<option value="">Todas las cuentas</option>'+cuentas.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
 
-  // Detectar columnas disponibles en primera fila
-  const sample=datos[0]||{};
-  const cols=Object.keys(sample);
+function vtLimpiarFiltros(){
+  vtFiltroMarca=''; vtFiltroProd=''; vtFiltroCuenta='';
+  document.getElementById('vt-sel-marca').value='';
+  document.getElementById('vt-sel-producto').value='';
+  document.getElementById('vt-sel-cuenta').value='';
+  document.getElementById('vt-dfrom').value='';
+  document.getElementById('vt-dto').value='';
+  document.querySelectorAll('[data-vp]').forEach(b=>b.className='spill');
+  document.querySelector('[data-vp="todo"]').className='spill on';
+  vtPeriodo='todo';
+  document.getElementById('vt-custom-range').classList.add('hidden');
+  vtRenderAll();
+}
 
-  // GMV: columna de ingresos reales de TikTok
-  const getGMV=v=>{
-    const gmv=vtGet(v,'GMV','GMV(USD)','Revenue','Revenue USD','Gmv','gmv');
-    if(gmv) return parseFloat(String(gmv).replace(/[$,]/g,''))||0;
-    // fallback: Price * Items Sold
-    const price=parseFloat(String(vtGet(v,'Price','PRICE','price')||'0').replace(/[$,]/g,''))||0;
-    const items=parseInt(vtGet(v,'Items Sold','ITEMS_SOLD','Items sold','items_sold')||'0')||0;
-    return price*items;
-  };
-  const getUnits=v=>parseInt(vtGet(v,'Items Sold','ITEMS_SOLD','Items sold','Qty','QTY','Units')||'0')||0;
-  const getComision=v=>parseFloat(String(vtGet(v,'Commission','COMMISSION','Affiliate Commission','commission')||'0').replace(/[$,]/g,''))||0;
-  const getOrderId=v=>vtGet(v,'Order ID','ORDER_ID','Order Id','order_id')||'';
-  const getMarca=v=>vtGet(v,'MARCA_SCALIFY','Marca_Scalify','marca_scalify')||vtGet(v,'Shop Name','SHOP_NAME','Shop name')||'Sin marca';
-  const getProducto=v=>vtGet(v,'PRODUCTO_SCALIFY','Producto_Scalify','producto_scalify')||vtGet(v,'Product Name','PRODUCT_NAME','Product name')||'';
-  const getSku=v=>vtGet(v,'SKU_SCALIFY','Sku_Scalify','sku_scalify')||vtGet(v,'SKU ID','SKU_ID','sku_id')||'';
-  const getSemana=v=>vtGet(v,'Semana_Archivo','SEMANA_ARCHIVO','Week','WEEK','Semana')||'';
-  const getCuenta=v=>vtGet(v,'Cuenta_Archivo','CUENTA_ARCHIVO','Celula','CELULA','Account')||'';
+function vtCambiarVista(vista,btn){
+  document.querySelectorAll('.vt-vista-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  vtVista=vista;
+  ['resumen','ciclos','detalle'].forEach(v=>{
+    const el=document.getElementById('vt-vista-'+v);
+    if(el) el.classList[v===vista?'remove':'add']('hidden');
+  });
+  if(vista==='ciclos') vtRenderCiclos();
+  if(vista==='detalle') vtRenderDetalle();
+}
 
-  // KPIs
-  const totalUnidades=datos.reduce((a,v)=>a+getUnits(v),0);
-  const totalGMV=datos.reduce((a,v)=>a+getGMV(v),0);
-  const totalComision=datos.reduce((a,v)=>a+getComision(v),0);
-  const totalOrdenes=new Set(datos.map(v=>getOrderId(v)).filter(Boolean)).size;
-  const totalProductos=new Set(datos.map(v=>getSku(v)).filter(Boolean)).size;
-  const tieneSKUScalify=datos.some(v=>vtGet(v,'SKU_SCALIFY','Sku_Scalify','sku_scalify'));
+function vtRenderAll(){
+  if(!ventasData.length) return;
+  vtActualizarChips();
+  const datos=vtFiltrar();
+  vtRenderKPIs(datos);
+  if(vtVista==='resumen') vtRenderResumen(datos);
+  if(vtVista==='ciclos')  vtRenderCiclos();
+  if(vtVista==='detalle') vtRenderDetalle();
+}
+
+function vtActualizarChips(){
+  const chips=document.getElementById('vt-chips');
+  const items=[];
+  if(vtFiltroMarca) items.push({label:'Marca: '+vtFiltroMarca, clear:()=>{vtFiltroMarca='';document.getElementById('vt-sel-marca').value='';vtRenderAll();}});
+  if(vtFiltroProd)  items.push({label:'Producto: '+(vtFiltroProd.length>20?vtFiltroProd.slice(0,19)+'…':vtFiltroProd), clear:()=>{vtFiltroProd='';document.getElementById('vt-sel-producto').value='';vtRenderAll();}});
+  if(vtFiltroCuenta) items.push({label:'Cuenta: '+vtFiltroCuenta, clear:()=>{vtFiltroCuenta='';document.getElementById('vt-sel-cuenta').value='';vtRenderAll();}});
+  chips.style.display=items.length?'flex':'none';
+  chips.innerHTML=items.map((it,i)=>`<span class="vt-chip" onclick="vtChipClear(${i})"><span>${it.label}</span><span>×</span></span>`).join('');
+  chips._items=items;
+}
+function vtChipClear(i){const chips=document.getElementById('vt-chips');if(chips._items&&chips._items[i]) chips._items[i].clear();}
+
+// ── KPIs ──────────────────────────────────────────────────────
+function vtRenderKPIs(datos){
+  const totalGMV=datos.reduce((a,v)=>a+vtGMV(v),0);
+  const totalUnits=datos.reduce((a,v)=>a+vtUnits(v),0);
+  const totalComm=datos.reduce((a,v)=>a+vtComm(v),0);
+  const totalOrdenes=new Set(datos.map(v=>vg(v,'Order_ID','Order ID')).filter(Boolean)).size;
+  const marcas=new Set(datos.map(v=>vtMarca(v)).filter(Boolean)).size;
+  const conContrato=datos.filter(v=>vtSKU(v)&&contratosData.some(c=>(c.SKU||'')===(vtSKU(v)||''))).length;
+  const pctContr=datos.length?Math.round(conContrato/datos.length*100):0;
+  const avgGMVorden=totalOrdenes?totalGMV/totalOrdenes:0;
 
   document.getElementById('vt-kpis').innerHTML=`
-    <div class="kpi" style="color:var(--teal)"><div class="kpi-l">Unidades vendidas</div><div class="kpi-v kv-teal">${totalUnidades.toLocaleString()}</div><div class="kpi-s">${datos.length} líneas</div></div>
-    <div class="kpi" style="color:var(--green)"><div class="kpi-l">GMV (ingresos)</div><div class="kpi-v kv-green">$${totalGMV.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="kpi-s">USD</div></div>
-    ${totalComision>0?`<div class="kpi" style="color:var(--purple)"><div class="kpi-l">Comisiones</div><div class="kpi-v kv-purple">$${totalComision.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="kpi-s">afiliados</div></div>`:''}
-    <div class="kpi" style="color:var(--blue)"><div class="kpi-l">Órdenes únicas</div><div class="kpi-v kv-blue">${totalOrdenes.toLocaleString()}</div><div class="kpi-s"></div></div>
-    <div class="kpi" style="color:var(--amber)"><div class="kpi-l">SKUs distintos</div><div class="kpi-v kv-amber">${totalProductos}</div><div class="kpi-s">${tieneSKUScalify?'con SKU Scalify':'sin SKU asignado'}</div></div>`;
-
-  // Por marca (GMV)
-  const porMarca={};const porMarcaUsd={};
-  datos.forEach(v=>{
-    const marca=getMarca(v);
-    const units=getUnits(v);
-    const gmv=getGMV(v);
-    porMarca[marca]=(porMarca[marca]||0)+units;
-    porMarcaUsd[marca]=(porMarcaUsd[marca]||0)+gmv;
-  });
-  renderVentaPanel('vt-por-marca',porMarca,'uds',false);
-  renderVentaPanel('vt-por-marca-usd',porMarcaUsd,'USD',true);
-
-  // Por semana
-  const porSemana={};
-  datos.forEach(v=>{const s=getSemana(v)||'Sin semana';const gmv=getGMV(v);porSemana[s]=(porSemana[s]||0)+gmv;});
-  const semSorted=Object.entries(porSemana).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
-  const maxSem=semSorted.length?semSorted[0][1]:1;
-  document.getElementById('vt-por-semana').innerHTML=semSorted.map(([s,n])=>`<div class="venta-row"><span class="venta-marca">${s}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(n/maxSem*100)}%"></div></div><span class="venta-val">$${n.toFixed(0)}</span></div>`).join('')||'<div class="nodata-seg">Sin datos</div>';
-
-  // Por cuenta/célula
-  const porCuenta={};
-  datos.forEach(v=>{const c=getCuenta(v)||'Sin cuenta';const gmv=getGMV(v);porCuenta[c]=(porCuenta[c]||0)+gmv;});
-  renderVentaPanel('vt-por-cuenta',porCuenta,'USD',true);
-
-  renderVentasTabla(datos, {getGMV,getUnits,getComision,getMarca,getProducto,getSku,getSemana});
+    <div class="vt-kpi" style="color:var(--teal)"><div class="vt-kpi-l">GMV Total</div><div class="vt-kpi-v" style="color:var(--teal)">$${totalGMV.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="vt-kpi-s">${datos.length.toLocaleString()} líneas</div></div>
+    <div class="vt-kpi" style="color:var(--blue)"><div class="vt-kpi-l">Unidades</div><div class="vt-kpi-v" style="color:var(--blue)">${totalUnits.toLocaleString()}</div><div class="vt-kpi-s">vendidas</div></div>
+    ${totalComm>0?`<div class="vt-kpi" style="color:var(--purple)"><div class="vt-kpi-l">Comisiones</div><div class="vt-kpi-v" style="color:var(--purple)">$${totalComm.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="vt-kpi-s">afiliados</div></div>`:''}
+    <div class="vt-kpi" style="color:var(--green)"><div class="vt-kpi-l">Órdenes</div><div class="vt-kpi-v" style="color:var(--green)">${totalOrdenes.toLocaleString()}</div><div class="vt-kpi-s">$${avgGMVorden.toFixed(0)} promedio</div></div>
+    <div class="vt-kpi" style="color:var(--amber)"><div class="vt-kpi-l">Marcas</div><div class="vt-kpi-v" style="color:var(--amber)">${marcas}</div><div class="vt-kpi-s">distintas</div></div>
+    <div class="vt-kpi" style="color:${pctContr>50?'var(--green)':'var(--amber)'}"><div class="vt-kpi-l">Con contrato</div><div class="vt-kpi-v" style="color:${pctContr>50?'var(--green)':'var(--amber)'}">${pctContr}%</div><div class="vt-kpi-s">líneas vinculadas</div></div>`;
 }
 
-function renderVentaPanel(elId,map,unit,isUsd){
-  const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  const max=sorted.length?sorted[0][1]:1;
-  document.getElementById(elId).innerHTML=sorted.map(([k,v])=>`<div class="venta-row"><span class="venta-marca" title="${k}">${k.length>22?k.slice(0,21)+'…':k}</span><div class="venta-bar-w"><div class="venta-bar" style="width:${Math.round(v/max*100)}%"></div></div><span class="venta-val">${isUsd?'$'+v.toFixed(0):v}</span></div>`).join('')||'<div class="nodata-seg">Sin datos</div>';
+// ── VISTA RESUMEN ─────────────────────────────────────────────
+function vtRenderResumen(datos){
+  // Helper: agrupar y renderizar panel de barras
+  function vtPanel(elId, datos, keyFn, valFn, fmt, color, limit){
+    const map={};
+    datos.forEach(v=>{const k=keyFn(v)||'Sin datos';map[k]=(map[k]||0)+valFn(v);});
+    const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,limit||10);
+    const max=sorted.length?sorted[0][1]:1;
+    const total=sorted.reduce((a,b)=>a+b[1],0);
+    document.getElementById(elId).innerHTML=sorted.map(([k,v])=>`
+      <div class="vt-bar-row">
+        <span class="vt-bar-label" title="${k}" onclick="vtClickBarLabel('${elId}','${k.replace(/'/g,"\'")}')">${k.length>16?k.slice(0,15)+'…':k}</span>
+        <div class="vt-bar-wrap"><div class="vt-bar-fill" style="width:${Math.round(v/max*100)}%;background:${color}"></div></div>
+        <span class="vt-bar-val">${fmt(v)}</span>
+        <span class="vt-bar-sub">${total?Math.round(v/total*100)+'%':''}</span>
+      </div>`).join('')||'<div class="nodata-seg">Sin datos</div>';
+  }
+
+  const fmtUSD=v=>'$'+v.toLocaleString('en-US',{maximumFractionDigits:0});
+  const fmtN=v=>v.toLocaleString();
+
+  document.getElementById('vt-gmv-total-lbl').textContent='$'+datos.reduce((a,v)=>a+vtGMV(v),0).toLocaleString('en-US',{maximumFractionDigits:0});
+
+  vtPanel('vt-por-marca-gmv',  datos, v=>vtMarca(v), vtGMV,   fmtUSD, 'var(--teal)',   12);
+  vtPanel('vt-por-marca-uds',  datos, v=>vtMarca(v), vtUnits, fmtN,   'var(--blue)',   12);
+  vtPanel('vt-por-semana-gmv', datos, v=>vtSemana(v)||vtMes(v), vtGMV, fmtUSD, 'var(--purple)', 12);
+  vtPanel('vt-por-producto-gmv',datos, v=>vtProd(v)||'Sin mapeo', vtGMV, fmtUSD, 'var(--amber)', 10);
+  vtPanel('vt-por-marca-comm', datos, v=>vtMarca(v), vtComm, fmtUSD, 'var(--purple)', 10);
+  vtPanel('vt-por-cuenta-gmv', datos, v=>vtCuenta(v)||'Sin cuenta', vtGMV, fmtUSD, 'var(--green)', 10);
 }
 
-function renderVentasTabla(datos, helpers){
-  if(!helpers){
-    helpers={
-      getGMV:v=>parseFloat(String(v.GMV||v.PRICE||'0').replace(/[$,]/g,''))||0,
-      getUnits:v=>parseInt(v.ITEMS_SOLD||v['ITEMS SOLD']||0)||0,
-      getComision:v=>parseFloat(String(v.COMMISSION||'0').replace(/[$,]/g,''))||0,
-      getMarca:v=>v.MARCA_SCALIFY||v['SHOP NAME']||v.SHOP_NAME||'',
-      getProducto:v=>v.PRODUCTO_SCALIFY||v['PRODUCT NAME']||'',
-      getSku:v=>v.SKU_SCALIFY||v.SKU_ID||'',
-      getSemana:v=>v.SEMANA_ARCHIVO||v.WEEK||''
-    };
+// Clic en barra → filtrar por esa marca/producto
+function vtClickBarLabel(panelId, valor){
+  if(panelId==='vt-por-marca-gmv'||panelId==='vt-por-marca-uds'||panelId==='vt-por-marca-comm'||panelId==='vt-por-marca-usd'){
+    vtFiltroMarca=valor==='Sin datos'?'':valor;
+    document.getElementById('vt-sel-marca').value=vtFiltroMarca;
+  } else if(panelId==='vt-por-producto-gmv'){
+    vtFiltroProd=valor==='Sin mapeo'?'':valor;
+    document.getElementById('vt-sel-producto').value=vtFiltroProd;
+  } else if(panelId==='vt-por-cuenta-gmv'){
+    vtFiltroCuenta=valor;
+    document.getElementById('vt-sel-cuenta').value=vtFiltroCuenta;
   }
-  const {getGMV,getUnits,getComision,getMarca,getProducto,getSku,getSemana}=helpers;
+  vtRenderAll();
+}
 
-  // Agrupar por SKU_Scalify + semana
-  const map={};
+// ── VISTA CICLOS ──────────────────────────────────────────────
+function vtRenderCiclos(){
+  if(!ventasData.length) return;
+  const datos=vtFiltrar();
+  const el=document.getElementById('vt-ciclos-content');
+
+  // Agrupar ventas por SKU_Scalify
+  const ventasPorSku={};
   datos.forEach(v=>{
-    const sku=getSku(v);
-    const marca=getMarca(v);
-    const prod=getProducto(v);
-    const semana=getSemana(v)||'Sin semana';
-    const units=getUnits(v);
-    const gmv=getGMV(v);
-    const comision=getComision(v);
-    const key=(sku||marca)+'||'+semana;
-    if(!map[key]) map[key]={sku,marca,prod,semana,units:0,gmv:0,comision:0};
-    map[key].units+=units;map[key].gmv+=gmv;map[key].comision+=comision;
+    const sku=vtSKU(v)||'__NO_SKU__';
+    if(!ventasPorSku[sku]) ventasPorSku[sku]={items:[],gmv:0,units:0,comm:0,marcas:new Set(),prods:new Set()};
+    ventasPorSku[sku].items.push(v);
+    ventasPorSku[sku].gmv+=vtGMV(v);
+    ventasPorSku[sku].units+=vtUnits(v);
+    ventasPorSku[sku].comm+=vtComm(v);
+    ventasPorSku[sku].marcas.add(vtMarca(v));
+    ventasPorSku[sku].prods.add(vtProd(v));
   });
 
-  // Cruzar con contratos por SKU
-  const contratosBySku={};
-  contratosData.forEach(c=>{
-    const sku=(c.SKU||'').trim();
-    if(!sku) return;
-    if(!contratosBySku[sku]) contratosBySku[sku]=[];
-    contratosBySku[sku].push(c);
+  // Para cada SKU, cruzar con contratos
+  let html='';
+  const skusConContrato=[], skusSinContrato=[];
+
+  Object.keys(ventasPorSku).forEach(sku=>{
+    const contratos=sku==='__NO_SKU__'?[]:contratosData.filter(c=>(c.SKU||'').trim()===sku);
+    if(contratos.length) skusConContrato.push({sku, contratos, data:ventasPorSku[sku]});
+    else skusSinContrato.push({sku, data:ventasPorSku[sku]});
   });
 
-  const filas=Object.values(map).sort((a,b)=>b.gmv-a.gmv).slice(0,60);
-  const hayComision=filas.some(f=>f.comision>0);
+  // Ordenar por GMV
+  skusConContrato.sort((a,b)=>b.data.gmv-a.data.gmv);
+  skusSinContrato.sort((a,b)=>b.data.gmv-a.data.gmv);
 
-  const tbody=document.getElementById('vt-tbody');
-  // Actualizar encabezados si hay comisión
-  const thead=document.querySelector('#vt-tbody')?.closest('table')?.querySelector('thead tr');
-  if(thead&&hayComision&&!thead.querySelector('.col-comision')){
-    const th=document.createElement('th');th.className='col-comision';th.style.width='90px';th.textContent='Comisión';
-    thead.insertBefore(th,thead.children[5]);
+  // ── Productos CON contrato ──
+  if(skusConContrato.length){
+    html+=`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:8px">✅ VINCULADOS A CONTRATOS (${skusConContrato.length})</div>`;
+    skusConContrato.forEach(({sku, contratos, data})=>{
+      const marca=[...data.marcas].join(', ');
+      const prod=[...data.prods].join(', ');
+
+      // Calcular GMV por semana para cruzar con ciclos
+      const gmvPorSemana={};
+      data.items.forEach(v=>{const s=vtSemana(v)||vtMes(v)||'?';gmvPorSemana[s]=(gmvPorSemana[s]||0)+vtGMV(v);});
+
+      // Para cada ciclo del contrato, calcular el GMV en el período del ciclo
+      const ciclosHtml=contratos.slice(0,4).map(c=>{
+        const sem=(c.SEMAFORO||'').toLowerCase();
+        const pct=parseFloat(String(c.PCT_COMPLETADO||'0'))||0;
+        const badgeColor=sem==='completado'?'var(--green)':sem==='en_curso'?'var(--blue)':sem==='vencido'?'var(--red)':'#94A3B8';
+        const badgeLabel=sem==='completado'?'Completado':sem==='en_curso'?'En curso':sem==='vencido'?'Vencido':sem||'—';
+        const ingreso=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+
+        return`<div class="ciclo-stat">
+          <span class="ciclo-stat-v" style="color:${badgeColor}">$${data.gmv.toLocaleString('en-US',{maximumFractionDigits:0})}</span>
+          <span class="ciclo-stat-l">GMV ciclo ${c.CICLO_NUM||1}</span>
+        </div>
+        <div class="ciclo-stat">
+          <span class="ciclo-stat-v" style="color:var(--blue)">${c.POSTEADOS_CICLO||0}/${c.VIDEOS_MES||0}</span>
+          <span class="ciclo-stat-l">videos</span>
+        </div>
+        <div class="ciclo-stat">
+          <span class="ciclo-stat-v" style="color:var(--teal)">$${ingreso.toFixed(0)}</span>
+          <span class="ciclo-stat-l">ingreso contrato</span>
+        </div>
+        <div class="ciclo-stat">
+          <span class="ciclo-stat-v" style="font-size:13px"><span class="ciclo-badge" style="background:${badgeColor}18;color:${badgeColor}">${badgeLabel}</span></span>
+          <span class="ciclo-stat-l">${c.CELULA_ID||'—'}</span>
+        </div>`;
+      }).join('');
+
+      html+=`<div class="ciclo-card">
+        <div class="ciclo-card-header">
+          <div>
+            <div class="ciclo-card-marca">${marca}</div>
+            <div class="ciclo-card-prod">${prod} · SKU: ${sku}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:18px;font-weight:700;color:var(--teal)">$${data.gmv.toLocaleString('en-US',{maximumFractionDigits:0})}</div>
+            <div style="font-size:11px;color:var(--text3)">${data.units.toLocaleString()} uds · ${data.items.length} líneas${data.comm>0?' · $'+data.comm.toFixed(0)+' comisiones':''}</div>
+          </div>
+        </div>
+        <div class="ciclo-stats">${ciclosHtml}</div>
+      </div>`;
+    });
   }
 
-  tbody.innerHTML=filas.map(f=>{
-    const contratos=contratosBySku[f.sku]||[];
+  // ── Ventas SIN contrato ──
+  if(skusSinContrato.length){
+    const totalSin=skusSinContrato.reduce((a,b)=>a+b.data.gmv,0);
+    html+=`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 8px">⬜ SIN CONTRATO ASOCIADO (${skusSinContrato.length} SKUs · $${totalSin.toLocaleString('en-US',{maximumFractionDigits:0})} GMV)</div>`;
+
+    // Agrupar por período para los sin contrato
+    const sinContrHtml=skusSinContrato.slice(0,15).map(({sku,data})=>{
+      const marca=[...data.marcas].join(', ');
+      const prod=[...data.prods].join(', ')||'Sin mapeo';
+      // Semanas con ventas
+      const semanas={};
+      data.items.forEach(v=>{const s=vtSemana(v)||vtMes(v)||'?';semanas[s]=(semanas[s]||0)+vtGMV(v);});
+      const semanasStr=Object.entries(semanas).sort((a,b)=>b[1]-a[1]).slice(0,4)
+        .map(([s,g])=>`<span style="font-size:10px;padding:2px 7px;background:var(--bg);border-radius:12px;border:1px solid var(--border)">${s}: $${g.toFixed(0)}</span>`).join(' ');
+      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${marca}</span>
+          <span style="font-size:11px;color:var(--text3);margin-left:6px">${prod.slice(0,30)}</span>
+          <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">${semanasStr}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:12px">
+          <div style="font-size:16px;font-weight:700;color:var(--text2)">$${data.gmv.toLocaleString('en-US',{maximumFractionDigits:0})}</div>
+          <div style="font-size:10px;color:var(--text3)">${data.units} uds</div>
+        </div>
+      </div>`;
+    }).join('');
+    html+=`<div class="vt-panel">${sinContrHtml}</div>`;
+  }
+
+  el.innerHTML=html||'<div class="nodata">Sin datos con los filtros aplicados</div>';
+}
+
+// ── VISTA DETALLE ─────────────────────────────────────────────
+let vtDetSortCol='gmv', vtDetSortAsc=false;
+
+function vtRenderDetalle(){
+  if(!ventasData.length) return;
+  const datos=vtFiltrar();
+  const agrupar=document.getElementById('vt-det-agrupar').value;
+  const rpp=parseInt(document.getElementById('vt-rpp').value)||50;
+
+  // Agrupar datos
+  let filas=[];
+  if(agrupar==='orden'){
+    filas=datos.map(v=>({
+      marca:vtMarca(v),prod:vtProd(v),sku:vtSKU(v),
+      semana:vtSemana(v),mes:vtMes(v),cuenta:vtCuenta(v),
+      gmv:vtGMV(v),units:vtUnits(v),comm:vtComm(v),
+      fecha:vg(v,'Fecha_Archivo','Fecha Archivo','Date')||'',
+      orderId:vg(v,'Order_ID','Order ID')||'',
+      n:1
+    }));
+  } else {
+    const map={};
+    datos.forEach(v=>{
+      let key='';
+      if(agrupar==='sku_semana')   key=(vtSKU(v)||vtProd(v))+'||'+vtSemana(v);
+      if(agrupar==='sku_mes')      key=(vtSKU(v)||vtProd(v))+'||'+vtMes(v);
+      if(agrupar==='marca_semana') key=vtMarca(v)+'||'+vtSemana(v);
+      if(agrupar==='marca_mes')    key=vtMarca(v)+'||'+vtMes(v);
+      if(!map[key]) map[key]={marca:vtMarca(v),prod:vtProd(v),sku:vtSKU(v),semana:vtSemana(v),mes:vtMes(v),cuenta:'',gmv:0,units:0,comm:0,n:0};
+      map[key].gmv+=vtGMV(v);
+      map[key].units+=vtUnits(v);
+      map[key].comm+=vtComm(v);
+      map[key].n++;
+    });
+    filas=Object.values(map);
+  }
+
+  // Cruzar con contratos
+  filas=filas.map(f=>{
+    const contratos=f.sku?contratosData.filter(c=>(c.SKU||'').trim()===f.sku):[];
     const activos=contratos.filter(c=>{const s=(c.SEMAFORO||'').toLowerCase();return s==='en_curso'||s==='urgente'||s==='completado';});
-    const enCiclo=f.sku&&activos.length>0;
-    const posteados=activos.length?activos[0].POSTEADOS_CICLO||'—':'—';
-    const videos=activos.length?activos[0].VIDEOS_MES||'—':'—';
-    const ingContr=activos.length?parseFloat(String(activos[0].INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0:0;
-    const cls=enCiclo?'ciclo-match':'';
-    return`<tr class="${cls}">
-      <td title="${f.marca}">${f.marca.slice(0,18)||'—'}</td>
+    return{...f,
+      enContrato:activos.length>0,
+      posteados:activos.length?activos[0].POSTEADOS_CICLO||'—':'—',
+      videos:activos.length?activos[0].VIDEOS_MES||'—':'—',
+      ingContr:activos.length?parseFloat(String(activos[0].INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0:0
+    };
+  });
+
+  // Ordenar
+  filas.sort((a,b)=>{
+    const av=a[vtDetSortCol]??'', bv=b[vtDetSortCol]??'';
+    const an=parseFloat(av), bn=parseFloat(bv);
+    if(!isNaN(an)&&!isNaN(bn)) return vtDetSortAsc?an-bn:bn-an;
+    return vtDetSortAsc?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));
+  });
+
+  const total=filas.length, pages=Math.max(1,Math.ceil(total/rpp));
+  if(vtPg>pages) vtPg=pages;
+  if(vtPg<1) vtPg=1;
+  const slice=filas.slice((vtPg-1)*rpp, vtPg*rpp);
+
+  // Headers
+  const srt=(col,lbl)=>`<th class="vt-sortable" onclick="vtDetSort('${col}')" style="white-space:nowrap">${lbl}${vtDetSortCol===col?(vtDetSortAsc?' ↑':' ↓'):''}</th>`;
+  document.getElementById('vt-det-thead').innerHTML=`<tr>
+    ${srt('marca','Marca')}${srt('prod','Producto')}${srt('sku','SKU')}
+    ${agrupar==='orden'?srt('fecha','Fecha'):(agrupar.includes('semana')?srt('semana','Semana'):srt('mes','Mes'))}
+    ${srt('gmv','GMV')}${srt('units','Uds')}${srt('comm','Comisión')}
+    <th>Contrato</th>${srt('posteados','Videos')}${srt('ingContr','Ingr. Contr.')}
+  </tr>`;
+
+  // Rows
+  document.getElementById('vt-det-tbody').innerHTML=slice.map(f=>`
+    <tr class="${f.enContrato?'vt-row-contrato':'vt-row-nocontrato'}">
+      <td title="${f.marca}">${f.marca.slice(0,16)||'—'}</td>
       <td title="${f.prod}">${(f.prod||'—').slice(0,22)}</td>
       <td style="font-size:10px;color:var(--text3)">${f.sku||'—'}</td>
-      <td style="text-align:center;font-weight:600">${f.units}</td>
-      <td style="text-align:right;font-weight:700;color:var(--teal)">$${f.gmv.toFixed(0)}</td>
-      ${hayComision?`<td style="text-align:right;color:var(--purple)">$${f.comision.toFixed(0)}</td>`:''}
-      <td style="font-size:11px">${f.semana||'—'}</td>
-      <td style="text-align:center">${enCiclo?'<span style="color:var(--green);font-weight:700">✅</span>':'<span style="color:var(--text3)">—</span>'}</td>
-      <td style="text-align:center">${enCiclo?`${posteados}/${videos}`:'—'}</td>
-      ${ingContr>0?`<td style="text-align:right;font-size:11px;color:var(--text3)">$${ingContr.toFixed(0)}</td>`:''}</tr>`;
-  }).join('')||'<tr><td colspan="9" class="nodata">Sin datos de ventas</td></tr>';
+      <td style="font-size:11px">${agrupar==='orden'?f.fecha:(f.semana||f.mes||'—')}</td>
+      <td style="text-align:right;font-weight:700;color:var(--teal)">$${f.gmv.toLocaleString('en-US',{maximumFractionDigits:0})}</td>
+      <td style="text-align:center">${f.units.toLocaleString()}</td>
+      <td style="text-align:right;color:var(--purple)">${f.comm>0?'$'+f.comm.toFixed(0):'—'}</td>
+      <td style="text-align:center">${f.enContrato?'<span style="color:var(--green);font-weight:700">✅</span>':'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="text-align:center;font-size:11px">${f.posteados!==undefined?f.posteados+'/'+(f.videos||'?'):'—'}</td>
+      <td style="text-align:right;font-size:11px;color:var(--text3)">${f.ingContr>0?'$'+f.ingContr.toFixed(0):'—'}</td>
+    </tr>`).join('')||'<tr><td colspan="10" class="nodata">Sin datos</td></tr>';
+
+  document.getElementById('vt-det-count').textContent=total.toLocaleString();
+  document.getElementById('vt-pginfo').textContent=`Pág. ${vtPg} de ${pages}`;
+  document.getElementById('vt-pgprev').disabled=vtPg<=1;
+  document.getElementById('vt-pgnext').disabled=vtPg>=pages;
+}
+
+function vtDetSort(col){
+  if(vtDetSortCol===col) vtDetSortAsc=!vtDetSortAsc;
+  else{vtDetSortCol=col;vtDetSortAsc=false;}
+  vtPg=1;vtRenderDetalle();
+}
+
+function vtExportarCSV(){
+  const datos=vtFiltrar();
+  const h=['Marca','Producto','SKU_Scalify','Semana','Mes','Cuenta','GMV','Unidades','Comision','En_Contrato'];
+  const rows=datos.map(v=>[vtMarca(v),vtProd(v),vtSKU(v),vtSemana(v),vtMes(v),vtCuenta(v),vtGMV(v),vtUnits(v),vtComm(v),contratosData.some(c=>(c.SKU||'')===vtSKU(v))?'Si':'No'].map(x=>`"${String(x||'').replace(/"/g,'""')}"`).join(','));
+  const csv='﻿'+[h.join(','),...rows].join('
+');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`ventas_scalify_${new Date().toISOString().slice(0,10)}.csv`;a.click();
 }
 
 // ═══════════════════════════════════════════════════════
