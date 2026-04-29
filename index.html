@@ -1792,9 +1792,29 @@ const vtMarca  = v=>vg(v,'Marca_Scalify','Marca_scalify')||vg(v,'Shop_Name','Sho
 const vtProd   = v=>vg(v,'Producto_Scalify','Producto_scalify')||vg(v,'Product_Name','Product Name')||'';
 const vtSKU    = v=>vg(v,'SKU_Scalify','Sku_Scalify')||vg(v,'SKU_ID','SKU ID')||'';
 const vtSemana = v=>vg(v,'Semana_Scalify','Semana_scalify')||vg(v,'Semana_Archivo','Semana Archivo')||'';
-const vtMes    = v=>{const s=vtSemana(v); return s?s.slice(0,7):vg(v,'Fecha_Archivo','Fecha Archivo','Date','fecha_archivo').slice?String(vg(v,'Fecha_Archivo')||'').slice(0,7):'';};
+const vtMes    = v=>{
+  // Calcular mes desde Order_date (fecha real)
+  const f=vtFecha(v);
+  if(f&&!isNaN(f)){
+    const y=f.getFullYear(),m=String(f.getMonth()+1).padStart(2,'0');
+    return y+'-'+m;
+  }
+  const s=vtSemana(v);
+  return s?s.slice(0,7):'';
+};;
 const vtCuenta = v=>vg(v,'Cuenta_Archivo','Cuenta Archivo','Account')||'';
-const vtFecha  = v=>{const raw=vg(v,'Fecha_Archivo','Fecha Archivo','Date','fecha_archivo');if(!raw) return null;if(raw instanceof Date) return raw;const d=new Date(String(raw));return isNaN(d)?null:d;};
+const vtFecha  = v=>{
+  // Order_date es la fecha principal (real de la venta)
+  // Fallback a Fecha_Archivo si no hay Order_date
+  const raw=vg(v,'Order_date','Order_Date','order_date','Fecha_Archivo','Fecha Archivo','Date','fecha_archivo');
+  if(!raw) return null;
+  if(raw instanceof Date) return raw;
+  // Parsear dd/MM/yyyy HH:mm o dd/MM/yyyy
+  const m=String(raw).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m) return new Date(+m[3],+m[2]-1,+m[1]);
+  const d=new Date(String(raw));
+  return isNaN(d)?null:d;
+};
 
 // Calcular rango de período
 function vtGetRango(){
