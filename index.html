@@ -2210,8 +2210,7 @@ function vtExportarCSV(){
   const datos=vtFiltrar();
   const h=['Marca','Producto','SKU_Scalify','Semana','Mes','Cuenta','GMV','Unidades','Comision','En_Contrato'];
   const rows=datos.map(v=>[vtMarca(v),vtProd(v),vtSKU(v),vtSemana(v),vtMes(v),vtCuenta(v),vtGMV(v),vtUnits(v),vtComm(v),contratosData.some(c=>(c.SKU||'')===vtSKU(v))?'Si':'No'].map(x=>`"${String(x||'').replace(/"/g,'""')}"`).join(','));
-  const csv='﻿'+[h.join(','),...rows].join('
-');
+  const csv='﻿'+[h.join(','),...rows].join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download=`ventas_scalify_${new Date().toISOString().slice(0,10)}.csv`;a.click();
