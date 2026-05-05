@@ -1871,9 +1871,44 @@ function vg(v,...keys){
   }
   return '';
 }
+// Parsea semana ISO YYYY-Wxx al lunes de esa semana
+function semanaToDate_(s){
+  if(!s) return null;
+  const m=String(s).match(/^(\d{4})-W(\d{1,2})$/);
+  if(!m) return null;
+  const year=+m[1], week=+m[2];
+  const jan4=new Date(year,0,4);
+  const dayOfWeek=jan4.getDay()||7;
+  return new Date(jan4.getTime()+(week-1)*7*86400000-(dayOfWeek-1)*86400000);
+}
+
+function parseFechaVenta_(v){
+  // Prioridad: Order_date > Fecha_Archivo > Semana_Scalify > Semana_Archivo
+  const candidates = [
+    vg(v,'Order_date','ORDER_DATE','Order date','Order Date'),
+    vg(v,'Fecha_Archivo','Fecha_archivo','FECHA_ARCHIVO'),
+  ];
+  for(const raw of candidates){
+    if(!raw) continue;
+    if(raw instanceof Date && !isNaN(raw)) return raw;
+    const s=String(raw).trim();
+    // dd/MM/yyyy HH:mm o dd/MM/yyyy
+    let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(m) return new Date(+m[3],+m[2]-1,+m[1]);
+    // yyyy-MM-dd
+    m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+  }
+  // Fallback a semana
+  const sem = vg(v,'Semana_Scalify','Semana_scalify','SEMANA_SCALIFY') ||
+              vg(v,'Semana_Archivo','Semana_archivo','SEMANA_ARCHIVO');
+  return semanaToDate_(sem);
+}
+
+
 const vtGMV    = v=>parseFloat(String(vg(v,'GMV','gmv','Revenue')||'0').replace(/[$,\s]/g,''))||0;
 const vtUnits  = v=>parseInt(String(vg(v,'Items_Sold','Items Sold','Qty')||'0').replace(/[^\d]/g,''))||0;
-const vtComm   = v=>parseFloat(String(vg(v,'Commission','commission','Affiliate Commission')||'0').replace(/[$,\s]/g,''))||0;
+const vtComm   = v=>parseFloat(String(vg(v,'Comm_Total','comm_total','Commission','commission','Affiliate Commission','Total final earned amount')||'0').replace(/[$,\s]/g,''))||0;
 const vtMarca  = v=>vg(v,'Marca_Scalify','Marca_scalify')||vg(v,'Shop_Name','Shop Name')||'Sin marca';
 const vtProd   = v=>vg(v,'Producto_Scalify','Producto_scalify')||vg(v,'Product_Name','Product Name')||'';
 const vtSKU    = v=>vg(v,'SKU_Scalify','Sku_Scalify')||vg(v,'SKU_ID','SKU ID')||'';
@@ -1903,18 +1938,7 @@ const vtMes    = v=>{
   return s?s.slice(0,7):'';
 };;
 const vtCuenta = v=>vg(v,'Cuenta_Archivo','Cuenta Archivo','Account')||'';
-const vtFecha  = v=>{
-  // Order_date es la fecha principal (real de la venta)
-  // Fallback a Fecha_Archivo si no hay Order_date
-  const raw=vg(v,'Order_date','Order_Date','order_date','Fecha_Archivo','Fecha Archivo','Date','fecha_archivo');
-  if(!raw) return null;
-  if(raw instanceof Date) return raw;
-  // Parsear dd/MM/yyyy HH:mm o dd/MM/yyyy
-  const m=String(raw).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(m) return new Date(+m[3],+m[2]-1,+m[1]);
-  const d=new Date(String(raw));
-  return isNaN(d)?null:d;
-};
+const vtFecha = v => parseFechaVenta_(v);
 
 // Calcular rango de período
 function vtGetRango(){
@@ -2117,27 +2141,24 @@ function pfc_(s){
 
 // Cache ventas agrupadas por SKU_Scalify con su fecha real
 let _gCache=null;
+
+
 function getGMVCache_(){
   if(_gCache) return _gCache;
   const mapa={};
   ventasData.forEach(v=>{
     const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
     if(!sku) return;
-    const rawF=vg(v,'ORDER_DATE','Order_date','Order Date','Fecha_Archivo')||'';
-    let f=null;
-    if(rawF instanceof Date) f=rawF;
-    else {
-      const m=String(rawF).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if(m) f=new Date(+m[3],+m[2]-1,+m[1]);
-      else {
-        const m2=String(rawF).match(/^(\d{4})-(\d{2})-(\d{2})/);
-        if(m2) f=new Date(+m2[1],+m2[2]-1,+m2[3]);
-      }
-    }
-    const gmv=parseFloat(String(vg(v,'GMV','gmv','Revenue')||'0').replace(/[$,\s]/g,''))||0;
-    const comm=parseFloat(String(vg(v,'Commission','COMMISSION','commission','Affiliate Commission')||'0').replace(/[$,\s]/g,''))||0;
+    const f = parseFechaVenta_(v);
+    const gmv = parseFloat(String(vg(v,'GMV','gmv','Revenue')||'0').replace(/[$,\s]/g,''))||0;
+    // Comisiones: nuevas columnas Comm_Organica, Comm_Ads, Comm_Total
+    // O fallback a Commission/COMMISSION
+    const commOrg   = parseFloat(String(vg(v,'Comm_Organica','comm_organica','Est. standard commission')||'0').replace(/[$,\s]/g,''))||0;
+    const commAds   = parseFloat(String(vg(v,'Comm_Ads','comm_ads','Est. Shop Ads commission')||'0').replace(/[$,\s]/g,''))||0;
+    const commTotal = parseFloat(String(vg(v,'Comm_Total','comm_total','Commission','COMMISSION','commission','Total final earned amount')||'0').replace(/[$,\s]/g,''))||0;
+    const comm = commTotal || (commOrg + commAds);
     if(!mapa[sku]) mapa[sku]=[];
-    mapa[sku].push({fecha:f,gmv,comm});
+    mapa[sku].push({fecha:f, gmv, comm, commOrg, commAds});
   });
   _gCache=mapa;
   return mapa;
@@ -2145,22 +2166,31 @@ function getGMVCache_(){
 function invalidarGMVCache_(){ _gCache=null; }
 
 // GMV + comisiones de un contrato en su período exacto
+// Cuando Order_date está vacío, las ventas sin fecha se incluyen TODAS en el último ciclo activo
 function getGMVParaContrato_(c){
-  if(!ventasData.length||!c.SKU) return {gmv:0,comm:0};
+  if(!ventasData.length||!c.SKU) return {gmv:0,comm:0,commOrg:0,commAds:0};
   const sku=(c.SKU||'').trim();
-  if(!sku) return {gmv:0,comm:0};
+  if(!sku) return {gmv:0,comm:0,commOrg:0,commAds:0};
   const cache=getGMVCache_();
   const vs=cache[sku];
-  if(!vs||!vs.length) return {gmv:0,comm:0};
+  if(!vs||!vs.length) return {gmv:0,comm:0,commOrg:0,commAds:0};
   const ini=pfc_(c.FECHA_INICIO_PROG||c.FECHA_INICIO_REAL||'');
   const fin=pfc_(c.FECHA_FIN_PROG||c.FECHA_FIN_REAL||'');
   const finEf=fin?new Date(fin.getTime()+86400000*2):new Date();
-  const filtered=ini
-    ? vs.filter(v=>v.fecha&&v.fecha>=ini&&v.fecha<=finEf)
-    : vs;
+  // Ventas con fecha en el período + ventas sin fecha (si este es el último ciclo activo)
+  const sem=(c.SEMAFORO||'').toLowerCase();
+  const esUltimoCiclo = ['en_curso','urgente','completado'].includes(sem);
+  const filtered = ini
+    ? vs.filter(v => {
+        if(!v.fecha) return esUltimoCiclo; // sin fecha → solo en ciclo activo
+        return v.fecha>=ini && v.fecha<=finEf;
+      })
+    : vs; // sin fechas en contrato → todas las ventas del SKU
   return {
-    gmv:filtered.reduce((a,v)=>a+v.gmv,0),
-    comm:filtered.reduce((a,v)=>a+v.comm,0)
+    gmv:     filtered.reduce((a,v)=>a+v.gmv,0),
+    comm:    filtered.reduce((a,v)=>a+v.comm,0),
+    commOrg: filtered.reduce((a,v)=>a+(v.commOrg||0),0),
+    commAds: filtered.reduce((a,v)=>a+(v.commAds||0),0)
   };
 }
 // ─────────────────────────────────────────────────────────────────
@@ -2474,18 +2504,30 @@ function anGetRangoVentas(){
   return null;
 }
 
-// Ventas filtradas por período de análisis
+// Ventas filtradas por período + filtros de análisis conectados
 function anGetVentasFiltradas(){
   const rango=anGetRangoVentas();
-  if(!rango) return ventasData;
+  const selMarca=(document.getElementById('an-sel-marca')?.value||'').trim();
+  // Construir set de SKUs válidos según filtros de contratos activos
+  const skusValidos = new Set();
+  contratosData.forEach(c=>{
+    const sem=(c.SEMAFORO||'').toLowerCase();
+    if(filtroAnalisis!=='todos'&&sem!==filtroAnalisis) return;
+    if(filtroAnCelula!=='todas'&&(c.CELULA_ID||'').trim()!==filtroAnCelula) return;
+    if(selMarca&&(c.MARCA_NOMBRE||'').trim()!==selMarca) return;
+    if(c.SKU) skusValidos.add((c.SKU||'').trim());
+  });
+  const filtrarPorSku = filtroAnalisis!=='todos' || filtroAnCelula!=='todas' || selMarca;
+
   return ventasData.filter(v=>{
-    const rawF=vg(v,'ORDER_DATE','Order_date','Order Date','Fecha_Archivo')||'';
-    let f=null;
-    if(rawF instanceof Date) f=rawF;
-    else {
-      const m=String(rawF).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if(m) f=new Date(+m[3],+m[2]-1,+m[1]);
+    // Filtrar por SKU si hay filtros activos
+    if(filtrarPorSku && skusValidos.size > 0){
+      const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+      if(!skusValidos.has(sku)) return false;
     }
+    // Filtrar por período
+    if(!rango) return true;
+    const f = parseFechaVenta_(v);
     if(!f) return true; // sin fecha → incluir
     return f>=rango[0]&&f<=rango[1];
   });
@@ -2676,10 +2718,15 @@ function renderAnPerformance_(datos, vtsFiltradas, gmvPorSku, skusFiltro, fmtU){
 function renderAnVentas_(vtsFiltradas, gmvPorSku, commPorSku, fmtU){
   // GMV por marca
   const gmvMarca={}, commMarca={};
+  const commOrgMarca={}, commAdsMarca={};
   vtsFiltradas.forEach(v=>{
     const m=(vg(v,'Marca_Scalify','MARCA_SCALIFY','marca_scalify')||'').trim()||'Sin marca';
     gmvMarca[m]=(gmvMarca[m]||0)+vtGMV(v);
     commMarca[m]=(commMarca[m]||0)+vtComm(v);
+    const org=parseFloat(String(vg(v,'Comm_Organica','comm_organica','Est. standard commission')||'0').replace(/[$,\s]/g,''))||0;
+    const ads=parseFloat(String(vg(v,'Comm_Ads','comm_ads','Est. Shop Ads commission')||'0').replace(/[$,\s]/g,''))||0;
+    commOrgMarca[m]=(commOrgMarca[m]||0)+org;
+    commAdsMarca[m]=(commAdsMarca[m]||0)+ads;
   });
   const maxGMV=Math.max(...Object.values(gmvMarca),1);
   const maxComm=Math.max(...Object.values(commMarca),1);
@@ -2701,7 +2748,27 @@ function renderAnVentas_(vtsFiltradas, gmvPorSku, commPorSku, fmtU){
   }
 
   barPanel('an-gmv-marcas', gmvMarca, maxGMV, 'var(--teal)', fmtU);
-  barPanel('an-comm-marcas', commMarca, maxComm, 'var(--purple)', fmtU);
+  // Panel comisiones con desglose orgánico/ads
+  const elCommPanel=document.getElementById('an-comm-marcas');
+  if(elCommPanel){
+    const sortedComm=Object.entries(commMarca).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const totalComm=sortedComm.reduce((a,[,v])=>a+v,0);
+    elCommPanel.innerHTML='<div style="font-size:9px;display:grid;grid-template-columns:1fr 60px 60px 50px;gap:4px;color:var(--text3);font-weight:700;text-transform:uppercase;padding:0 2px 4px">'+
+      '<span>Marca</span><span style="text-align:right">Orgánica</span><span style="text-align:right">Ads</span><span style="text-align:right">Total</span></div>'+
+      sortedComm.map(([k,v])=>`
+        <div style="display:flex;flex-direction:column;padding:4px 0;border-bottom:1px solid var(--border)">
+          <div style="display:grid;grid-template-columns:1fr 60px 60px 50px;gap:4px;align-items:center">
+            <span style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${k}">${k.slice(0,14)}</span>
+            <span style="text-align:right;font-size:10px;color:var(--green)">${(commOrgMarca[k]||0)>0?fmtU(commOrgMarca[k]):'-'}</span>
+            <span style="text-align:right;font-size:10px;color:var(--blue)">${(commAdsMarca[k]||0)>0?fmtU(commAdsMarca[k]):'-'}</span>
+            <span style="text-align:right;font-size:11px;font-weight:700;color:var(--purple)">${fmtU(v)}</span>
+          </div>
+          <div style="display:flex;height:4px;border-radius:2px;overflow:hidden;margin-top:3px;background:var(--border)">
+            <div style="width:${totalComm?Math.round((commOrgMarca[k]||0)/totalComm*100):0}%;background:var(--green)"></div>
+            <div style="width:${totalComm?Math.round((commAdsMarca[k]||0)/totalComm*100):0}%;background:var(--blue)"></div>
+          </div>
+        </div>`).join('')||'<div class="nodata">Sin datos</div>';
+  }
 
   // GMV por semana (tendencia)
   const gmvSem={};
