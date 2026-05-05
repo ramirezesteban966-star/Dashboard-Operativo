@@ -293,6 +293,11 @@ tr:hover td{background:var(--blue-light)}
 .ct-fecha-chip:hover{border-color:var(--border2)}
 .ct-fecha-chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
 
+/* Sub-pestañas de Análisis */
+.an-tab-btn{font-size:12px;font-weight:600;padding:7px 14px;border:none;background:none;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;border-radius:var(--radius) var(--radius) 0 0}
+.an-tab-btn:hover{color:var(--text);background:var(--bg)}
+.an-tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--surface)}
+
 /* ══════════════════════════════════════════
    TAB CONTRATOS v2 END
 ══════════════════════════════════════════ */
@@ -671,15 +676,15 @@ tr:hover td{background:var(--blue-light)}
             <input type="date" id="vt-dto"   onchange="vtRenderAll()">
           </div>
         </div>
-        <div class="vt-filtros-row">
+        <div class="vt-filtros-row" style="flex-wrap:wrap;gap:6px">
           <span class="strip-lbl">Marca:</span>
-          <select id="vt-sel-marca" onchange="vtOnMarcaCambia()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:140px">
+          <select id="vt-sel-marca" onchange="vtOnMarcaCambia()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:120px">
             <option value="">Todas</option>
           </select>
-          <select id="vt-sel-producto" onchange="vtRenderAll()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:160px">
+          <select id="vt-sel-producto" onchange="vtRenderAll()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:140px">
             <option value="">Todos los productos</option>
           </select>
-          <select id="vt-sel-celula" onchange="vtOnCelulaCambia()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:120px">
+          <select id="vt-sel-celula" onchange="vtOnCelulaCambia()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
             <option value="">Todas las células</option>
             <option value="Celula 1">Célula 1</option>
             <option value="Celula 2">Célula 2</option>
@@ -687,8 +692,18 @@ tr:hover td{background:var(--blue-light)}
             <option value="Celula 4">Célula 4</option>
             <option value="Celula 5">Célula 5</option>
           </select>
-          <select id="vt-sel-cuenta" onchange="vtRenderAll()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:130px">
+          <select id="vt-sel-cuenta" onchange="vtRenderAll()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:120px">
             <option value="">Todas las cuentas</option>
+          </select>
+          <span class="strip-lbl">Orden:</span>
+          <select id="vt-orden" onchange="vtRenderAll()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+            <option value="gmv_desc">GMV ↓</option>
+            <option value="gmv_asc">GMV ↑</option>
+            <option value="sem_desc">Semana reciente ↓</option>
+            <option value="sem_asc">Semana antigua ↑</option>
+            <option value="marca_az">Marca A→Z</option>
+            <option value="comm_desc">Comisión ↓</option>
+            <option value="units_desc">Unidades ↓</option>
           </select>
           <button class="btn btn-sm" style="background:var(--red);color:#fff;border-color:var(--red)" onclick="vtLimpiarFiltros()">✕ Limpiar</button>
           <button class="btn btn-sm" onclick="vtExportarCSV()">↓ CSV</button>
@@ -785,83 +800,151 @@ tr:hover td{background:var(--blue-light)}
 
   <!-- ═══ TAB: ANÁLISIS ═══ -->
   <div id="tab-analisis" class="tab-pane">
-    <div id="an-no-data" class="alert alert-info">Cargá contratos para ver el análisis.</div>
+    <div id="an-no-data" class="alert alert-info">Cargá contratos y ventas para ver el análisis.</div>
     <div id="an-content" class="hidden">
 
-      <!-- ── FILTROS ANÁLISIS ── -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;box-shadow:var(--shadow)">
-        <span class="strip-lbl">Estado:</span>
-        <button class="spill on" data-an="todos"       onclick="filtrarAnalisis('todos',this)">Todos</button>
-        <button class="spill" data-an="finalizado"     onclick="filtrarAnalisis('finalizado',this)">📁 Finalizados</button>
-        <button class="spill" data-an="completado"     onclick="filtrarAnalisis('completado',this)">✅ Completados</button>
-        <button class="spill" data-an="en_curso"       onclick="filtrarAnalisis('en_curso',this)">🔵 En curso</button>
-        <button class="spill" data-an="vencido"        onclick="filtrarAnalisis('vencido',this)">🔴 Vencidos</button>
-        <span class="strip-lbl" style="margin-left:8px">Célula:</span>
-        <button class="spill on" data-ancelula="todas" onclick="filtrarAnCelula('todas',this)">Todas</button>
-        <button class="spill" data-ancelula="Celula 1" onclick="filtrarAnCelula('Celula 1',this)">C1</button>
-        <button class="spill" data-ancelula="Celula 2" onclick="filtrarAnCelula('Celula 2',this)">C2</button>
-        <button class="spill" data-ancelula="Celula 3" onclick="filtrarAnCelula('Celula 3',this)">C3</button>
-        <button class="spill" data-ancelula="Celula 4" onclick="filtrarAnCelula('Celula 4',this)">C4</button>
-        <button class="spill" data-ancelula="Celula 5" onclick="filtrarAnCelula('Celula 5',this)">C5</button>
-        <select id="an-sel-marca" onchange="onAnMarcaCambia()" style="font-size:12px;padding:4px 9px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);margin-left:8px;min-width:130px">
-          <option value="">Todas las marcas</option>
-        </select>
-        <select id="an-sel-producto" onchange="renderAnalisis()" style="font-size:12px;padding:4px 9px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:150px">
-          <option value="">Todos los productos</option>
-        </select>
+      <!-- ── FILTROS GLOBALES ── -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;box-shadow:var(--shadow);margin-bottom:12px">
+        <div class="contratos-filtros" style="gap:6px;flex-wrap:wrap">
+          <span class="strip-lbl">Estado:</span>
+          <button class="spill on" data-an="todos"       onclick="filtrarAnalisis('todos',this)">Todos</button>
+          <button class="spill" data-an="finalizado"     onclick="filtrarAnalisis('finalizado',this)">📁 Finalizados</button>
+          <button class="spill" data-an="completado"     onclick="filtrarAnalisis('completado',this)">✅ Completados</button>
+          <button class="spill" data-an="en_curso"       onclick="filtrarAnalisis('en_curso',this)">🔵 En curso</button>
+          <button class="spill" data-an="vencido"        onclick="filtrarAnalisis('vencido',this)">🔴 Vencidos</button>
+          <span class="strip-lbl" style="margin-left:8px">Célula:</span>
+          <button class="spill on" data-ancelula="todas" onclick="filtrarAnCelula('todas',this)">Todas</button>
+          <button class="spill" data-ancelula="Celula 1" onclick="filtrarAnCelula('Celula 1',this)">C1</button>
+          <button class="spill" data-ancelula="Celula 2" onclick="filtrarAnCelula('Celula 2',this)">C2</button>
+          <button class="spill" data-ancelula="Celula 3" onclick="filtrarAnCelula('Celula 3',this)">C3</button>
+          <button class="spill" data-ancelula="Celula 4" onclick="filtrarAnCelula('Celula 4',this)">C4</button>
+          <button class="spill" data-ancelula="Celula 5" onclick="filtrarAnCelula('Celula 5',this)">C5</button>
+          <select id="an-sel-marca" onchange="onAnMarcaCambia()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);margin-left:8px;min-width:120px">
+            <option value="">Todas las marcas</option>
+          </select>
+          <select id="an-sel-producto" onchange="renderAnalisis()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:140px">
+            <option value="">Todos los productos</option>
+          </select>
+        </div>
+        <div class="contratos-filtros" style="gap:6px;flex-wrap:wrap;margin-top:6px">
+          <span class="strip-lbl">Período ventas:</span>
+          <button class="spill on" data-anp="todo"       onclick="filtrarAnPeriodo('todo',this)">Todo</button>
+          <button class="spill" data-anp="semana"        onclick="filtrarAnPeriodo('semana',this)">Esta semana</button>
+          <button class="spill" data-anp="mes"           onclick="filtrarAnPeriodo('mes',this)">Este mes</button>
+          <button class="spill" data-anp="mes_pasado"    onclick="filtrarAnPeriodo('mes_pasado',this)">Mes pasado</button>
+          <button class="spill" data-anp="custom"        onclick="filtrarAnPeriodo('custom',this)">Personalizado</button>
+          <div class="dr hidden" id="an-custom-range" style="display:none">
+            <input type="date" id="an-dfrom" onchange="renderAnalisis()" style="font-size:12px;padding:3px 7px;border:1px solid var(--border);border-radius:var(--radius)">
+            <span>—</span>
+            <input type="date" id="an-dto"   onchange="renderAnalisis()" style="font-size:12px;padding:3px 7px;border:1px solid var(--border);border-radius:var(--radius)">
+          </div>
+          <span class="strip-lbl" style="margin-left:8px">Orden:</span>
+          <select id="an-orden" onchange="renderAnalisis()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+            <option value="ingreso_desc">Ingreso ↓</option>
+            <option value="gmv_desc">GMV ↓</option>
+            <option value="comm_desc">Comisión ↓</option>
+            <option value="pct_desc">% Completado ↓</option>
+            <option value="retraso_desc">Retraso ↓</option>
+            <option value="marca_az">Marca A→Z</option>
+          </select>
+        </div>
       </div>
 
-      <!-- ── SCORECARDS RESUMEN ── -->
-      <div id="an-scorecards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px"></div>
+      <!-- ── SCORECARDS ── -->
+      <div id="an-scorecards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px"></div>
 
-      <!-- ── SECCIÓN: PERFORMANCE POR MARCA ── -->
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow);margin-bottom:14px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:12px">📊 Performance por marca — contratos y cumplimiento</div>
-        <div id="an-marcas-grid" style="display:flex;flex-direction:column;gap:10px"></div>
+      <!-- ── SUB-PESTAÑAS ── -->
+      <div style="display:flex;gap:4px;margin-bottom:12px;border-bottom:2px solid var(--border);padding-bottom:0">
+        <button class="an-tab-btn active" data-antab="performance" onclick="anCambiarTab('performance',this)">📊 Performance</button>
+        <button class="an-tab-btn" data-antab="ventas"    onclick="anCambiarTab('ventas',this)">💰 Ventas & Comisiones</button>
+        <button class="an-tab-btn" data-antab="cobros"    onclick="anCambiarTab('cobros',this)">⏱ Cobros & Tiempos</button>
+        <button class="an-tab-btn" data-antab="detalle"   onclick="anCambiarTab('detalle',this)">📋 Detalle completo</button>
       </div>
 
-      <!-- ── SECCIÓN: CICLOS — velocidad y retrasos ── -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <!-- ── PESTAÑA: PERFORMANCE ── -->
+      <div id="an-tab-performance">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">📊 Performance por marca</div>
+            <div id="an-marcas-grid"></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">⚡ Velocidad de posteo (top 10)</div>
+            <div id="an-velocidad"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PESTAÑA: VENTAS & COMISIONES ── -->
+      <div id="an-tab-ventas" class="hidden">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">💰 GMV por marca</div>
+            <div id="an-gmv-marcas"></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">🤝 Comisiones por marca</div>
+            <div id="an-comm-marcas"></div>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow);margin-bottom:14px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">📈 GMV por semana (tendencia)</div>
+          <div id="an-gmv-semanas"></div>
+        </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">⏱ Top productos por velocidad</div>
-          <div id="an-velocidad"></div>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">💰 Cobros: tiempo hasta pago</div>
-          <div id="an-cobros"></div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">📦 Top productos por GMV</div>
+          <div id="an-gmv-productos"></div>
         </div>
       </div>
 
-      <!-- ── SECCIÓN: TABLA DETALLADA ── -->
-      <div class="tpanel">
-        <div class="thdr">
-          <span class="ttitle">Detalle de contratos <span class="cbadge" id="an-count">0</span></span>
-          <button class="btn btn-sm" onclick="anExportCSV()">↓ Exportar CSV</button>
+      <!-- ── PESTAÑA: COBROS & TIEMPOS ── -->
+      <div id="an-tab-cobros" class="hidden">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">⏱ Días hasta cobro (por contrato)</div>
+            <div id="an-cobros"></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">📊 Cartera pendiente de cobro</div>
+            <div id="an-cartera"></div>
+          </div>
         </div>
-        <div class="twrap">
-          <table>
-            <thead>
-              <tr>
-                <th onclick="sbAn('CELULA_ID')" style="cursor:pointer;width:75px">Célula ↕</th>
-                <th onclick="sbAn('MARCA_NOMBRE')" style="cursor:pointer;width:110px">Marca ↕</th>
-                <th onclick="sbAn('PRODUCTO')" style="cursor:pointer;width:130px">Producto ↕</th>
-                <th onclick="sbAn('CICLO_NUM')" style="cursor:pointer;width:50px">Ciclo ↕</th>
-                <th onclick="sbAn('PCT_COMPLETADO')" style="cursor:pointer;width:80px">% Complet. ↕</th>
-                <th onclick="sbAn('VIDEOS_MES')" style="cursor:pointer;width:65px">Videos ↕</th>
-                <th onclick="sbAn('SEMAFORO')" style="cursor:pointer;width:90px">Estado ↕</th>
-                <th onclick="sbAn('DIAS_RETRASO')" style="cursor:pointer;width:80px">Retraso ↕</th>
-                <th onclick="sbAn('DIAS_COBRO')" style="cursor:pointer;width:80px">Días cobro ↕</th>
-                <th onclick="sbAn('INGRESO_FIJO_USD')" style="cursor:pointer;width:90px">Ingreso ↕</th>
-                <th style="width:90px">GMV ventas</th>
-              </tr>
-            </thead>
-            <tbody id="an-tbody"></tbody>
-          </table>
-        </div>
-        <div class="pg">
-          <button class="pg-btn" id="an-pgprev" onclick="anPg--;renderAnalisis()">← Anterior</button>
-          <span id="an-pginfo"></span>
-          <button class="pg-btn" id="an-pgnext" onclick="anPg++;renderAnalisis()">Siguiente →</button>
+      </div>
+
+      <!-- ── PESTAÑA: DETALLE COMPLETO ── -->
+      <div id="an-tab-detalle" class="hidden">
+        <div class="tpanel">
+          <div class="thdr">
+            <span class="ttitle">Detalle de contratos <span class="cbadge" id="an-count">0</span></span>
+            <button class="btn btn-sm" onclick="anExportCSV()">↓ CSV</button>
+          </div>
+          <div class="twrap">
+            <table>
+              <thead>
+                <tr>
+                  <th onclick="sbAn('CELULA_ID')" class="vt-sortable">Célula ↕</th>
+                  <th onclick="sbAn('MARCA_NOMBRE')" class="vt-sortable">Marca ↕</th>
+                  <th onclick="sbAn('PRODUCTO')" class="vt-sortable">Producto ↕</th>
+                  <th onclick="sbAn('CICLO_NUM')" class="vt-sortable" style="text-align:center">Ciclo ↕</th>
+                  <th onclick="sbAn('PCT_COMPLETADO')" class="vt-sortable">Completado ↕</th>
+                  <th onclick="sbAn('VIDEOS_MES')" class="vt-sortable" style="text-align:center">Videos ↕</th>
+                  <th onclick="sbAn('SEMAFORO')" class="vt-sortable">Estado ↕</th>
+                  <th onclick="sbAn('DIAS_RETRASO')" class="vt-sortable" style="text-align:center">Retraso ↕</th>
+                  <th onclick="sbAn('DIAS_COBRO')" class="vt-sortable" style="text-align:center">Días cobro ↕</th>
+                  <th onclick="sbAn('INGRESO_FIJO_USD')" class="vt-sortable" style="text-align:right">Ingreso ↕</th>
+                  <th style="text-align:right">GMV</th>
+                  <th style="text-align:right">Comisión</th>
+                  <th style="text-align:center">Pagado</th>
+                </tr>
+              </thead>
+              <tbody id="an-tbody"></tbody>
+            </table>
+          </div>
+          <div class="pg">
+            <button class="pg-btn" id="an-pgprev" onclick="anPg--;renderAnalisis()">← Anterior</button>
+            <span id="an-pginfo"></span>
+            <button class="pg-btn" id="an-pgnext" onclick="anPg++;renderAnalisis()">Siguiente →</button>
+          </div>
         </div>
       </div>
 
@@ -1531,70 +1614,6 @@ function renderContratos(){
 }
 
 // ── Tarjeta normal ──────────────────────────────────────────────────
-// Parsea fecha dd/MM/yyyy HH:mm o yyyy-MM-dd a Date
-function parseFechaContrato_(s){
-  if(!s) return null;
-  if(s instanceof Date) return s;
-  const str=String(s).trim();
-  let m=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(m) return new Date(+m[3],+m[2]-1,+m[1]);
-  m=str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if(m) return new Date(+m[1],+m[2]-1,+m[3]);
-  return null;
-}
-
-// Cache de ventas agrupadas por SKU con fecha
-let _gmvCicloCache = null;
-function buildGMVCicloCache_(){
-  if(_gmvCicloCache) return _gmvCicloCache;
-  const mapa = {};
-  ventasData.forEach(v=>{
-    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
-    if(!sku) return;
-    // Usar ORDER_DATE o vtFecha
-    const rawFecha = vg(v,'ORDER_DATE','Order_date','Order Date','Fecha_Archivo')||'';
-    let f = null;
-    if(rawFecha){
-      const m=String(rawFecha).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if(m) f=new Date(+m[3],+m[2]-1,+m[1]);
-      else {
-        const m2=String(rawFecha).match(/^(\d{4})-(\d{2})-(\d{2})/);
-        if(m2) f=new Date(+m2[1],+m2[2]-1,+m2[3]);
-      }
-    }
-    if(!mapa[sku]) mapa[sku]=[];
-    mapa[sku].push({fecha:f, gmv:vtGMV(v)});
-  });
-  _gmvCicloCache = mapa;
-  return mapa;
-}
-
-// Invalida cache cuando cambian datos de ventas
-function invalidarGMVCache_(){ _gmvCicloCache = null; }
-
-// Calcula GMV para un contrato según su período exacto
-// El GMV del ciclo = ventas del SKU entre fechaInicio y fechaFin del ciclo
-// Para el último ciclo activo: hasta hoy (incluye ventas sin asignar)
-function getGMVParaContrato_(c){
-  if(!ventasData.length||!c.SKU) return 0;
-  const sku=(c.SKU||'').trim();
-  if(!sku) return 0;
-  const cache = buildGMVCicloCache_();
-  const ventasSku = cache[sku];
-  if(!ventasSku||!ventasSku.length) return 0;
-  const inicio = parseFechaContrato_(c.FECHA_INICIO_PROG||c.FECHA_INICIO_REAL||'');
-  const fin    = parseFechaContrato_(c.FECHA_FIN_PROG||c.FECHA_FIN_REAL||'');
-  if(!inicio){
-    // Sin fechas: retornar GMV total del SKU
-    return ventasSku.reduce((a,v)=>a+v.gmv,0);
-  }
-  // Agregar 2 días buffer al fin para incluir ventas del día de cierre
-  const finEfectivo = fin ? new Date(fin.getTime()+86400000*2) : new Date();
-  return ventasSku
-    .filter(v=>v.fecha && v.fecha>=inicio && v.fecha<=finEfectivo)
-    .reduce((a,v)=>a+v.gmv,0);
-}
-
 
 function buildContratoCard(c){
   const sem=(c.SEMAFORO||'en_curso').toLowerCase();
@@ -1626,7 +1645,7 @@ function buildContratoCard(c){
     <div class="ccard-meta">
       <span class="ccard-chip celula">${c.CELULA_ID||'—'}</span>
       <span class="ccard-chip ciclo">Ciclo ${cicloNum}</span>
-      ${(()=>{const gmvC=getGMVParaContrato_(c);return gmvC>0?`<span class="ccard-chip" style="background:#F0FDF4;border-color:#86EFAC;color:#15803D;font-weight:700">💰 $${gmvC.toLocaleString('en-US',{maximumFractionDigits:0})} GMV</span>`:''})()}
+      ${(()=>{const _gd=getGMVParaContrato_(c);const gmvC=_gd.gmv||0;return gmvC>0?`<span class="ccard-chip" style="background:#F0FDF4;border-color:#86EFAC;color:#15803D;font-weight:700">💰 $${gmvC.toLocaleString('en-US',{maximumFractionDigits:0})}</span>`:``})()}
       ${esFin?`<span class="ccard-chip" style="${pagado?'background:var(--green-bg);border-color:#A7F3D0;color:var(--green)':'background:var(--amber-bg);border-color:#FDE68A;color:var(--amber)'}">${pagado?'✅ Pagado':'⏳ Sin pagar'}</span>`:''}
     </div>
     <div class="progress-wrap">
@@ -2022,13 +2041,30 @@ function vtCambiarVista(vista,btn){
   if(vista==='detalle') vtRenderDetalle();
 }
 
+function vtOrdenar(datos){
+  const ord=document.getElementById('vt-orden')?.value||'gmv_desc';
+  return [...datos].sort((a,b)=>{
+    switch(ord){
+      case 'gmv_desc':  return vtGMV(b)-vtGMV(a);
+      case 'gmv_asc':   return vtGMV(a)-vtGMV(b);
+      case 'sem_desc':  return (vtSemana(b)||'').localeCompare(vtSemana(a)||'');
+      case 'sem_asc':   return (vtSemana(a)||'').localeCompare(vtSemana(b)||'');
+      case 'marca_az':  return vtMarca(a).localeCompare(vtMarca(b));
+      case 'marca_za':  return vtMarca(b).localeCompare(vtMarca(a));
+      case 'comm_desc': return vtComm(b)-vtComm(a);
+      case 'units_desc':return vtUnits(b)-vtUnits(a);
+      default: return 0;
+    }
+  });
+}
+
 function vtRenderAll(){
   if(!ventasData.length) return;
   vtActualizarChips();
-  const datos=vtFiltrar();
+  const datos=vtOrdenar(vtFiltrar());
   vtRenderKPIs(datos);
   if(vtVista==='resumen') vtRenderResumen(datos);
-  if(vtVista==='ciclos')  vtRenderCiclos();
+  if(vtVista==='ciclos')  vtRenderCiclos(datos);
   if(vtVista==='detalle') vtRenderDetalle();
 }
 
@@ -2065,6 +2101,70 @@ function vtRenderKPIs(datos){
 }
 
 // ── VISTA RESUMEN ─────────────────────────────────────────────
+
+// ── GMV POR PERÍODO DE CICLO ─────────────────────────────────────
+// Parsea fechas dd/MM/yyyy o yyyy-MM-dd
+function pfc_(s){
+  if(!s) return null;
+  if(s instanceof Date) return new Date(s);
+  const t=String(s).trim();
+  let m=t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m) return new Date(+m[3],+m[2]-1,+m[1]);
+  m=t.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+  return null;
+}
+
+// Cache ventas agrupadas por SKU_Scalify con su fecha real
+let _gCache=null;
+function getGMVCache_(){
+  if(_gCache) return _gCache;
+  const mapa={};
+  ventasData.forEach(v=>{
+    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    if(!sku) return;
+    const rawF=vg(v,'ORDER_DATE','Order_date','Order Date','Fecha_Archivo')||'';
+    let f=null;
+    if(rawF instanceof Date) f=rawF;
+    else {
+      const m=String(rawF).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if(m) f=new Date(+m[3],+m[2]-1,+m[1]);
+      else {
+        const m2=String(rawF).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if(m2) f=new Date(+m2[1],+m2[2]-1,+m2[3]);
+      }
+    }
+    const gmv=parseFloat(String(vg(v,'GMV','gmv','Revenue')||'0').replace(/[$,\s]/g,''))||0;
+    const comm=parseFloat(String(vg(v,'Commission','COMMISSION','commission','Affiliate Commission')||'0').replace(/[$,\s]/g,''))||0;
+    if(!mapa[sku]) mapa[sku]=[];
+    mapa[sku].push({fecha:f,gmv,comm});
+  });
+  _gCache=mapa;
+  return mapa;
+}
+function invalidarGMVCache_(){ _gCache=null; }
+
+// GMV + comisiones de un contrato en su período exacto
+function getGMVParaContrato_(c){
+  if(!ventasData.length||!c.SKU) return {gmv:0,comm:0};
+  const sku=(c.SKU||'').trim();
+  if(!sku) return {gmv:0,comm:0};
+  const cache=getGMVCache_();
+  const vs=cache[sku];
+  if(!vs||!vs.length) return {gmv:0,comm:0};
+  const ini=pfc_(c.FECHA_INICIO_PROG||c.FECHA_INICIO_REAL||'');
+  const fin=pfc_(c.FECHA_FIN_PROG||c.FECHA_FIN_REAL||'');
+  const finEf=fin?new Date(fin.getTime()+86400000*2):new Date();
+  const filtered=ini
+    ? vs.filter(v=>v.fecha&&v.fecha>=ini&&v.fecha<=finEf)
+    : vs;
+  return {
+    gmv:filtered.reduce((a,v)=>a+v.gmv,0),
+    comm:filtered.reduce((a,v)=>a+v.comm,0)
+  };
+}
+// ─────────────────────────────────────────────────────────────────
+
 function vtRenderResumen(datos){
   // Helper: agrupar y renderizar panel de barras
   function vtPanel(elId, datos, keyFn, valFn, fmt, color, limit){
@@ -2110,123 +2210,119 @@ function vtClickBarLabel(panelId, valor){
   vtRenderAll();
 }
 
-// ── VISTA CICLOS ──────────────────────────────────────────────
-function vtRenderCiclos(){
+// ── VISTA CICLOS ─────────────────────────────────────────────
+function vtRenderCiclos(datosOrdenados){
   if(!ventasData.length) return;
-  const datos=vtFiltrar();
+  const datos = datosOrdenados || vtOrdenar(vtFiltrar());
   const el=document.getElementById('vt-ciclos-content');
 
   // Agrupar ventas por SKU_Scalify
-  const ventasPorSku={};
+  const porSku={};
   datos.forEach(v=>{
-    const sku=vtSKU(v)||'__NO_SKU__';
-    if(!ventasPorSku[sku]) ventasPorSku[sku]={items:[],gmv:0,units:0,comm:0,marcas:new Set(),prods:new Set()};
-    ventasPorSku[sku].items.push(v);
-    ventasPorSku[sku].gmv+=vtGMV(v);
-    ventasPorSku[sku].units+=vtUnits(v);
-    ventasPorSku[sku].comm+=vtComm(v);
-    ventasPorSku[sku].marcas.add(vtMarca(v));
-    ventasPorSku[sku].prods.add(vtProd(v));
+    const sku=vtSKU(v)||'__SIN_SKU__';
+    if(!porSku[sku]){porSku[sku]={sku,marca:vtMarca(v),prod:vtProd(v),filas:[],gmv:0,comm:0,units:0,semanas:new Set()};}
+    porSku[sku].filas.push(v);
+    porSku[sku].gmv+=vtGMV(v);
+    porSku[sku].comm+=vtComm(v);
+    porSku[sku].units+=vtUnits(v);
+    const sem=vtSemana(v);if(sem)porSku[sku].semanas.add(sem);
   });
 
-  // Para cada SKU, cruzar con contratos
-  let html='';
-  const skusConContrato=[], skusSinContrato=[];
-
-  Object.keys(ventasPorSku).forEach(sku=>{
-    const contratos=sku==='__NO_SKU__'?[]:contratosData.filter(c=>(c.SKU||'').trim()===sku);
-    if(contratos.length) skusConContrato.push({sku, contratos, data:ventasPorSku[sku]});
-    else skusSinContrato.push({sku, data:ventasPorSku[sku]});
+  // Separar con contrato y sin contrato
+  const conContrato=[], sinContrato=[];
+  Object.values(porSku).forEach(grupo=>{
+    const ctrs=grupo.sku==='__SIN_SKU__'?[]:contratosData.filter(c=>(c.SKU||'').trim()===grupo.sku);
+    if(ctrs.length) conContrato.push({...grupo,ctrs});
+    else sinContrato.push({...grupo,ctrs:[]});
   });
+  conContrato.sort((a,b)=>b.gmv-a.gmv);
+  sinContrato.sort((a,b)=>b.gmv-a.gmv);
 
-  // Ordenar por GMV
-  skusConContrato.sort((a,b)=>b.data.gmv-a.data.gmv);
-  skusSinContrato.sort((a,b)=>b.data.gmv-a.data.gmv);
+  const fmtUSD=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+  const hayComm=datos.some(v=>vtComm(v)>0);
 
-  // ── Productos CON contrato ──
-  if(skusConContrato.length){
-    html+=`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:8px">✅ VINCULADOS A CONTRATOS (${skusConContrato.length})</div>`;
-    skusConContrato.forEach(({sku, contratos, data})=>{
-      const marca=[...data.marcas].join(', ');
-      const prod=[...data.prods].join(', ');
+  let html_out='';
 
-      // Calcular GMV por semana para cruzar con ciclos
-      const gmvPorSemana={};
-      data.items.forEach(v=>{const s=vtSemana(v)||vtMes(v)||'?';gmvPorSemana[s]=(gmvPorSemana[s]||0)+vtGMV(v);});
+  // ── TABLA CON CONTRATO ──
+  if(conContrato.length){
+    html_out+=`<div style="margin-bottom:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green)">✅ Vinculados a contrato — ${conContrato.length} SKUs</div>`;
+    html_out+=`<div class="tpanel" style="margin-bottom:14px"><div class="twrap"><table>
+      <thead><tr>
+        <th>Marca</th><th>Producto</th><th>SKU</th>
+        <th>Ciclo</th><th>Estado</th><th>Videos</th>
+        <th style="text-align:right">GMV</th>
+        ${hayComm?'<th style="text-align:right">Comisión</th>':''}
+        <th style="text-align:center">Uds</th>
+        <th>Semanas activas</th>
+      </tr></thead><tbody>`;
 
-      // Para cada ciclo del contrato, calcular el GMV en el período del ciclo
-      const ciclosHtml=contratos.slice(0,4).map(c=>{
-        const sem=(c.SEMAFORO||'').toLowerCase();
-        const _pR=parseFloat(String(c.PCT_COMPLETADO||'0').replace('%',''))||0;const pct=_pR>1?_pR/100:_pR;
-        const badgeColor=sem==='completado'?'var(--green)':sem==='en_curso'?'var(--blue)':sem==='vencido'?'var(--red)':'#94A3B8';
-        const badgeLabel=sem==='completado'?'Completado':sem==='en_curso'?'En curso':sem==='vencido'?'Vencido':sem||'—';
-        const ingreso=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+    conContrato.forEach(({sku,marca,prod,gmv,comm,units,semanas,ctrs})=>{
+      // Encontrar ciclo activo
+      const activo=ctrs.find(c=>['en_curso','urgente','completado'].includes((c.SEMAFORO||'').toLowerCase()));
+      const ctr=activo||ctrs[0]||{};
+      const sem=(ctr.SEMAFORO||'').toLowerCase();
+      const semColor={en_curso:'var(--blue)',urgente:'var(--amber)',completado:'var(--green)',vencido:'var(--red)',finalizado:'#94A3B8'}[sem]||'#94A3B8';
+      const semLabel={en_curso:'En curso',urgente:'Urgente',completado:'Completado',vencido:'Vencido',finalizado:'Finalizado'}[sem]||sem||'—';
+      const posteados=parseInt(ctr.POSTEADOS_CICLO||0);
+      const videos=parseInt(ctr.VIDEOS_MES||0);
+      const pct=videos?Math.min(100,Math.round(posteados/videos*100)):0;
+      // Semanas legibles (últimas 4)
+      const semsArr=[...semanas].sort().reverse().slice(0,4).map(s=>vtSemanaLabel(s)).join(', ');
 
-        return`<div class="ciclo-stat">
-          <span class="ciclo-stat-v" style="color:${badgeColor}">$${data.gmv.toLocaleString('en-US',{maximumFractionDigits:0})}</span>
-          <span class="ciclo-stat-l">GMV ciclo ${c.CICLO_NUM||1}</span>
-        </div>
-        <div class="ciclo-stat">
-          <span class="ciclo-stat-v" style="color:var(--blue)">${c.POSTEADOS_CICLO||0}/${c.VIDEOS_MES||0}</span>
-          <span class="ciclo-stat-l">videos</span>
-        </div>
-        <div class="ciclo-stat">
-          <span class="ciclo-stat-v" style="color:var(--teal)">$${ingreso.toFixed(0)}</span>
-          <span class="ciclo-stat-l">ingreso contrato</span>
-        </div>
-        <div class="ciclo-stat">
-          <span class="ciclo-stat-v" style="font-size:13px"><span class="ciclo-badge" style="background:${badgeColor}18;color:${badgeColor}">${badgeLabel}</span></span>
-          <span class="ciclo-stat-l">${c.CELULA_ID||'—'}</span>
-        </div>`;
-      }).join('');
-
-      html+=`<div class="ciclo-card">
-        <div class="ciclo-card-header">
-          <div>
-            <div class="ciclo-card-marca">${marca}</div>
-            <div class="ciclo-card-prod">${prod} · SKU: ${sku}</div>
+      html_out+=`<tr>
+        <td style="font-weight:600;white-space:nowrap">${marca.slice(0,16)}</td>
+        <td style="font-size:11px" title="${prod}">${prod.slice(0,20)||'—'}</td>
+        <td style="font-size:10px;color:var(--text3)">${sku==='__SIN_SKU__'?'—':sku}</td>
+        <td style="text-align:center"><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:12px;background:var(--purple-bg);color:var(--purple)">C${ctr.CICLO_NUM||1}</span></td>
+        <td><span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;background:${semColor}18;color:${semColor}">${semLabel}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:5px">
+            <div style="width:50px;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:${semColor}"></div>
+            </div>
+            <span style="font-size:10px;color:var(--text3)">${posteados}/${videos}</span>
           </div>
-          <div style="text-align:right">
-            <div style="font-size:18px;font-weight:700;color:var(--teal)">$${data.gmv.toLocaleString('en-US',{maximumFractionDigits:0})}</div>
-            <div style="font-size:11px;color:var(--text3)">${data.units.toLocaleString()} uds · ${data.items.length} líneas${data.comm>0?' · $'+data.comm.toFixed(0)+' comisiones':''}</div>
-          </div>
-        </div>
-        <div class="ciclo-stats">${ciclosHtml}</div>
-      </div>`;
+        </td>
+        <td style="text-align:right;font-weight:700;color:var(--teal)">${fmtUSD(gmv)}</td>
+        ${hayComm?`<td style="text-align:right;color:var(--purple);font-size:11px">${comm>0?fmtUSD(comm):'—'}</td>`:''}
+        <td style="text-align:center;font-size:11px">${units.toLocaleString()}</td>
+        <td style="font-size:10px;color:var(--text3)">${semsArr||'—'}</td>
+      </tr>`;
     });
+    html_out+=`</tbody></table></div></div>`;
   }
 
-  // ── Ventas SIN contrato ──
-  if(skusSinContrato.length){
-    const totalSin=skusSinContrato.reduce((a,b)=>a+b.data.gmv,0);
-    html+=`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 8px">⬜ SIN CONTRATO ASOCIADO (${skusSinContrato.length} SKUs · $${totalSin.toLocaleString('en-US',{maximumFractionDigits:0})} GMV)</div>`;
+  // ── TABLA SIN CONTRATO ──
+  if(sinContrato.length){
+    const totalSin=sinContrato.reduce((a,g)=>a+g.gmv,0);
+    html_out+=`<div style="margin-bottom:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">⬜ Sin contrato — ${sinContrato.length} SKUs · ${fmtUSD(totalSin)}</div>`;
+    html_out+=`<div class="tpanel"><div class="twrap"><table>
+      <thead><tr>
+        <th>Marca</th><th>Producto</th><th>SKU</th>
+        <th style="text-align:right">GMV</th>
+        ${hayComm?'<th style="text-align:right">Comisión</th>':''}
+        <th style="text-align:center">Uds</th>
+        <th>Semanas activas</th>
+      </tr></thead><tbody>`;
 
-    // Agrupar por período para los sin contrato
-    const sinContrHtml=skusSinContrato.slice(0,15).map(({sku,data})=>{
-      const marca=[...data.marcas].join(', ');
-      const prod=[...data.prods].join(', ')||'Sin mapeo';
-      // Semanas con ventas
-      const semanas={};
-      data.items.forEach(v=>{const s=vtSemana(v)||vtMes(v)||'?';semanas[s]=(semanas[s]||0)+vtGMV(v);});
-      const semanasStr=Object.entries(semanas).sort((a,b)=>b[1]-a[1]).slice(0,4)
-        .map(([s,g])=>`<span style="font-size:10px;padding:2px 7px;background:var(--bg);border-radius:12px;border:1px solid var(--border)">${s}: $${g.toFixed(0)}</span>`).join(' ');
-      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-        <div>
-          <span style="font-size:12px;font-weight:600;color:var(--text)">${marca}</span>
-          <span style="font-size:11px;color:var(--text3);margin-left:6px">${prod.slice(0,30)}</span>
-          <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">${semanasStr}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0;margin-left:12px">
-          <div style="font-size:16px;font-weight:700;color:var(--text2)">$${data.gmv.toLocaleString('en-US',{maximumFractionDigits:0})}</div>
-          <div style="font-size:10px;color:var(--text3)">${data.units} uds</div>
-        </div>
-      </div>`;
-    }).join('');
-    html+=`<div class="vt-panel">${sinContrHtml}</div>`;
+    sinContrato.forEach(({sku,marca,prod,gmv,comm,units,semanas})=>{
+      const semsArr=[...semanas].sort().reverse().slice(0,4).map(s=>vtSemanaLabel(s)).join(', ');
+      html_out+=`<tr>
+        <td style="font-weight:600">${marca.slice(0,16)}</td>
+        <td style="font-size:11px" title="${prod}">${prod.slice(0,20)||'—'}</td>
+        <td style="font-size:10px;color:var(--text3)">${sku==='__SIN_SKU__'?'—':sku}</td>
+        <td style="text-align:right;font-weight:700;color:var(--text2)">${fmtUSD(gmv)}</td>
+        ${hayComm?`<td style="text-align:right;color:var(--purple);font-size:11px">${comm>0?fmtUSD(comm):'—'}</td>`:''}
+        <td style="text-align:center;font-size:11px">${units.toLocaleString()}</td>
+        <td style="font-size:10px;color:var(--text3)">${semsArr||'—'}</td>
+      </tr>`;
+    });
+    html_out+=`</tbody></table></div></div>`;
   }
 
-  el.innerHTML=html||'<div class="nodata">Sin datos con los filtros aplicados</div>';
+  el.innerHTML=html_out||'<div class="nodata">Sin datos con los filtros aplicados</div>';
 }
+
 
 // ── VISTA DETALLE ─────────────────────────────────────────────
 let vtDetSortCol='gmv', vtDetSortAsc=false;
@@ -2337,11 +2433,63 @@ function vtExportarCSV(){
 }
 
 // ═══════════════════════════════════════════════════════
-// TAB ANÁLISIS — v2 reinventado
+// TAB ANÁLISIS v3 — sub-pestañas, comisiones, filtros fecha
 // ═══════════════════════════════════════════════════════
-let filtroAnalisis='todos', filtroAnCelula='todas';
-let anData=[], anSortCol='MARCA_NOMBRE', anSortAsc=true, anPg=1;
+let filtroAnalisis='todos', filtroAnCelula='todas', filtroAnPeriodo='todo';
+let anData=[], anSortCol='INGRESO_FIJO_USD', anSortAsc=false, anPg=1;
+let anTabActual='performance';
 const AN_RPP=20;
+
+function anCambiarTab(tab, btn){
+  anTabActual=tab;
+  document.querySelectorAll('.an-tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  ['performance','ventas','cobros','detalle'].forEach(t=>{
+    const el=document.getElementById('an-tab-'+t);
+    if(el) el.classList[t===tab?'remove':'add']('hidden');
+  });
+  renderAnalisis();
+}
+
+function filtrarAnPeriodo(p, btn){
+  filtroAnPeriodo=p;
+  document.querySelectorAll('[data-anp]').forEach(b=>b.className='spill');
+  if(btn) btn.className='spill on';
+  const cr=document.getElementById('an-custom-range');
+  if(cr) cr.style.display=p==='custom'?'flex':'none';
+  renderAnalisis();
+}
+
+function anGetRangoVentas(){
+  const now=new Date(), hoy=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  if(filtroAnPeriodo==='todo') return null;
+  if(filtroAnPeriodo==='semana'){const d=hoy.getDay(),m=new Date(hoy.getTime()-(d===0?6:d-1)*864e5);return[m,now];}
+  if(filtroAnPeriodo==='mes') return[new Date(now.getFullYear(),now.getMonth(),1),now];
+  if(filtroAnPeriodo==='mes_pasado') return[new Date(now.getFullYear(),now.getMonth()-1,1),new Date(now.getFullYear(),now.getMonth(),0,23,59,59)];
+  if(filtroAnPeriodo==='custom'){
+    const f=document.getElementById('an-dfrom')?.value, t=document.getElementById('an-dto')?.value;
+    if(!f&&!t) return null;
+    return[f?new Date(f):new Date(0),t?new Date(t+'T23:59:59'):now];
+  }
+  return null;
+}
+
+// Ventas filtradas por período de análisis
+function anGetVentasFiltradas(){
+  const rango=anGetRangoVentas();
+  if(!rango) return ventasData;
+  return ventasData.filter(v=>{
+    const rawF=vg(v,'ORDER_DATE','Order_date','Order Date','Fecha_Archivo')||'';
+    let f=null;
+    if(rawF instanceof Date) f=rawF;
+    else {
+      const m=String(rawF).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if(m) f=new Date(+m[3],+m[2]-1,+m[1]);
+    }
+    if(!f) return true; // sin fecha → incluir
+    return f>=rango[0]&&f<=rango[1];
+  });
+}
 
 function mostrarTabAnalisis(){
   if(!contratosData.length) return;
@@ -2356,18 +2504,16 @@ function mostrarTabAnalisis(){
 function poblarSelectoresAnalisis(){
   const marcas=[...new Set(contratosData.map(c=>(c.MARCA_NOMBRE||'').trim()).filter(Boolean))].sort();
   const selM=document.getElementById('an-sel-marca');
-  selM.innerHTML='<option value="">Todas las marcas</option>'+marcas.map(m=>`<option value="${m}">${m}</option>`).join('');
+  if(selM) selM.innerHTML='<option value="">Todas las marcas</option>'+marcas.map(m=>`<option value="${m}">${m}</option>`).join('');
   onAnMarcaCambia();
 }
 
 function onAnMarcaCambia(){
-  const selM=document.getElementById('an-sel-marca').value;
+  const selM=document.getElementById('an-sel-marca')?.value||'';
   const selP=document.getElementById('an-sel-producto');
+  if(!selP) return;
   const curP=selP.value;
-  const prods=[...new Set(
-    contratosData.filter(c=>!selM||(c.MARCA_NOMBRE||'').trim()===selM)
-      .map(c=>(c.PRODUCTO||'').trim()).filter(Boolean)
-  )].sort();
+  const prods=[...new Set(contratosData.filter(c=>!selM||(c.MARCA_NOMBRE||'').trim()===selM).map(c=>(c.PRODUCTO||'').trim()).filter(Boolean))].sort();
   selP.innerHTML='<option value="">Todos los productos</option>'+prods.map(p=>`<option value="${p}"${p===curP?' selected':''}>${p}</option>`).join('');
   renderAnalisis();
 }
@@ -2377,27 +2523,25 @@ function filtrarAnalisis(f,btn){
   if(btn) btn.className='spill on';
   filtroAnalisis=f;anPg=1;renderAnalisis();
 }
-
 function filtrarAnCelula(c,btn){
   document.querySelectorAll('[data-ancelula]').forEach(b=>b.className='spill');
   if(btn) btn.className='spill on';
   filtroAnCelula=c;anPg=1;renderAnalisis();
 }
-
 function sbAn(col){
-  if(anSortCol===col)anSortAsc=!anSortAsc;else{anSortCol=col;anSortAsc=true;}
+  if(anSortCol===col)anSortAsc=!anSortAsc;else{anSortCol=col;anSortAsc=false;}
   anPg=1;renderAnalisis();
 }
-
 function getParsedPct_(c){
-  const r=parseFloat(String(c.PCT_COMPLETADO||0).replace('%','').replace(',','.'))||0;
-  return r>1?r:r*100;
+  const _p=parseInt(c.POSTEADOS_CICLO||0),_v=parseInt(c.VIDEOS_MES||1)||1;
+  return _v>0?Math.min(100,Math.round(_p/_v*100)):0;
 }
 
 function renderAnalisis(){
   if(!contratosData.length) return;
-  const selMarca=(document.getElementById('an-sel-marca').value||'').trim();
-  const selProd=(document.getElementById('an-sel-producto').value||'').trim();
+  const selMarca=(document.getElementById('an-sel-marca')?.value||'').trim();
+  const selProd=(document.getElementById('an-sel-producto')?.value||'').trim();
+  const orden=document.getElementById('an-orden')?.value||'ingreso_desc';
 
   let datos=contratosData.filter(c=>{
     const sem=(c.SEMAFORO||'').toLowerCase();
@@ -2408,217 +2552,347 @@ function renderAnalisis(){
     return true;
   });
 
-  // ── SCORECARDS ──────────────────────────────────────
+  // Ventas del período
+  const vtsFiltradas=anGetVentasFiltradas();
+
+  // GMV+Comm por SKU (período filtrado)
+  const gmvPorSku={}, commPorSku={};
+  vtsFiltradas.forEach(v=>{
+    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    if(!sku) return;
+    gmvPorSku[sku]=(gmvPorSku[sku]||0)+vtGMV(v);
+    commPorSku[sku]=(commPorSku[sku]||0)+vtComm(v);
+  });
+
+  // SCORECARDS
   const total=datos.length;
   const completados=datos.filter(c=>['completado','finalizado'].includes((c.SEMAFORO||'').toLowerCase())).length;
   const enCurso=datos.filter(c=>(c.SEMAFORO||'').toLowerCase()==='en_curso').length;
   const vencidos=datos.filter(c=>(c.SEMAFORO||'').toLowerCase()==='vencido').length;
-  const urgentes=datos.filter(c=>(c.SEMAFORO||'').toLowerCase()==='urgente').length;
   const totalVideos=datos.reduce((a,c)=>a+parseInt(c.VIDEOS_MES||0),0);
-  const posteados=datos.reduce((a,c)=>a+parseInt(c.POSTEADOS_CICLO||0),0);
-  const pctGlobal=totalVideos?Math.round(posteados/totalVideos*100):0;
-  const ingresoTotal=datos.reduce((a,c)=>a+parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0,0);
-  const pagados=datos.filter(c=>(c.PAGADO||'').toLowerCase()==='si').reduce((a,c)=>a+parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0,0);
-  const sinCobrar=ingresoTotal-pagados;
-  const diasCobProm=datos.filter(c=>parsearDias(c.DIAS_COBRO)!=='').reduce((a,c,_,arr)=>{
-    const d=parsearDias(c.DIAS_COBRO);
-    return typeof d==='number'?a+d/arr.filter(x=>parsearDias(x.DIAS_COBRO)!=='').length:a;
-  },0);
+  const posteadosTotal=datos.reduce((a,c)=>a+parseInt(c.POSTEADOS_CICLO||0),0);
+  const pctGlobal=totalVideos?Math.round(posteadosTotal/totalVideos*100):0;
+  const ingresoTotal=datos.reduce((a,c)=>a+(parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0),0);
+  const cobrado=datos.filter(c=>(c.PAGADO||'').toLowerCase()==='si').reduce((a,c)=>a+(parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0),0);
+  const skusFiltro=new Set(datos.map(c=>(c.SKU||'').trim()).filter(Boolean));
+  const gmvTotal=Object.entries(gmvPorSku).filter(([k])=>skusFiltro.has(k)).reduce((a,[,v])=>a+v,0);
+  const commTotal=Object.entries(commPorSku).filter(([k])=>skusFiltro.has(k)).reduce((a,[,v])=>a+v,0);
+  const fmtU=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
 
-  // GMV total de ventas para los SKUs en este filtro
-  const skusEnFiltro=new Set(datos.map(c=>(c.SKU||'').trim()).filter(Boolean));
-  const gmvFiltro=ventasData.reduce((a,v)=>{
-    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','sku_scalify')||'').trim();
-    return skusEnFiltro.has(sku)?a+vtGMV(v):a;
-  },0);
-
-  const sc=[
-    {l:'Contratos',v:total,c:'var(--blue)',s:''},
-    {l:'% completado',v:pctGlobal+'%',c:pctGlobal>=80?'var(--green)':pctGlobal>=50?'var(--amber)':'var(--red)',s:posteados+'/'+totalVideos+' videos'},
-    {l:'En curso',v:enCurso,c:'var(--blue)',s:urgentes>0?urgentes+' urgentes':''},
-    {l:'Vencidos',v:vencidos,c:'var(--red)',s:urgentes+' urgentes'},
-    {l:'Completados',v:completados,c:'var(--green)',s:''},
-    {l:'Ingreso total',v:'$'+ingresoTotal.toLocaleString('en-US',{maximumFractionDigits:0}),c:'var(--teal)',s:''},
-    {l:'Sin cobrar',v:'$'+sinCobrar.toLocaleString('en-US',{maximumFractionDigits:0}),c:'var(--amber)',s:'pendiente'},
-    {l:'GMV generado',v:gmvFiltro>0?'$'+gmvFiltro.toLocaleString('en-US',{maximumFractionDigits:0}):'—',c:'var(--purple)',s:'ventas TikTok'},
-    {l:'Prom días cobro',v:Math.round(diasCobProm)+'d',c:'var(--text2)',s:'desde finalización'},
+  const scs=[
+    {l:'Contratos',v:total,c:'var(--blue)',s:completados+' completados'},
+    {l:'% Completado',v:pctGlobal+'%',c:pctGlobal>=80?'var(--green)':pctGlobal>=50?'var(--amber)':'var(--red)',s:posteadosTotal+'/'+totalVideos+' videos'},
+    {l:'En curso',v:enCurso,c:'var(--blue)',s:vencidos+' vencidos'},
+    {l:'Ingreso total',v:fmtU(ingresoTotal),c:'var(--teal)',s:'contratos'},
+    {l:'Cobrado',v:fmtU(cobrado),c:'var(--green)',s:fmtU(ingresoTotal-cobrado)+' pendiente'},
+    {l:'GMV período',v:gmvTotal>0?fmtU(gmvTotal):'—',c:'var(--purple)',s:'ventas TikTok'},
+    {l:'Comisiones',v:commTotal>0?fmtU(commTotal):'—',c:'var(--amber)',s:'afiliados'},
   ];
-
-  document.getElementById('an-scorecards').innerHTML=sc.map(s=>`
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;border-top:3px solid ${s.c};box-shadow:var(--shadow)">
+  const scEl=document.getElementById('an-scorecards');
+  if(scEl) scEl.innerHTML=scs.map(s=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:11px 13px;border-top:3px solid ${s.c};box-shadow:var(--shadow)">
       <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)">${s.l}</div>
-      <div style="font-size:22px;font-weight:700;color:${s.c};line-height:1.2;margin:4px 0">${s.v}</div>
-      ${s.s?`<div style="font-size:10px;color:var(--text3)">${s.s}</div>`:''}
+      <div style="font-size:20px;font-weight:700;color:${s.c};line-height:1.2;margin:3px 0">${s.v}</div>
+      <div style="font-size:9px;color:var(--text3)">${s.s}</div>
     </div>`).join('');
 
-  // ── PERFORMANCE POR MARCA ────────────────────────────
+  if(anTabActual==='performance') renderAnPerformance_(datos, vtsFiltradas, gmvPorSku, skusFiltro, fmtU);
+  if(anTabActual==='ventas')      renderAnVentas_(vtsFiltradas, gmvPorSku, commPorSku, fmtU);
+  if(anTabActual==='cobros')      renderAnCobros_(datos, fmtU);
+  if(anTabActual==='detalle')     renderAnDetalle_(datos, gmvPorSku, commPorSku, orden, fmtU);
+}
+
+// ── PESTAÑA PERFORMANCE ─────────────────────────────────────────────
+function renderAnPerformance_(datos, vtsFiltradas, gmvPorSku, skusFiltro, fmtU){
+  // Por marca — performance
   const porMarca={};
   datos.forEach(c=>{
     const m=(c.MARCA_NOMBRE||'Sin marca').trim();
-    if(!porMarca[m]) porMarca[m]={total:0,completados:0,vencidos:0,videos:0,posteados:0,ingreso:0,pagado:0,ciclos:[]};
-    const pm=porMarca[m];
+    if(!porMarca[m]) porMarca[m]={total:0,completados:0,vencidos:0,videos:0,posteados:0,ingreso:0,pagado:0};
+    const pm=porMarca[m],sem=(c.SEMAFORO||'').toLowerCase();
     pm.total++;
-    const sem=(c.SEMAFORO||'').toLowerCase();
     if(sem==='completado'||sem==='finalizado') pm.completados++;
     if(sem==='vencido') pm.vencidos++;
     pm.videos+=parseInt(c.VIDEOS_MES||0);
     pm.posteados+=parseInt(c.POSTEADOS_CICLO||0);
     pm.ingreso+=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
     if((c.PAGADO||'').toLowerCase()==='si') pm.pagado+=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
-    pm.ciclos.push(getParsedPct_(c));
   });
-
-  // Agregar GMV por marca desde ventasData
-  ventasData.forEach(v=>{
-    const marca=(vg(v,'Marca_Scalify','Marca_scalify')||'').trim();
+  vtsFiltradas.forEach(v=>{
+    const marca=(vg(v,'Marca_Scalify','MARCA_SCALIFY','marca_scalify')||'').trim();
     if(porMarca[marca]) porMarca[marca].gmv=(porMarca[marca].gmv||0)+vtGMV(v);
   });
 
-  const marcasOrdenadas=Object.entries(porMarca).sort((a,b)=>b[1].ingreso-a[1].ingreso);
-  const maxIngreso=marcasOrdenadas.length?marcasOrdenadas[0][1].ingreso||1:1;
-
-  document.getElementById('an-marcas-grid').innerHTML=marcasOrdenadas.map(([marca,d])=>{
+  const marcasOrd=Object.entries(porMarca).sort((a,b)=>b[1].ingreso-a[1].ingreso);
+  const el=document.getElementById('an-marcas-grid');
+  if(el) el.innerHTML=marcasOrd.map(([marca,d])=>{
     const pct=d.videos?Math.round(d.posteados/d.videos*100):0;
     const pctColor=pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
-    const sinCobrarM=d.ingreso-d.pagado;
     const gmvM=d.gmv||0;
-    return`<div style="display:grid;grid-template-columns:130px 1fr 70px 70px 70px 70px 70px;gap:10px;align-items:center;padding:8px 10px;border-radius:var(--radius);background:var(--bg);border:1px solid var(--border)">
-      <div style="font-size:12px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${marca}">${marca}</div>
+    const sinCobrar=d.ingreso-d.pagado;
+    return`<div style="display:grid;grid-template-columns:110px 1fr 60px 65px 65px 60px;gap:8px;align-items:center;padding:7px 8px;border-radius:var(--radius);background:var(--bg);border:1px solid var(--border);margin-bottom:4px">
+      <span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${marca}">${marca}</span>
       <div>
-        <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px">
-          <span style="color:var(--text3)">${d.posteados}/${d.videos} videos</span>
+        <div style="display:flex;justify-content:space-between;font-size:9px;margin-bottom:2px">
+          <span style="color:var(--text3)">${d.posteados}/${d.videos}</span>
           <span style="font-weight:700;color:${pctColor}">${pct}%</span>
         </div>
-        <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
-          <div style="width:${pct}%;height:100%;background:${pctColor};border-radius:3px;transition:width .3s"></div>
+        <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${pctColor}"></div>
         </div>
       </div>
-      <div style="text-align:center;font-size:11px"><span style="font-weight:700;color:var(--blue)">${d.total}</span><div style="font-size:9px;color:var(--text3)">contratos</div></div>
-      <div style="text-align:center;font-size:11px"><span style="font-weight:700;color:var(--teal)">$${Math.round(d.ingreso).toLocaleString()}</span><div style="font-size:9px;color:var(--text3)">ingreso</div></div>
-      <div style="text-align:center;font-size:11px"><span style="font-weight:700;color:${sinCobrarM>0?'var(--amber)':'var(--green)'}">$${Math.round(sinCobrarM).toLocaleString()}</span><div style="font-size:9px;color:var(--text3)">sin cobrar</div></div>
-      <div style="text-align:center;font-size:11px"><span style="font-weight:700;color:var(--purple)">${gmvM>0?'$'+Math.round(gmvM).toLocaleString():'—'}</span><div style="font-size:9px;color:var(--text3)">GMV</div></div>
-      <div style="text-align:center;font-size:11px"><span style="font-weight:700;color:var(--red)">${d.vencidos||'—'}</span><div style="font-size:9px;color:var(--text3)">vencidos</div></div>
+      <div style="text-align:right;font-size:11px;font-weight:700;color:var(--teal)">${fmtU(d.ingreso)}</div>
+      <div style="text-align:right;font-size:10px;color:${sinCobrar>0?'var(--amber)':'var(--green)'}">${fmtU(sinCobrar)}</div>
+      <div style="text-align:right;font-size:11px;font-weight:700;color:var(--purple)">${gmvM>0?fmtU(gmvM):'—'}</div>
+      <div style="text-align:center;font-size:10px;color:${d.vencidos>0?'var(--red)':'var(--text3)'}">${d.vencidos>0?d.vencidos+'⚠':'—'}</div>
     </div>`;
   }).join('')||'<div class="nodata">Sin datos</div>';
 
-  // ── VELOCIDAD DE POSTEO ─────────────────────────────
-  const velocidad=datos
-    .filter(c=>parseInt(c.VIDEOS_MES||0)>0)
-    .map(c=>{
-      const total=parseInt(c.VIDEOS_MES||0);
-      const post=parseInt(c.POSTEADOS_CICLO||0);
-      const pct=Math.round(post/total*100);
-      const dr=parsearDias(c.DIAS_RESTANTES);
-      return{marca:(c.MARCA_NOMBRE||'').trim(),prod:(c.PRODUCTO||'').trim(),total,post,pct,dr,sem:(c.SEMAFORO||'').toLowerCase()};
-    })
-    .sort((a,b)=>b.pct-a.pct)
-    .slice(0,8);
+  // Velocidad
+  const vel=datos.filter(c=>parseInt(c.VIDEOS_MES||0)>0).map(c=>({
+    marca:(c.MARCA_NOMBRE||'').trim(),prod:(c.PRODUCTO||'').trim(),
+    pct:getParsedPct_(c),post:parseInt(c.POSTEADOS_CICLO||0),vid:parseInt(c.VIDEOS_MES||0),
+    sem:(c.SEMAFORO||'').toLowerCase()
+  })).sort((a,b)=>b.pct-a.pct).slice(0,10);
 
-  const fmtBar=(pct,sem)=>{
-    const col=sem==='completado'?'var(--green)':sem==='vencido'?'var(--red)':pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
-    return`<div style="height:5px;background:var(--border);border-radius:3px;flex:1;overflow:hidden"><div style="width:${Math.min(100,pct)}%;height:100%;background:${col}"></div></div>`;
-  };
-  document.getElementById('an-velocidad').innerHTML=velocidad.map(v=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+  const elV=document.getElementById('an-velocidad');
+  if(elV) elV.innerHTML=vel.map(v=>{
+    const col=v.sem==='completado'?'var(--green)':v.pct>=80?'var(--green)':v.pct>=50?'var(--amber)':'var(--red)';
+    return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
       <div style="flex:1;min-width:0">
         <div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.marca}</div>
         <div style="font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.prod}</div>
       </div>
-      ${fmtBar(v.pct,v.sem)}
-      <div style="font-size:11px;font-weight:700;color:${v.pct>=80?'var(--green)':v.pct>=50?'var(--amber)':'var(--red)'};min-width:38px;text-align:right">${v.pct}%</div>
-      <div style="font-size:10px;color:var(--text3);min-width:50px;text-align:right">${v.post}/${v.total}</div>
-    </div>`).join('')||'<div class="nodata">Sin datos</div>';
+      <div style="flex:0 0 80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div style="width:${v.pct}%;height:100%;background:${col}"></div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:${col};min-width:36px;text-align:right">${v.pct}%</span>
+      <span style="font-size:10px;color:var(--text3);min-width:40px;text-align:right">${v.post}/${v.vid}</span>
+    </div>`;
+  }).join('')||'<div class="nodata">Sin datos</div>';
+}
 
-  // ── COBROS: TIEMPO HASTA PAGO ────────────────────────
-  const cobros=datos
-    .filter(c=>{const d=parsearDias(c.DIAS_COBRO);return typeof d==='number'&&d>0;})
+// ── PESTAÑA VENTAS & COMISIONES ─────────────────────────────────────
+function renderAnVentas_(vtsFiltradas, gmvPorSku, commPorSku, fmtU){
+  // GMV por marca
+  const gmvMarca={}, commMarca={};
+  vtsFiltradas.forEach(v=>{
+    const m=(vg(v,'Marca_Scalify','MARCA_SCALIFY','marca_scalify')||'').trim()||'Sin marca';
+    gmvMarca[m]=(gmvMarca[m]||0)+vtGMV(v);
+    commMarca[m]=(commMarca[m]||0)+vtComm(v);
+  });
+  const maxGMV=Math.max(...Object.values(gmvMarca),1);
+  const maxComm=Math.max(...Object.values(commMarca),1);
+
+  function barPanel(elId, mapa, max, color, fmt){
+    const el=document.getElementById(elId);
+    if(!el) return;
+    const sorted=Object.entries(mapa).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const total=sorted.reduce((a,[,v])=>a+v,0);
+    el.innerHTML=sorted.map(([k,v])=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:11px;flex:0 0 110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${k}">${k.slice(0,15)}</span>
+        <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div style="width:${Math.round(v/max*100)}%;height:100%;background:${color}"></div>
+        </div>
+        <span style="font-size:11px;font-weight:700;min-width:60px;text-align:right">${fmt(v)}</span>
+        <span style="font-size:10px;color:var(--text3);min-width:30px;text-align:right">${total?Math.round(v/total*100)+'%':''}</span>
+      </div>`).join('')||'<div class="nodata">Sin datos</div>';
+  }
+
+  barPanel('an-gmv-marcas', gmvMarca, maxGMV, 'var(--teal)', fmtU);
+  barPanel('an-comm-marcas', commMarca, maxComm, 'var(--purple)', fmtU);
+
+  // GMV por semana (tendencia)
+  const gmvSem={};
+  vtsFiltradas.forEach(v=>{
+    const rawF=vg(v,'ORDER_DATE','Order_date','Order Date')||'';
+    let sem='';
+    const mf=String(rawF).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(mf){
+      const d=new Date(+mf[3],+mf[2]-1,+mf[1]);
+      // Calcular semana ISO
+      const t=new Date(d.valueOf());t.setDate(t.getDate()+3-((t.getDay()+6)%7));
+      const w1=new Date(t.getFullYear(),0,4);
+      const wn=1+Math.round((((t-w1)/86400000)-3+((w1.getDay()+6)%7))/7);
+      sem=t.getFullYear()+'-W'+('0'+wn).slice(-2);
+    }
+    if(sem) gmvSem[sem]=(gmvSem[sem]||0)+vtGMV(v);
+  });
+  const semOrd=Object.entries(gmvSem).sort((a,b)=>a[0].localeCompare(b[0]));
+  const maxSemGMV=Math.max(...semOrd.map(([,v])=>v),1);
+  const elSem=document.getElementById('an-gmv-semanas');
+  if(elSem) elSem.innerHTML=semOrd.slice(-12).map(([sem,gmv])=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;flex:0 0 70px">${vtSemanaLabel(sem)}</span>
+      <div style="flex:1;height:14px;background:var(--border);border-radius:3px;overflow:hidden;position:relative">
+        <div style="width:${Math.round(gmv/maxSemGMV*100)}%;height:100%;background:var(--purple);border-radius:3px"></div>
+        <span style="position:absolute;left:6px;top:0;font-size:10px;font-weight:700;color:#fff;line-height:14px">${fmtU(gmv)}</span>
+      </div>
+    </div>`).join('')||'<div class="nodata">Sin datos de ventas</div>';
+
+  // Top productos por GMV
+  const gmvProd={}, commProd={};
+  vtsFiltradas.forEach(v=>{
+    const prod=(vg(v,'Producto_Scalify','PRODUCTO_SCALIFY','producto_scalify')||vg(v,'Product_Name','PRODUCT_NAME')||'').trim()||'Sin mapeo';
+    gmvProd[prod]=(gmvProd[prod]||0)+vtGMV(v);
+    commProd[prod]=(commProd[prod]||0)+vtComm(v);
+  });
+  const maxPGMV=Math.max(...Object.values(gmvProd),1);
+  const prodOrd=Object.entries(gmvProd).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const elProd=document.getElementById('an-gmv-productos');
+  const hayCP=Object.values(commProd).some(v=>v>0);
+  if(elProd) elProd.innerHTML=`<div style="display:grid;grid-template-columns:1fr${hayCP?' 80px':''} 80px 50px;gap:4px;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;padding:0 4px 4px">
+    <span>Producto</span>${hayCP?'<span style="text-align:right">Comisión</span>':''}
+    <span style="text-align:right">GMV</span><span style="text-align:right">%</span>
+  </div>`+prodOrd.map(([prod,gmv])=>{
+    const pct=Math.round(gmv/maxPGMV*100);
+    const comm=commProd[prod]||0;
+    const total=prodOrd.reduce((a,[,v])=>a+v,0);
+    return`<div style="display:flex;flex-direction:column;padding:5px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${prod}">${prod.slice(0,24)}</span>
+        ${hayCP?`<span style="font-size:11px;color:var(--purple);min-width:70px;text-align:right">${comm>0?fmtU(comm):'—'}</span>`:''}
+        <span style="font-size:11px;font-weight:700;color:var(--teal);min-width:70px;text-align:right">${fmtU(gmv)}</span>
+        <span style="font-size:10px;color:var(--text3);min-width:35px;text-align:right">${total?Math.round(gmv/total*100)+'%':''}</span>
+      </div>
+      <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:3px">
+        <div style="width:${pct}%;height:100%;background:var(--teal)"></div>
+      </div>
+    </div>`;
+  }).join('')||'<div class="nodata">Sin datos</div>';
+}
+
+// ── PESTAÑA COBROS & TIEMPOS ─────────────────────────────────────────
+function renderAnCobros_(datos, fmtU){
+  // Cobros: tiempo hasta pago
+  const cobros=datos.filter(c=>{const d=parsearDias(c.DIAS_COBRO);return typeof d==='number'&&d>=0;})
     .map(c=>({
-      marca:(c.MARCA_NOMBRE||'').trim(),
-      prod:(c.PRODUCTO||'').trim(),
-      dias:parsearDias(c.DIAS_COBRO),
-      pagado:(c.PAGADO||'').toLowerCase()==='si',
+      marca:(c.MARCA_NOMBRE||'').trim(),prod:(c.PRODUCTO||'').trim(),
+      dias:parsearDias(c.DIAS_COBRO),pagado:(c.PAGADO||'').toLowerCase()==='si',
       ingreso:parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0
-    }))
-    .sort((a,b)=>b.dias-a.dias)
-    .slice(0,8);
-
-  const maxDias=cobros.length?cobros[0].dias||1:1;
-  document.getElementById('an-cobros').innerHTML=cobros.map(c=>`
+    })).sort((a,b)=>b.dias-a.dias).slice(0,10);
+  const maxD=cobros.length?cobros[0].dias||1:1;
+  const elC=document.getElementById('an-cobros');
+  if(elC) elC.innerHTML=cobros.map(c=>`
     <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
       <div style="flex:1;min-width:0">
         <div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.marca}</div>
-        <div style="font-size:10px;color:var(--text3)">${c.pagado?'✅ Cobrado':'⏳ Pendiente'} · $${Math.round(c.ingreso).toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--text3)">${c.pagado?'✅ Cobrado':'⏳ Pendiente'} · ${fmtU(c.ingreso)}</div>
       </div>
       <div style="flex:0 0 80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
-        <div style="width:${Math.round(c.dias/maxDias*100)}%;height:100%;background:${c.dias>30?'var(--red)':c.dias>15?'var(--amber)':'var(--green)'}"></div>
+        <div style="width:${Math.round(c.dias/maxD*100)}%;height:100%;background:${c.dias>30?'var(--red)':c.dias>15?'var(--amber)':'var(--green)'}"></div>
       </div>
-      <div style="font-size:11px;font-weight:700;color:${c.dias>30?'var(--red)':c.dias>15?'var(--amber)':'var(--green)'};min-width:35px;text-align:right">${c.dias}d</div>
-    </div>`).join('')||'<div class="nodata" style="color:var(--text3);font-size:12px;padding:8px">Sin datos de cobro disponibles</div>';
+      <span style="font-size:11px;font-weight:700;color:${c.dias>30?'var(--red)':c.dias>15?'var(--amber)':'var(--green)'};min-width:30px;text-align:right">${c.dias}d</span>
+    </div>`).join('')||'<div class="nodata" style="color:var(--text3);font-size:12px;padding:8px">Sin datos de cobro</div>';
 
-  // ── TABLA DETALLADA ──────────────────────────────────
-  const sorted=[...datos].sort((a,b)=>{
-    const av=a[anSortCol]??'', bv=b[anSortCol]??'';
-    if(anSortCol==='PCT_COMPLETADO'){return anSortAsc?getParsedPct_(a)-getParsedPct_(b):getParsedPct_(b)-getParsedPct_(a);}
-    if(anSortCol==='INGRESO_FIJO_USD'||anSortCol==='DIAS_RETRASO'||anSortCol==='DIAS_COBRO'){
-      const an2=parseFloat(String(av).replace(/[$,]/g,''))||0;
-      const bn2=parseFloat(String(bv).replace(/[$,]/g,''))||0;
-      return anSortAsc?an2-bn2:bn2-an2;
-    }
-    const an2=parseFloat(av), bn2=parseFloat(bv);
-    if(!isNaN(an2)&&!isNaN(bn2)) return anSortAsc?an2-bn2:bn2-an2;
-    return anSortAsc?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));
-  });
-
-  const total2=sorted.length, pages=Math.max(1,Math.ceil(total2/AN_RPP));
-  if(anPg>pages) anPg=pages; if(anPg<1) anPg=1;
-  const slice=sorted.slice((anPg-1)*AN_RPP, anPg*AN_RPP);
-
-  // Mapa GMV por SKU desde ventas
-  const gmvPorSku={};
-  ventasData.forEach(v=>{
-    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','sku_scalify')||'').trim();
-    if(sku) gmvPorSku[sku]=(gmvPorSku[sku]||0)+vtGMV(v);
-  });
-
-  document.getElementById('an-count').textContent=total2;
-  document.getElementById('an-tbody').innerHTML=slice.map(c=>{
+  // Cartera pendiente
+  const pendientes=datos.filter(c=>{
     const sem=(c.SEMAFORO||'').toLowerCase();
-    const pctN=getParsedPct_(c);
-    const pctColor=pctN>=80?'var(--green)':pctN>=50?'var(--amber)':'var(--red)';
-    const ingreso=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
-    const dr=parsearDias(c.DIAS_RETRASO);
-    const dc=parsearDias(c.DIAS_COBRO);
+    return (sem==='finalizado'||sem==='completado')&&(c.PAGADO||'').toLowerCase()!=='si';
+  }).sort((a,b)=>{
+    const ia=parseFloat(String(a.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+    const ib=parseFloat(String(b.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+    return ib-ia;
+  });
+  const totalPend=pendientes.reduce((a,c)=>a+(parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0),0);
+  const elCar=document.getElementById('an-cartera');
+  if(elCar) elCar.innerHTML=(pendientes.length?`
+    <div style="font-size:14px;font-weight:700;color:var(--amber);margin-bottom:10px">${fmtU(totalPend)} pendiente de cobro</div>
+    ${pendientes.slice(0,8).map(c=>{
+      const ingr=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+      const dc=parsearDias(c.DIAS_COBRO);
+      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:11px;font-weight:600">${(c.MARCA_NOMBRE||'').slice(0,16)}</div>
+          <div style="font-size:10px;color:var(--text3)">${(c.PRODUCTO||'').slice(0,20)} · ${c.CELULA_ID||'—'}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:700;color:var(--amber)">${fmtU(ingr)}</div>
+          ${dc!==''?`<div style="font-size:10px;color:${typeof dc==='number'&&dc>30?'var(--red)':'var(--text3)'}">${dc}d de cobro</div>`:''}
+        </div>
+      </div>`;
+    }).join('')}`:
+    '<div style="color:var(--green);font-weight:600;padding:10px;font-size:12px">✅ Todo cobrado</div>');
+}
+
+// ── PESTAÑA DETALLE COMPLETO ─────────────────────────────────────────
+function renderAnDetalle_(datos, gmvPorSku, commPorSku, orden, fmtU){
+  // Ordenar
+  const sorted=[...datos].sort((a,b)=>{
+    const getIn=c=>parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+    switch(orden){
+      case 'ingreso_desc': return getIn(b)-getIn(a);
+      case 'gmv_desc':     return (gmvPorSku[(b.SKU||'').trim()]||0)-(gmvPorSku[(a.SKU||'').trim()]||0);
+      case 'comm_desc':    return (commPorSku[(b.SKU||'').trim()]||0)-(commPorSku[(a.SKU||'').trim()]||0);
+      case 'pct_desc':     return getParsedPct_(b)-getParsedPct_(a);
+      case 'retraso_desc': {
+        const ad=parsearDias(a.DIAS_RETRASO),bd=parsearDias(b.DIAS_RETRASO);
+        return (typeof bd==='number'?bd:0)-(typeof ad==='number'?ad:0);
+      }
+      case 'marca_az':    return (a.MARCA_NOMBRE||'').localeCompare(b.MARCA_NOMBRE||'');
+      default:            return 0;
+    }
+  });
+
+  const total=sorted.length, pages=Math.max(1,Math.ceil(total/AN_RPP));
+  if(anPg>pages) anPg=pages; if(anPg<1) anPg=1;
+  const slice=sorted.slice((anPg-1)*AN_RPP,anPg*AN_RPP);
+
+  const countEl=document.getElementById('an-count');
+  if(countEl) countEl.textContent=total;
+
+  const tbody=document.getElementById('an-tbody');
+  if(!tbody) return;
+  tbody.innerHTML=slice.map(c=>{
+    const sem=(c.SEMAFORO||'').toLowerCase();
+    const pct=getParsedPct_(c);
+    const pctColor=pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
+    const ingr=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+    const dr=parsearDias(c.DIAS_RETRASO), dc=parsearDias(c.DIAS_COBRO);
     const pagado=(c.PAGADO||'').toLowerCase()==='si';
-    const gmvSku=gmvPorSku[(c.SKU||'').trim()]||0;
-    const semLabels={en_curso:'🔵 En curso',completado:'✅ Complet.',vencido:'🔴 Vencido',urgente:'⚠ Urgente',finalizado:'📁 Finaliz.',pausado:'⏸ Pausado'};
+    const skuTrim=(c.SKU||'').trim();
+    const gmvSku=gmvPorSku[skuTrim]||0;
+    const commSku=commPorSku[skuTrim]||0;
+    const semL={en_curso:'🔵',completado:'✅',vencido:'🔴',urgente:'⚠️',finalizado:'📁',pausado:'⏸'}[sem]||'';
     return`<tr>
-      <td>${c.CELULA_ID||'—'}</td>
-      <td title="${c.MARCA_NOMBRE||''}">${(c.MARCA_NOMBRE||'—').slice(0,13)}</td>
-      <td title="${c.PRODUCTO||''}">${(c.PRODUCTO||'—').slice(0,16)}</td>
-      <td style="text-align:center">${c.CICLO_NUM||1}</td>
+      <td style="font-size:11px">${c.CELULA_ID||'—'}</td>
+      <td style="font-weight:600;font-size:11px" title="${c.MARCA_NOMBRE||''}">${(c.MARCA_NOMBRE||'—').slice(0,13)}</td>
+      <td style="font-size:11px" title="${c.PRODUCTO||''}">${(c.PRODUCTO||'—').slice(0,16)}</td>
+      <td style="text-align:center"><span style="font-size:10px;padding:1px 6px;border-radius:10px;background:var(--purple-bg);color:var(--purple)">${c.CICLO_NUM||1}</span></td>
       <td>
         <div style="display:flex;align-items:center;gap:4px">
-          <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:${Math.min(100,pctN)}%;height:100%;background:${pctColor}"></div></div>
-          <span style="font-size:10px;font-weight:700;color:${pctColor};min-width:28px">${Math.round(pctN)}%</span>
+          <div style="flex:1;height:5px;background:var(--border);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${pctColor}"></div></div>
+          <span style="font-size:10px;color:${pctColor};font-weight:700;min-width:28px">${pct}%</span>
         </div>
       </td>
       <td style="text-align:center;font-size:11px">${c.POSTEADOS_CICLO||0}/${c.VIDEOS_MES||0}</td>
-      <td><span style="font-size:10px">${semLabels[sem]||sem||'—'}</span></td>
+      <td style="font-size:10px">${semL} ${sem||'—'}</td>
       <td style="text-align:center;font-size:11px;color:${typeof dr==='number'&&dr>0?'var(--amber)':typeof dr==='number'&&dr<0?'var(--red)':'var(--text3)'}">${typeof dr==='number'?(dr>0?'+':'')+dr+'d':'—'}</td>
       <td style="text-align:center;font-size:11px;color:${typeof dc==='number'&&dc>30?'var(--red)':typeof dc==='number'&&dc>15?'var(--amber)':'var(--text3)'}">${typeof dc==='number'?dc+'d':'—'}</td>
-      <td style="text-align:right;font-size:11px;font-weight:600;color:var(--teal)">${ingreso>0?'$'+Math.round(ingreso).toLocaleString():'—'}</td>
-      <td style="text-align:right;font-size:11px;font-weight:700;color:var(--purple)">${gmvSku>0?'$'+Math.round(gmvSku).toLocaleString():'—'}</td>
+      <td style="text-align:right;font-size:11px;font-weight:600;color:var(--teal)">${ingr>0?fmtU(ingr):'—'}</td>
+      <td style="text-align:right;font-size:11px;font-weight:700;color:var(--purple)">${gmvSku>0?fmtU(gmvSku):'—'}</td>
+      <td style="text-align:right;font-size:11px;color:var(--amber)">${commSku>0?fmtU(commSku):'—'}</td>
+      <td style="text-align:center">${pagado?'<span style="color:var(--green)">✅</span>':'<span style="color:var(--amber)">⏳</span>'}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="11" class="nodata">Sin datos</td></tr>';
+  }).join('')||'<tr><td colspan="13" class="nodata">Sin datos</td></tr>';
 
-  document.getElementById('an-pginfo').textContent=`Pág. ${anPg} de ${pages}`;
-  document.getElementById('an-pgprev').disabled=anPg<=1;
-  document.getElementById('an-pgnext').disabled=anPg>=pages;
+  const pgInfo=document.getElementById('an-pginfo');
+  if(pgInfo) pgInfo.textContent=`Pág. ${anPg} de ${pages}`;
+  const prev=document.getElementById('an-pgprev'), next=document.getElementById('an-pgnext');
+  if(prev) prev.disabled=anPg<=1;
+  if(next) next.disabled=anPg>=pages;
 }
 
 function anExportCSV(){
-  const selMarca=(document.getElementById('an-sel-marca').value||'').trim();
-  const selProd=(document.getElementById('an-sel-producto').value||'').trim();
+  const selMarca=(document.getElementById('an-sel-marca')?.value||'').trim();
+  const selProd=(document.getElementById('an-sel-producto')?.value||'').trim();
+  const vtsFiltradas=anGetVentasFiltradas();
+  const gmvPorSku={}, commPorSku={};
+  vtsFiltradas.forEach(v=>{
+    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    if(sku){gmvPorSku[sku]=(gmvPorSku[sku]||0)+vtGMV(v);commPorSku[sku]=(commPorSku[sku]||0)+vtComm(v);}
+  });
   let datos=contratosData.filter(c=>{
     const sem=(c.SEMAFORO||'').toLowerCase();
     if(filtroAnalisis!=='todos'&&sem!==filtroAnalisis) return false;
@@ -2627,18 +2901,16 @@ function anExportCSV(){
     if(selProd&&(c.PRODUCTO||'').trim()!==selProd) return false;
     return true;
   });
-  const gmvPorSku={};
-  ventasData.forEach(v=>{const sku=(vg(v,'SKU_Scalify','Sku_Scalify','sku_scalify')||'').trim();if(sku)gmvPorSku[sku]=(gmvPorSku[sku]||0)+vtGMV(v);});
-  const hdrs=['Celula','Marca','Producto','Ciclo','%_Completado','Videos_Comprometidos','Videos_Posteados','Estado','Dias_Retraso','Dias_Cobro','Ingreso_USD','Pagado','GMV_Ventas'];
+  const hdrs=['Celula','Marca','Producto','Ciclo','%_Completado','Videos','Posteados','Estado','Retraso_d','Dias_Cobro','Ingreso_USD','Pagado','GMV_Ventas','Comision_Ventas'];
   const rows=datos.map(c=>{
-    const ingreso=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
-    const gmv=gmvPorSku[(c.SKU||'').trim()]||0;
-    return[c.CELULA_ID||'',c.MARCA_NOMBRE||'',c.PRODUCTO||'',c.CICLO_NUM||1,Math.round(getParsedPct_(c)),c.VIDEOS_MES||0,c.POSTEADOS_CICLO||0,c.SEMAFORO||'',parsearDias(c.DIAS_RETRASO)||'',parsearDias(c.DIAS_COBRO)||'',ingreso.toFixed(2),(c.PAGADO||''),gmv.toFixed(2)].map(x=>`"${String(x||'').replace(/"/g,'""')}"`).join(',');
+    const skuT=(c.SKU||'').trim();
+    const ingr=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+    return[c.CELULA_ID||'',c.MARCA_NOMBRE||'',c.PRODUCTO||'',c.CICLO_NUM||1,getParsedPct_(c),c.VIDEOS_MES||0,c.POSTEADOS_CICLO||0,c.SEMAFORO||'',parsearDias(c.DIAS_RETRASO)||'',parsearDias(c.DIAS_COBRO)||'',ingr.toFixed(2),c.PAGADO||'',(gmvPorSku[skuT]||0).toFixed(2),(commPorSku[skuT]||0).toFixed(2)].map(x=>`"${String(x||'').replace(/"/g,'""')}"`).join(',');
   });
-  const csv='﻿'+[hdrs.join(','),...rows].join('\n');
+  const csv='\ufeff'+[hdrs.join(','),...rows].join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-  a.download=`analisis_contratos_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  a.download=`analisis_${new Date().toISOString().slice(0,10)}.csv`;a.click();
 }
 </script>
 </body>
