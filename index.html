@@ -1877,7 +1877,7 @@ function parseFechaVenta_(v){
 }
 
 
-const vtGMV    = v=>vtGMVval(v);
+const vtGMV    = v=>parseFloat(String(vg(v,'GMV','gmv','Revenue')||'0').replace(/[$,\s]/g,''))||0;
 const vtUnits  = v=>parseInt(String(vg(v,'Items_Sold','Items Sold','Qty')||'0').replace(/[^\d]/g,''))||0;
 // ── Helpers de comisiones reales del CONSOLIDADO_PUB ──────────────────────
 // Comisión orgánica: Standard commission (real) o Est. standard commission
