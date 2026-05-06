@@ -821,6 +821,7 @@ tr:hover td{background:var(--blue-light)}
           <button class="spill" data-ancelula="Celula 5" onclick="anFiltrarCelula('Celula 5',this)">C5</button>
           <select id="an-sel-marca" onchange="anOnMarcaCambia()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);margin-left:8px;min-width:120px"><option value="">Todas las marcas</option></select>
           <select id="an-sel-producto" onchange="anRender()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:130px"><option value="">Todos los productos</option></select>
+          <select id="an-sel-ciclo" onchange="anFiltrarCiclo()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:110px"><option value="todos">Todos los ciclos</option></select>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
           <span class="strip-lbl">Período ventas:</span>
@@ -847,6 +848,7 @@ tr:hover td{background:var(--blue-light)}
         <button class="an-tab-btn" data-antab="gmv"    onclick="anCambiarTab('gmv',this)">💰 GMV &amp; Comisiones</button>
         <button class="an-tab-btn" data-antab="cobros" onclick="anCambiarTab('cobros',this)">⏱ Cobros</button>
         <button class="an-tab-btn" data-antab="detalle" onclick="anCambiarTab('detalle',this)">📋 Detalle</button>
+        <button class="an-tab-btn" data-antab="orders" onclick="anCambiarTab('orders',this)">📦 Orders ID</button>
       </div>
 
       <!-- ══ PERFORMANCE ══ -->
@@ -909,6 +911,7 @@ tr:hover td{background:var(--blue-light)}
             <th>% Vid</th><th style="text-align:center">Post.</th><th>Estado</th>
             <th style="text-align:right">Ingreso</th>
             <th style="text-align:right">GMV org.</th><th style="text-align:right">GMV ads</th>
+            <th style="text-align:right;font-weight:700;color:var(--purple)">GMV Total</th>
             <th style="text-align:right">Com. org.</th><th style="text-align:right">Com. ads</th>
             <th style="text-align:right">%</th><th style="text-align:center">✓</th>
           </tr></thead><tbody id="an-tbody"></tbody></table></div>
@@ -919,6 +922,51 @@ tr:hover td{background:var(--blue-light)}
           </div>
         </div>
       </div>
+      <!-- ══ ORDERS ID ══ -->
+      <div id="an-tab-orders" class="hidden">
+        <div class="tpanel">
+          <div class="thdr">
+            <span class="ttitle">Orders ID <span class="cbadge" id="an-orders-count">0</span></span>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <select id="an-orders-marca" onchange="anRenderOrders_()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:120px"><option value="">Todas las marcas</option></select>
+              <select id="an-orders-celula" onchange="anRenderOrders_()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:110px"><option value="">Todas las células</option></select>
+              <select id="an-orders-tipo" onchange="anRenderOrders_()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+                <option value="">Todos los tipos</option>
+                <option value="organic">Orgánico</option>
+                <option value="ads">Shop Ads</option>
+              </select>
+              <select id="an-orders-rpp" onchange="anOrdersPg=1;anRenderOrders_()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+                <option value="50" selected>50 filas</option>
+                <option value="100">100 filas</option>
+                <option value="250">250 filas</option>
+              </select>
+              <button class="btn btn-sm" onclick="anExportOrders_()">↓ CSV Orders</button>
+            </div>
+          </div>
+          <div class="twrap">
+            <table>
+              <thead><tr>
+                <th style="min-width:140px">Order ID</th>
+                <th style="min-width:80px">Fecha</th>
+                <th style="min-width:90px">Marca</th>
+                <th style="min-width:120px">Producto</th>
+                <th style="min-width:80px">SKU</th>
+                <th style="min-width:70px">Célula</th>
+                <th style="text-align:right;min-width:60px">GMV</th>
+                <th style="min-width:80px">Tipo</th>
+                <th style="text-align:right;min-width:70px">Comisión</th>
+              </tr></thead>
+              <tbody id="an-orders-tbody"></tbody>
+            </table>
+          </div>
+          <div class="pg">
+            <button class="pg-btn" id="an-orders-prev" onclick="anOrdersPg--;anRenderOrders_()">← Ant.</button>
+            <span id="an-orders-pginfo"></span>
+            <button class="pg-btn" id="an-orders-next" onclick="anOrdersPg++;anRenderOrders_()">Sig. →</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div><!-- /tab-analisis -->
 
@@ -2486,8 +2534,9 @@ function vtExportarCSV(){
 
 // ═══════════════════════════════════════════════════════
 // ══ TAB ANÁLISIS v4 — GMV orgánico/ads, comisiones, cobros ══════════════
-let anEstado='todos', anCelula='todas', anPeriodo='todo';
+let anEstado='todos', anCelula='todas', anPeriodo='todo', anCiclo='todos';
 let anTabActual='performance', anPg=1, anSortCol='ingreso_desc';
+let anOrdersPg=1;
 const AN_RPP=20;
 
 // ── Helpers ventas ────────────────────────────────────────────────
@@ -2556,11 +2605,15 @@ function anOnMarcaCambia(){
   if(selP) selP.innerHTML='<option value="">Todos los productos</option>'+prods.map(p=>`<option value="${p}"${p===cur?' selected':''}>${p}</option>`).join('');
   anRender();
 }
+function anFiltrarCiclo(){
+  anCiclo=document.getElementById('an-sel-ciclo')?.value||'todos';
+  anPg=1; anRender();
+}
 function anCambiarTab(tab,btn){
   anTabActual=tab;
   document.querySelectorAll('.an-tab-btn').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  ['performance','gmv','cobros','detalle'].forEach(t=>{
+  ['performance','gmv','cobros','detalle','orders'].forEach(t=>{
     const el=document.getElementById('an-tab-'+t);
     if(el) el.classList[t===tab?'remove':'add']('hidden');
   });
@@ -2606,6 +2659,7 @@ function anGetCtrs(){
     if(anCelula!=='todas'&&(c.CELULA_ID||'').trim()!==anCelula) return false;
     if(selM&&(c.MARCA_NOMBRE||'').trim()!==selM) return false;
     if(selP&&(c.PRODUCTO||'').trim()!==selP) return false;
+    if(anCiclo!=='todos'&&String(c.CICLO_NUM||'1')!==anCiclo) return false;
     return true;
   });
 }
@@ -2686,6 +2740,7 @@ function anRender(){
   if(anTabActual==='gmv')         anRenderGMV_(vts,fmtU,fmtUd);
   if(anTabActual==='cobros')      anRenderCobros_(ctrs,fmtU);
   if(anTabActual==='detalle')     anRenderDetalle_(ctrs,vts,fmtU);
+  if(anTabActual==='orders')      anRenderOrders_();
 }
 
 // ── PERFORMANCE ───────────────────────────────────────────────────
@@ -2935,31 +2990,58 @@ function anRenderCobros_(ctrs,fmtU){
 // ── DETALLE COMPLETO ──────────────────────────────────────────────
 function anRenderDetalle_(ctrs,vts,fmtU){
   const orden=document.getElementById('an-orden')?.value||'ingreso_desc';
-  // GMV por SKU de ventas filtradas
-  const gmvOrgSku={}, gmvAdsSku={}, commOrgSku={}, commAdsSku={};
+
+  // GMV por célula+SKU (clave: "CELULA_ID||SKU")
+  const gmvOrgKey={}, gmvAdsKey={}, commOrgKey={}, commAdsKey={};
   vts.forEach(v=>{
     const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
     if(!sku) return;
-    gmvOrgSku[sku]=(gmvOrgSku[sku]||0)+vtGMVOrg(v);
-    gmvAdsSku[sku]=(gmvAdsSku[sku]||0)+vtGMVAds(v);
-    commOrgSku[sku]=(commOrgSku[sku]||0)+vtCommOrgV(v);
-    commAdsSku[sku]=(commAdsSku[sku]||0)+vtCommAdsV(v);
+    const cel=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
+    const k=cel+'||'+sku;
+    gmvOrgKey[k]=(gmvOrgKey[k]||0)+vtGMVOrg(v);
+    gmvAdsKey[k]=(gmvAdsKey[k]||0)+vtGMVAds(v);
+    commOrgKey[k]=(commOrgKey[k]||0)+vtCommOrgV(v);
+    commAdsKey[k]=(commAdsKey[k]||0)+vtCommAdsV(v);
   });
-  // Fallback: si no hay Order_Type, usar GMV total en orgánico
+  // Fallback por solo SKU cuando la ventas no tiene celula
+  const fbOrg={}, fbAds={}, fbCO={}, fbCA={};
   vts.forEach(v=>{
     const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
     if(!sku) return;
-    if((gmvOrgSku[sku]||0)===0&&(gmvAdsSku[sku]||0)===0) gmvOrgSku[sku]=(gmvOrgSku[sku]||0)+vtGMV(v);
+    fbOrg[sku]=(fbOrg[sku]||0)+vtGMVOrg(v);
+    fbAds[sku]=(fbAds[sku]||0)+vtGMVAds(v);
+    fbCO[sku]=(fbCO[sku]||0)+vtCommOrgV(v);
+    fbCA[sku]=(fbCA[sku]||0)+vtCommAdsV(v);
   });
+  // Fallback Order_Type: si no hay distinción org/ads, poner GMV total en org
+  vts.forEach(v=>{
+    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    const cel=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
+    if(!sku) return;
+    const k=cel+'||'+sku;
+    if((gmvOrgKey[k]||0)===0&&(gmvAdsKey[k]||0)===0) gmvOrgKey[k]=(gmvOrgKey[k]||0)+vtGMV(v);
+    if((fbOrg[sku]||0)===0&&(fbAds[sku]||0)===0) fbOrg[sku]=(fbOrg[sku]||0)+vtGMV(v);
+  });
+  // Determinar si los datos tienen información de célula
+  const hasCelInfo=Object.keys(gmvOrgKey).some(k=>k.split('||')[0]!=='');
 
   const getIn=c=>parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+  const getGMV=c=>{
+    const sku=(c.SKU||'').trim(), cel=(c.CELULA_ID||'').trim();
+    const k=cel+'||'+sku;
+    if(hasCelInfo){
+      return {gOrg:gmvOrgKey[k]||0, gAds:gmvAdsKey[k]||0, cOrg:commOrgKey[k]||0, cAds:commAdsKey[k]||0};
+    }
+    return {gOrg:fbOrg[sku]||0, gAds:fbAds[sku]||0, cOrg:fbCO[sku]||0, cAds:fbCA[sku]||0};
+  };
+
   const sorted=[...ctrs].sort((a,b)=>{
-    const as=(a.SKU||'').trim(), bs=(b.SKU||'').trim();
-    const ag=(gmvOrgSku[as]||0)+(gmvAdsSku[as]||0), bg=(gmvOrgSku[bs]||0)+(gmvAdsSku[bs]||0);
+    const ag_=getGMV(a), bg_=getGMV(b);
+    const ag=(ag_.gOrg||0)+(ag_.gAds||0), bg=(bg_.gOrg||0)+(bg_.gAds||0);
     switch(orden){
       case 'ingreso_desc': return getIn(b)-getIn(a);
       case 'gmv_desc':     return bg-ag;
-      case 'comm_desc':    return ((commOrgSku[bs]||0)+(commAdsSku[bs]||0))-((commOrgSku[as]||0)+(commAdsSku[as]||0));
+      case 'comm_desc':    return ((bg_.cOrg||0)+(bg_.cAds||0))-((ag_.cOrg||0)+(ag_.cAds||0));
       case 'pct_desc':     return anPct(b)-anPct(a);
       case 'retraso_desc': {const ap=parseFloat(a.DIAS_RETRASO||0),bp=parseFloat(b.DIAS_RETRASO||0);return bp-ap;}
       case 'marca_az':     return (a.MARCA_NOMBRE||'').localeCompare(b.MARCA_NOMBRE||'');
@@ -2978,9 +3060,7 @@ function anRenderDetalle_(ctrs,vts,fmtU){
     const sem=(c.SEMAFORO||'').toLowerCase();
     const sL={en_curso:'🔵',completado:'✅',vencido:'🔴',urgente:'⚠️',finalizado:'📁'}[sem]||'';
     const ing=getIn(c), pagado=(c.PAGADO||'').toLowerCase()==='si';
-    const sku=(c.SKU||'').trim();
-    const gOrg=gmvOrgSku[sku]||0, gAds=gmvAdsSku[sku]||0;
-    const cOrg=commOrgSku[sku]||0, cAds=commAdsSku[sku]||0;
+    const {gOrg,gAds,cOrg,cAds}=getGMV(c);
     const gTot=gOrg+gAds, cTot=cOrg+cAds;
     const pctC=gTot>0?((cTot/gTot)*100).toFixed(1):0;
     return`<tr>
@@ -2999,12 +3079,13 @@ function anRenderDetalle_(ctrs,vts,fmtU){
       <td style="text-align:right;font-size:11px;font-weight:600;color:var(--teal)">${ing>0?'$'+ing.toLocaleString('en-US',{maximumFractionDigits:0}):'—'}</td>
       <td style="text-align:right;font-size:11px;color:var(--teal)">${gOrg>0?'$'+Math.round(gOrg).toLocaleString():'—'}</td>
       <td style="text-align:right;font-size:11px;color:var(--blue)">${gAds>0?'$'+Math.round(gAds).toLocaleString():'—'}</td>
+      <td style="text-align:right;font-size:11px;font-weight:700;color:var(--purple)">${gTot>0?'$'+Math.round(gTot).toLocaleString():'—'}</td>
       <td style="text-align:right;font-size:11px;color:var(--green)">${cOrg>0?'$'+Math.round(cOrg).toLocaleString():'—'}</td>
       <td style="text-align:right;font-size:11px;color:var(--blue)">${cAds>0?'$'+Math.round(cAds).toLocaleString():'—'}</td>
       <td style="text-align:right;font-size:10px;font-weight:700;color:${+pctC>15?'var(--green)':+pctC>8?'var(--amber)':'var(--text3)'}">${pctC}%</td>
       <td style="text-align:center">${pagado?'<span style="color:var(--green)">✅</span>':'<span style="color:var(--amber)">⏳</span>'}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="14" class="nodata">Sin datos</td></tr>';
+  }).join('')||'<tr><td colspan="15" class="nodata">Sin datos</td></tr>';
 
   const pi=document.getElementById('an-pginfo'); if(pi) pi.textContent=`Pág. ${anPg} de ${pages}`;
   const prev=document.getElementById('an-pgprev'),next=document.getElementById('an-pgnext');
@@ -3014,21 +3095,42 @@ function anRenderDetalle_(ctrs,vts,fmtU){
 // ── EXPORT CSV ───────────────────────────────────────────────────
 function anExportCSV(){
   const ctrs=anGetCtrs(), vts=anGetVentas(ctrs);
-  const gmvOrgSku={},gmvAdsSku={},commOrgSku={},commAdsSku={};
+  const gmvOrgKey={},gmvAdsKey={},commOrgKey={},commAdsKey={};
   vts.forEach(v=>{
     const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
     if(!sku) return;
-    gmvOrgSku[sku]=(gmvOrgSku[sku]||0)+vtGMVOrg(v);
-    gmvAdsSku[sku]=(gmvAdsSku[sku]||0)+vtGMVAds(v);
-    commOrgSku[sku]=(commOrgSku[sku]||0)+vtCommOrgV(v);
-    commAdsSku[sku]=(commAdsSku[sku]||0)+vtCommAdsV(v);
+    const cel=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
+    const k=cel+'||'+sku;
+    gmvOrgKey[k]=(gmvOrgKey[k]||0)+vtGMVOrg(v);
+    gmvAdsKey[k]=(gmvAdsKey[k]||0)+vtGMVAds(v);
+    commOrgKey[k]=(commOrgKey[k]||0)+vtCommOrgV(v);
+    commAdsKey[k]=(commAdsKey[k]||0)+vtCommAdsV(v);
   });
+  const fbOrg={},fbAds={},fbCO={},fbCA2={};
+  vts.forEach(v=>{
+    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    if(!sku) return;
+    fbOrg[sku]=(fbOrg[sku]||0)+vtGMVOrg(v); fbAds[sku]=(fbAds[sku]||0)+vtGMVAds(v);
+    fbCO[sku]=(fbCO[sku]||0)+vtCommOrgV(v); fbCA2[sku]=(fbCA2[sku]||0)+vtCommAdsV(v);
+  });
+  vts.forEach(v=>{
+    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    const cel=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
+    if(!sku) return;
+    const k=cel+'||'+sku;
+    if((gmvOrgKey[k]||0)===0&&(gmvAdsKey[k]||0)===0) gmvOrgKey[k]=(gmvOrgKey[k]||0)+vtGMV(v);
+    if((fbOrg[sku]||0)===0&&(fbAds[sku]||0)===0) fbOrg[sku]=(fbOrg[sku]||0)+vtGMV(v);
+  });
+  const hasCelInfoExp=Object.keys(gmvOrgKey).some(k=>k.split('||')[0]!=='');
   const hdrs=['Celula','Marca','Producto','Ciclo','%_Completado','Videos','Posteados','Estado','Ingreso_USD','Pagado','GMV_Organico','GMV_Ads','GMV_Total','Comm_Organica','Comm_Ads','Comm_Total','Pct_Comision'];
   const rows=ctrs.map(c=>{
-    const sku=(c.SKU||'').trim();
+    const sku=(c.SKU||'').trim(), cel=(c.CELULA_ID||'').trim();
+    const k=cel+'||'+sku;
     const ing=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
-    const gO=gmvOrgSku[sku]||0,gA=gmvAdsSku[sku]||0;
-    const cO=commOrgSku[sku]||0,cA=commAdsSku[sku]||0;
+    const gO=hasCelInfoExp?(gmvOrgKey[k]||0):(fbOrg[sku]||0);
+    const gA=hasCelInfoExp?(gmvAdsKey[k]||0):(fbAds[sku]||0);
+    const cO=hasCelInfoExp?(commOrgKey[k]||0):(fbCO[sku]||0);
+    const cA=hasCelInfoExp?(commAdsKey[k]||0):(fbCA2[sku]||0);
     const gT=gO+gA,cT=cO+cA;
     return[c.CELULA_ID||'',c.MARCA_NOMBRE||'',c.PRODUCTO||'',c.CICLO_NUM||1,anPct(c),c.VIDEOS_MES||0,c.POSTEADOS_CICLO||0,c.SEMAFORO||'',ing.toFixed(2),c.PAGADO||'',gO.toFixed(2),gA.toFixed(2),gT.toFixed(2),cO.toFixed(2),cA.toFixed(2),cT.toFixed(2),(gT>0?(cT/gT*100).toFixed(1):0)+'%'].map(x=>`"${String(x||'').replace(/"/g,'""')}"`).join(',');
   });
@@ -3038,6 +3140,96 @@ function anExportCSV(){
   a.download=`analisis_${new Date().toISOString().slice(0,10)}.csv`;a.click();
 }
 
+// ── ORDERS ID ────────────────────────────────────────────────────
+function anGetOrderId(v){
+  return vg(v,'Order_id','Order_ID','ORDER_ID','Order ID','order_id','OrderId','ORDERID')||'';
+}
+function anRenderOrders_(){
+  if(!ventasData.length) return;
+  const ctrs=anGetCtrs();
+  const skus=new Set(ctrs.map(c=>(c.SKU||'').trim()).filter(Boolean));
+  const rango=anGetRango();
+  const fMarca=(document.getElementById('an-orders-marca')?.value||'').toLowerCase();
+  const fCelula=(document.getElementById('an-orders-celula')?.value||'').toLowerCase();
+  const fTipo=(document.getElementById('an-orders-tipo')?.value||'').toLowerCase();
+  const rpp=parseInt(document.getElementById('an-orders-rpp')?.value||50);
+  const selMO=document.getElementById('an-orders-marca');
+  if(selMO&&selMO.children.length<=1){
+    const marcas=[...new Set(ventasData.map(v=>vtMarca(v)).filter(Boolean))].sort();
+    selMO.innerHTML='<option value="">Todas las marcas</option>'+marcas.map(m=>`<option value="${m}">${m}</option>`).join('');
+  }
+  const selCO=document.getElementById('an-orders-celula');
+  if(selCO&&selCO.children.length<=1){
+    const cels=[...new Set(ventasData.map(v=>(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim()).filter(Boolean))].sort();
+    if(cels.length) selCO.innerHTML='<option value="">Todas las células</option>'+cels.map(c=>`<option value="${c.toLowerCase()}">${c}</option>`).join('');
+  }
+  const rows=ventasData.filter(v=>{
+    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    if(skus.size>0&&!skus.has(sku)) return false;
+    if(rango){const f=parseFechaVenta_(v);if(!f||f<rango[0]||f>rango[1]) return false;}
+    if(fMarca&&vtMarca(v).toLowerCase()!==fMarca) return false;
+    if(fCelula){const cv=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').toLowerCase();if(cv!==fCelula) return false;}
+    if(fTipo==='organic'&&!vtIsOrg(v)) return false;
+    if(fTipo==='ads'&&!vtIsAds(v)) return false;
+    return true;
+  });
+  const total=rows.length, pages=Math.max(1,Math.ceil(total/rpp));
+  if(anOrdersPg>pages) anOrdersPg=pages;
+  if(anOrdersPg<1) anOrdersPg=1;
+  const slice=rows.slice((anOrdersPg-1)*rpp, anOrdersPg*rpp);
+  const cntEl=document.getElementById('an-orders-count'); if(cntEl) cntEl.textContent=total.toLocaleString();
+  const tbody=document.getElementById('an-orders-tbody'); if(!tbody) return;
+  tbody.innerHTML=slice.map(v=>{
+    const oid=anGetOrderId(v)||'—';
+    const fecha=parseFechaVenta_(v);
+    const dd=fecha?fecha.getDate().toString().padStart(2,'0'):'—';
+    const mm=fecha?(fecha.getMonth()+1).toString().padStart(2,'0'):'';
+    const yy=fecha?fecha.getFullYear():'';
+    const fechaStr=fecha?`${dd}/${mm}/${yy}`:'—';
+    const marca=vtMarca(v)||'—';
+    const cel=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'—');
+    const gmv=vtGMV(v);
+    const tipoRaw=vtOrderType(v)||'';
+    const tipoLabel=vtIsOrg(v)?'<span style="color:var(--teal);font-weight:600">Orgánico</span>':vtIsAds(v)?'<span style="color:var(--blue);font-weight:600">Shop Ads</span>':`<span style="color:var(--text3)">${tipoRaw||'—'}</span>`;
+    const comm=vtComm(v);
+    return`<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--text2);user-select:all" title="${oid}">${oid}</td>
+      <td style="font-size:11px">${fechaStr}</td>
+      <td style="font-size:11px;font-weight:600" title="${marca}">${marca.slice(0,14)}</td>
+      <td style="font-size:11px" title="${vtProd(v)||''}">${(vtProd(v)||'—').slice(0,24)}</td>
+      <td style="font-size:10px;color:var(--text3)">${vtSKU(v)||'—'}</td>
+      <td style="font-size:11px">${cel}</td>
+      <td style="text-align:right;font-weight:700;color:var(--teal);font-size:11px">${gmv>0?'$'+gmv.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
+      <td style="font-size:11px">${tipoLabel}</td>
+      <td style="text-align:right;font-size:11px;color:var(--purple)">${comm>0?'$'+comm.toFixed(2):'—'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="9" class="nodata">Sin órdenes. Verificá que las ventas tengan Order_ID y SKU_Scalify.</td></tr>';
+  const pi=document.getElementById('an-orders-pginfo'); if(pi) pi.textContent=`Pág. ${anOrdersPg} de ${pages}`;
+  const prev=document.getElementById('an-orders-prev'),next=document.getElementById('an-orders-next');
+  if(prev) prev.disabled=anOrdersPg<=1; if(next) next.disabled=anOrdersPg>=pages;
+}
+function anExportOrders_(){
+  const ctrs=anGetCtrs();
+  const skus=new Set(ctrs.map(c=>(c.SKU||'').trim()).filter(Boolean));
+  const rango=anGetRango();
+  const rows=ventasData.filter(v=>{
+    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    if(skus.size>0&&!skus.has(sku)) return false;
+    if(rango){const f=parseFechaVenta_(v);if(!f||f<rango[0]||f>rango[1]) return false;}
+    return true;
+  });
+  const hdrs=['Order_ID','Fecha','Marca','Producto','SKU_Scalify','Celula','GMV','Tipo_Orden','Comision_Organica','Comision_Ads','Comision_Total'];
+  const data=rows.map(v=>{
+    const fecha=parseFechaVenta_(v);
+    const fechaStr=fecha?`${fecha.getFullYear()}-${(fecha.getMonth()+1).toString().padStart(2,'0')}-${fecha.getDate().toString().padStart(2,'0')}`:'';
+    return[anGetOrderId(v),fechaStr,vtMarca(v),vtProd(v),vtSKU(v),vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'',vtGMV(v).toFixed(2),vtOrderType(v),vtCommOrgV(v).toFixed(2),vtCommAdsV(v).toFixed(2),vtComm(v).toFixed(2)].map(x=>`"${String(x||'').replace(/"/g,'""')}"`).join(',');
+  });
+  const csvData='﻿'+[hdrs.join(','),...data].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csvData],{type:'text/csv;charset=utf-8'}));
+  a.download=`orders_scalify_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
 // ── Init análisis ─────────────────────────────────────────────────
 function mostrarTabAnalisis(){
   if(!contratosData.length) return;
@@ -3045,10 +3237,13 @@ function mostrarTabAnalisis(){
   document.getElementById('badge-an').textContent=contratosData.length;
   document.getElementById('an-no-data').classList.add('hidden');
   document.getElementById('an-content').classList.remove('hidden');
-  // Poblar selects de marca
+  // Poblar selects de marca y ciclo
   const marcas=[...new Set(contratosData.map(c=>(c.MARCA_NOMBRE||'').trim()).filter(Boolean))].sort();
   const selM=document.getElementById('an-sel-marca');
   if(selM) selM.innerHTML='<option value="">Todas las marcas</option>'+marcas.map(m=>`<option value="${m}">${m}</option>`).join('');
+  const ciclos=[...new Set(contratosData.map(c=>String(c.CICLO_NUM||'1')).filter(Boolean))].sort((a,b)=>+a-+b);
+  const selCiclo=document.getElementById('an-sel-ciclo');
+  if(selCiclo) selCiclo.innerHTML='<option value="todos">Todos los ciclos</option>'+ciclos.map(n=>`<option value="${n}">Ciclo ${n}</option>`).join('');
   anOnMarcaCambia();
   anRender();
 }
