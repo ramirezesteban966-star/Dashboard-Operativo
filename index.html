@@ -3181,7 +3181,7 @@ function anRenderPosts_(){
   if(!allData.length){el.innerHTML='<div class="alert alert-warn">Cargá los datos de ClickUp para ver los links de los videos.</div>';return;}
 
   el.innerHTML=ctrs.map((c,idx)=>{
-    const sku=(c.SKU||'').trim(), cel=(c.CELULA_ID||'').trim();
+    const sku=(c.SKU||'').trim(), cel=normCelPosts((c.CELULA_ID||'').trim());
     const videosMes=parseInt(c.VIDEOS_MES||0), cicloOffset=parseInt(c.CICLO_OFFSET||0);
     const sem=(c.SEMAFORO||'').toLowerCase();
     const semCol={en_curso:'var(--blue)',completado:'var(--green)',finalizado:'#94A3B8',vencido:'var(--red)',urgente:'var(--amber)'}[sem]||'var(--text3)';
