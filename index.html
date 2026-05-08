@@ -1843,7 +1843,7 @@ function cruzarContratosConClickUp(contratos){
   Object.keys(conteoBySKUCel).forEach(k=>conteoBySKUCel[k].sort((a,b)=>a.fecha-b.fecha));
   return contratos.map(c=>{
     const sku=(c.SKU||'').trim();
-    const cel=(c.CELULA_ID||'').trim();
+    const cel=normCelCruce((c.CELULA_ID||'').trim());
     if(!sku||!cel) return c;
     const clave=cel+'||'+sku;
     const videosMes=parseInt(String(c.VIDEOS_MES||'0'))||0;
@@ -3235,7 +3235,7 @@ function anRenderPosts_(){
 
 async function copiarLinks(idx){
   const c=window.__anCtrsForPosts?.[idx]; if(!c) return;
-  const sku=(c.SKU||'').trim(), cel=(c.CELULA_ID||'').trim();
+  const sku=(c.SKU||'').trim(), cel=normCelPosts((c.CELULA_ID||'').trim());
   const videosMes=parseInt(c.VIDEOS_MES||0), offset=parseInt(c.CICLO_OFFSET||0);
   const tareas=allData.filter(r=>{
     const tSku=(r.SKU_PRODUCTO||'').trim(), tCel=normCelPosts((r.CELULA||'').trim());
@@ -3254,7 +3254,7 @@ async function copiarLinks(idx){
 
 function generarInforme_(idx){
   const c=window.__anCtrsForPosts?.[idx]; if(!c) return;
-  const sku=(c.SKU||'').trim(), cel=(c.CELULA_ID||'').trim();
+  const sku=(c.SKU||'').trim(), cel=normCelPosts((c.CELULA_ID||'').trim());
   const videosMes=parseInt(c.VIDEOS_MES||0), offset=parseInt(c.CICLO_OFFSET||0);
   const cicloNum=c.CICLO_NUM||1;
   const marca=c.MARCA_NOMBRE||'—', producto=c.PRODUCTO||'—';
@@ -3301,11 +3301,13 @@ function generarInforme_(idx){
 
   const videosHtml=videosCiclo.map((r,i)=>{
     const pl=getPostLink(r), fecha=r.FECHA_PUBLICADO||r._fd||'';
+    const cuenta=r.CUENTA||'—';
     return`<tr style="border-bottom:1px solid #F1F5F9">
       <td style="padding:9px 8px;text-align:center;font-size:11px;color:#94A3B8;width:36px">${offset+i+1}</td>
-      <td style="padding:9px 8px;font-size:12px;color:#334155">${(r.NOMBRE||'—').slice(0,55)}</td>
+      <td style="padding:9px 8px;font-size:12px;color:#334155">${(r.NOMBRE||'—').slice(0,50)}</td>
+      <td style="padding:9px 8px;font-size:11px;color:#64748B;white-space:nowrap">${cuenta}</td>
       <td style="padding:9px 8px;font-size:11px;color:#94A3B8;white-space:nowrap">${fecha}</td>
-      <td style="padding:9px 8px;white-space:nowrap">${pl?`<a href="${pl}" target="_blank" style="color:#185FA5;font-weight:600;font-size:12px;text-decoration:none">🔗 Ver post</a>`:'<span style="color:#CBD5E1;font-size:11px">—</span>'}</td>
+      <td style="padding:9px 8px;white-space:nowrap">${pl?`<a href="${pl}" target="_blank" style="color:#185FA5;font-weight:600;font-size:12px;text-decoration:underline">${pl.length>40?pl.slice(0,40)+'…':pl}</a>`:'<span style="color:#CBD5E1;font-size:11px">—</span>'}</td>
     </tr>`;
   }).join('');
 
@@ -3382,7 +3384,7 @@ ${hasSales?`<div class="success-banner">
   <div class="kpi" style="color:#185FA5"><div class="kpi-v" style="color:#185FA5">${fmtM(gmvTot)}</div><div class="kpi-l">GMV Total</div></div>
   <div class="kpi" style="color:#0F6E56"><div class="kpi-v" style="color:#0F6E56">${fmtM(gmvOrg)}</div><div class="kpi-l">GMV Orgánico</div></div>
   <div class="kpi" style="color:#2563EB"><div class="kpi-v" style="color:#2563EB">${fmtM(gmvAds)}</div><div class="kpi-l">GMV Shop Ads</div></div>
-  <div class="kpi" style="color:#5B21B6"><div class="kpi-v" style="color:#5B21B6">${fmtM(commTot)}</div><div class="kpi-l">Comisión</div></div>
+  <div class="kpi" style="color:#5B21B6"><div class="kpi-v" style="color:#5B21B6">${orderIds.length}</div><div class="kpi-l"># Órdenes</div></div>
   <div class="kpi" style="color:#B45309"><div class="kpi-v" style="color:#B45309">${units.toLocaleString()}</div><div class="kpi-l">Unidades</div></div>
   <div class="kpi" style="color:#1E7E3A"><div class="kpi-v" style="color:#1E7E3A">${posteados}/${videosMes}</div><div class="kpi-l">Videos</div></div>
 </div>
@@ -3405,7 +3407,7 @@ ${!hasSales?noSalesHtml:''}
 
 <div class="section">
   <div class="sec-title">Videos del ciclo — ${posteados} de ${videosMes} publicados</div>
-  ${videosCiclo.length?`<table><thead><tr><th style="width:36px">#</th><th>Nombre del video</th><th style="width:100px">Publicado</th><th style="width:110px">Link</th></tr></thead><tbody>${videosHtml}</tbody></table>`:'<div style="color:#94A3B8;font-size:12px;padding:16px 0;text-align:center">Sin videos en este ciclo aún.</div>'}
+  ${videosCiclo.length?`<table><thead><tr><th style="width:36px">#</th><th>Nombre del video</th><th style="width:110px">Cuenta</th><th style="width:90px">Publicado</th><th>Link</th></tr></thead><tbody>${videosHtml}</tbody></table>`:'<div style="color:#94A3B8;font-size:12px;padding:16px 0;text-align:center">Sin videos en este ciclo aún.</div>'}
 </div>
 
 ${orderIds.length?`<div class="section">
