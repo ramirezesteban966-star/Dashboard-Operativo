@@ -935,6 +935,9 @@ tr:hover td{background:var(--blue-light)}
         <div style="background:var(--blue-light);border:1px solid #BFDBFE;border-radius:var(--radius-lg);padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--blue-dark)">
           <strong>Columna de link en ClickUp:</strong> Nombrá el campo personalizado como <code style="background:#DBEAFE;padding:1px 5px;border-radius:3px">LINK_POST</code> o <code style="background:#DBEAFE;padding:1px 5px;border-radius:3px">URL_POST</code> para que aparezca aquí automáticamente.
         </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn" onclick="generarInformeAgrupado()" style="background:#0C447C;color:#fff;border-color:#0C447C;font-weight:600;padding:8px 16px">📄 Generar Informe Agrupado</button>
+        </div>
         <div id="an-posts-content"></div>
       </div>
 
@@ -1953,7 +1956,7 @@ function parseFechaVenta_(v){
 
 
 const vtGMV    = v=>parseFloat(String(vg(v,'GMV','gmv','Revenue')||'0').replace(/[$,\s]/g,''))||0;
-const vtUnits  = v=>parseInt(String(vg(v,'Items_Sold','Items Sold','Qty')||'0').replace(/[^\d]/g,''))||0;
+const vtUnits  = v=>Math.round(parseFloat(String(vg(v,'Items_Sold','Items Sold','Qty')||'0').replace(/[^0-9.]/g,''))||0)||0;
 // ── Helpers de comisiones reales del CONSOLIDADO_PUB ──────────────────────
 // Comisión orgánica: Standard commission (real) o Est. standard commission
 const vtCommOrg = v => {
@@ -3433,6 +3436,132 @@ ${orderIds.length?`<div class="section">
   Informe confidencial preparado exclusivamente para <strong>${marca}</strong>.
 </div>
 
+</div></body></html>`;
+
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+  else alert('Habilitá los popups del navegador para generar el informe.');
+}
+
+// ── INFORME AGRUPADO ─────────────────────────────────────────────
+function generarInformeAgrupado(){
+  const ctrs=anGetCtrs();
+  if(!ctrs.length){alert('Sin contratos con los filtros aplicados.');return;}
+  if(!allData.length){alert('Cargá los datos de ClickUp primero.');return;}
+
+  const marcas=[...new Set(ctrs.map(c=>c.MARCA_NOMBRE||'').filter(Boolean))];
+  const cels=[...new Set(ctrs.map(c=>c.CELULA_ID||'').filter(Boolean))];
+  const ciclos=[...new Set(ctrs.map(c=>String(c.CICLO_NUM||1)))].sort((a,b)=>+a-+b);
+  const marcaLabel=marcas.join(' / ')||'—';
+  const celLabel=cels.length===1?cels[0]:cels.join(' / ');
+  const cicloLabel=ciclos.length===1?`Ciclo ${ciclos[0]}`:`Ciclos ${ciclos.join(', ')}`;
+
+  const allVideosCiclo=[];
+  let totalVideosMes=0;
+  ctrs.forEach(c=>{
+    const sku=(c.SKU||'').trim(), cel=normCelPosts((c.CELULA_ID||'').trim());
+    const videosMes=parseInt(c.VIDEOS_MES||0), offset=parseInt(c.CICLO_OFFSET||0);
+    totalVideosMes+=videosMes;
+    const tareas=allData.filter(r=>{
+      const tSku=(r.SKU_PRODUCTO||'').trim(), tCel=normCelPosts((r.CELULA||'').trim());
+      const estado=(r.ESTADO||'').toLowerCase().replace(/ /g,'_');
+      return tSku===sku&&tCel===cel&&estadosQueCuentan.has(estado);
+    }).sort((a,b)=>(parseDate(a.FECHA_PUBLICADO||a.FECHA_ACTUALIZACION||'')||new Date(0))-(parseDate(b.FECHA_PUBLICADO||b.FECHA_ACTUALIZACION||'')||new Date(0)));
+    tareas.slice(offset,offset+videosMes).forEach(v=>allVideosCiclo.push({...v,_producto:c.PRODUCTO||''}));
+  });
+  const totalPosteados=allVideosCiclo.length;
+  const pct=totalVideosMes>0?Math.round(totalPosteados/totalVideosMes*100):0;
+
+  const skuSet=new Set(ctrs.map(c=>(c.SKU||'').trim()).filter(Boolean));
+  const vtsCiclo=ventasData.filter(v=>skuSet.has((vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim()));
+  const gmvOrg=vtsCiclo.reduce((a,v)=>a+vtGMVOrg(v),0);
+  const gmvAds=vtsCiclo.reduce((a,v)=>a+vtGMVAds(v),0);
+  let gmvTot=gmvOrg+gmvAds;
+  if(gmvTot===0) gmvTot=vtsCiclo.reduce((a,v)=>a+vtGMV(v),0);
+  const commTot=vtsCiclo.reduce((a,v)=>a+vtCommTotV(v),0);
+  const units=vtsCiclo.reduce((a,v)=>a+vtUnits(v),0);
+  const orderIds=[...new Set(vtsCiclo.map(v=>anGetOrderId(v)).filter(Boolean))];
+  const hasSales=gmvTot>0;
+  const pctComm=gmvTot>0?((commTot/gmvTot)*100).toFixed(1):0;
+  const ingreso=ctrs.reduce((a,c)=>a+(parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0),0);
+  const fmtM=n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const today=new Date();
+  const fechaRep=today.getDate().toString().padStart(2,'0')+'/'+(today.getMonth()+1).toString().padStart(2,'0')+'/'+today.getFullYear();
+
+  const videosHtml=allVideosCiclo.map((r,i)=>{
+    const pl=getPostLink(r), fecha=r.FECHA_PUBLICADO||r._fd||'';
+    const cuenta=r.CUENTA||'—';
+    const prod=(r._producto||'').slice(0,20);
+    return`<tr style="border-bottom:1px solid #F1F5F9">
+      <td style="padding:8px 6px;text-align:center;font-size:11px;color:#94A3B8;width:30px">${i+1}</td>
+      <td style="padding:8px 6px;font-size:12px;color:#334155">${(r.NOMBRE||'—').slice(0,45)}</td>
+      <td style="padding:8px 6px;font-size:11px;color:#64748B;white-space:nowrap">${cuenta}</td>
+      <td style="padding:8px 6px;font-size:11px;color:#64748B;white-space:nowrap">${prod}</td>
+      <td style="padding:8px 6px;font-size:11px;color:#94A3B8;white-space:nowrap">${fecha}</td>
+      <td style="padding:8px 6px;white-space:nowrap">${pl?`<a href="${pl}" target="_blank" style="color:#185FA5;font-weight:600;font-size:11px;text-decoration:underline">${pl.length>35?pl.slice(0,35)+'…':pl}</a>`:'<span style="color:#CBD5E1;font-size:11px">—</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  const ordersHtml=orderIds.slice(0,100).map(oid=>`<div style="font-family:monospace;font-size:11px;padding:5px 8px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;color:#334155;user-select:all">${oid}</div>`).join('');
+
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Informe ${marcaLabel} · ${cicloLabel}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#F1F5F9;color:#0F1729;font-size:14px;line-height:1.5}
+.page{max-width:900px;margin:0 auto;padding:28px 20px}
+.header{background:linear-gradient(135deg,#0C447C,#185FA5,#1e7ec8);color:#fff;border-radius:16px;padding:32px 36px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-bottom:22px}
+.kpi{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px 12px;text-align:center;border-top:3px solid currentColor;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.kpi-v{font-size:22px;font-weight:800;line-height:1.1}
+.kpi-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94A3B8;margin-top:4px}
+.section{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #F1F5F9}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94A3B8;padding:8px 6px;border-bottom:2px solid #F1F5F9;text-align:left;background:#FAFBFC}
+.orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.footer{text-align:center;padding:20px;color:#94A3B8;font-size:11px;margin-top:16px;border-top:1px solid #E2E8F0}
+@media print{body{background:#fff}button{display:none!important}.page{padding:12px}}
+</style>
+</head><body><div class="page">
+<div style="text-align:right;margin-bottom:16px;display:flex;justify-content:flex-end;gap:8px">
+  <button onclick="window.print()" style="background:#185FA5;color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">🖨 Descargar PDF</button>
+  <button onclick="window.close()" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px">✕ Cerrar</button>
+</div>
+<div class="header">
+  <div>
+    <div style="font-size:11px;font-weight:600;opacity:.65;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Informe de rendimiento · TikTok Shop</div>
+    <div style="font-size:28px;font-weight:800;letter-spacing:-.5px">${marcaLabel}</div>
+    <div style="font-size:13px;opacity:.8;margin-top:4px">${celLabel}</div>
+  </div>
+  <div style="text-align:right">
+    <div style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:7px 16px;border-radius:20px;font-size:13px;font-weight:700;margin-bottom:8px">${cicloLabel}</div>
+    <div style="font-size:11px;opacity:.65">${fechaRep}</div>
+    <div style="font-size:11px;opacity:.65;margin-top:3px">${totalPosteados}/${totalVideosMes} videos · ${units.toLocaleString()} unidades</div>
+  </div>
+</div>
+<div class="kpis">
+  <div class="kpi" style="color:#185FA5"><div class="kpi-v" style="color:#185FA5">${fmtM(gmvTot)}</div><div class="kpi-l">GMV Total</div></div>
+  <div class="kpi" style="color:#0F6E56"><div class="kpi-v" style="color:#0F6E56">${fmtM(gmvOrg)}</div><div class="kpi-l">GMV Orgánico</div></div>
+  <div class="kpi" style="color:#2563EB"><div class="kpi-v" style="color:#2563EB">${fmtM(gmvAds)}</div><div class="kpi-l">GMV Shop Ads</div></div>
+  <div class="kpi" style="color:#5B21B6"><div class="kpi-v" style="color:#5B21B6">${orderIds.length}</div><div class="kpi-l"># Órdenes</div></div>
+  <div class="kpi" style="color:#B45309"><div class="kpi-v" style="color:#B45309">${units.toLocaleString()}</div><div class="kpi-l">Unidades</div></div>
+  <div class="kpi" style="color:#1E7E3A"><div class="kpi-v" style="color:#1E7E3A">${totalPosteados}/${totalVideosMes}</div><div class="kpi-l">Videos</div></div>
+  <div class="kpi" style="color:#0F6E56"><div class="kpi-v" style="color:#0F6E56">$${ingreso.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="kpi-l">Ingreso</div></div>
+</div>
+<div class="section">
+  <div class="sec-title">Videos del ${cicloLabel} — ${totalPosteados} de ${totalVideosMes} publicados (${pct}%)</div>
+  ${allVideosCiclo.length?`<table><thead><tr>
+    <th style="width:30px">#</th><th>Nombre del video</th><th style="width:110px">Cuenta</th><th style="width:120px">Producto</th><th style="width:90px">Publicado</th><th>Link</th>
+  </tr></thead><tbody>${videosHtml}</tbody></table>`:'<div style="color:#94A3B8;font-size:12px;padding:16px 0;text-align:center">Sin videos en este ciclo aún.</div>'}
+</div>
+${orderIds.length?`<div class="section">
+  <div class="sec-title">Order IDs — ${orderIds.length} órdenes</div>
+  <div class="orders-grid">${ordersHtml}</div>
+  ${orderIds.length>100?`<div style="font-size:11px;color:#94A3B8;margin-top:10px">Mostrando primeras 100 de ${orderIds.length} órdenes.</div>`:''}
+</div>`:''}
+<div class="footer">Generado por <strong>SCALIFY Dashboard</strong> · ${fechaRep}<br>Informe confidencial preparado exclusivamente para <strong>${marcaLabel}</strong>.</div>
 </div></body></html>`;
 
   const w=window.open('','_blank');
