@@ -688,7 +688,7 @@ tr:hover td{background:var(--blue-light)}
           <select id="vt-sel-marca" onchange="vtOnMarcaCambia()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:120px">
             <option value="">Todas</option>
           </select>
-          <select id="vt-sel-producto" onchange="vtRenderAll()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:140px">
+          <select id="vt-sel-producto" onchange="vtFiltroProd=this.value;vtRenderAll()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:140px">
             <option value="">Todos los productos</option>
           </select>
           <select id="vt-sel-celula" onchange="vtOnCelulaCambia()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
@@ -699,7 +699,7 @@ tr:hover td{background:var(--blue-light)}
             <option value="Celula 4">Célula 4</option>
             <option value="Celula 5">Célula 5</option>
           </select>
-          <select id="vt-sel-cuenta" onchange="vtRenderAll()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:120px">
+          <select id="vt-sel-cuenta" onchange="vtFiltroCuenta=this.value;vtRenderAll()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:120px">
             <option value="">Todas las cuentas</option>
           </select>
           <span class="strip-lbl">Orden:</span>
@@ -827,7 +827,7 @@ tr:hover td{background:var(--blue-light)}
           <button class="spill" data-ancelula="Celula 4" onclick="anFiltrarCelula('Celula 4',this)">C4</button>
           <button class="spill" data-ancelula="Celula 5" onclick="anFiltrarCelula('Celula 5',this)">C5</button>
           <select id="an-sel-marca" onchange="anOnMarcaCambia()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);margin-left:8px;min-width:120px"><option value="">Todas las marcas</option></select>
-          <select id="an-sel-producto" onchange="anRender()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:130px"><option value="">Todos los productos</option></select>
+          <select id="an-sel-producto" onchange="anOnProductoCambia()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:130px"><option value="">Todos los productos</option></select>
           <select id="an-sel-ciclo" onchange="anFiltrarCiclo()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:110px"><option value="todos">Todos los ciclos</option></select>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
@@ -1494,7 +1494,7 @@ async function loadContratos(){
 
 // Normaliza campos de días que vienen como fechas de Excel
 function normalizarContratos_(contratos){
-  return contratos.map(c=>{
+  const normalizado=contratos.map(c=>{
     const nc={...c};
     ['DIAS_RESTANTES','DIAS_DURACION','DIAS_RETRASO','DIAS_COBRO','DIAS_CICLO_TOTAL'].forEach(k=>{
       nc[k]=parsearDias(c[k]);
@@ -1503,6 +1503,30 @@ function normalizarContratos_(contratos){
     nc._sinAsignar=0; // se calcula abajo después de agrupar
     return nc;
   });
+  // Auto-asignar CICLO_NUM y CICLO_OFFSET agrupando por SKU+CELULA_ID y ordenando por fecha fin
+  // Esto corrige casos donde el CSV tiene ciclos mal numerados o con offset incorrecto
+  const grupos={};
+  normalizado.forEach((c,i)=>{
+    const k=(c.SKU||'').trim()+'||'+(c.CELULA_ID||'').trim();
+    if(!grupos[k]) grupos[k]=[];
+    grupos[k].push(i);
+  });
+  function _pfd(s){if(!s)return new Date(0);const m=String(s).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(m)return new Date(parseInt(m[3]),parseInt(m[2])-1,parseInt(m[1]));return parseDate(s)||new Date(0);}
+  Object.values(grupos).forEach(idxs=>{
+    if(idxs.length<2) return; // un solo ciclo: no reordenar
+    idxs.sort((a,b)=>{
+      const da=_pfd(normalizado[a].FECHA_FIN_PROG||normalizado[a].FECHA_FIN_REAL||'');
+      const db=_pfd(normalizado[b].FECHA_FIN_PROG||normalizado[b].FECHA_FIN_REAL||'');
+      return da-db;
+    });
+    let offset=0;
+    idxs.forEach((idx,n)=>{
+      normalizado[idx].CICLO_NUM=n+1;
+      normalizado[idx].CICLO_OFFSET=offset;
+      offset+=parseInt(normalizado[idx].VIDEOS_MES||0)||0;
+    });
+  });
+  return normalizado;
 }
 
 // ── Poblar selectores ──────────────────────────────────────────────
@@ -2058,7 +2082,7 @@ function vtOnCelulaCambia(){
   const curC=selC.value;
   // Usar Celula_Scalify si existe en los datos
   const cuentasFiltradas=[...new Set(ventasData
-    .filter(v=>!vtFiltroCelula||vg(v,'Celula_Scalify','celula_scalify','Celula')||''===vtFiltroCelula)
+    .filter(v=>!vtFiltroCelula||(vg(v,'Celula_Scalify','celula_scalify','Celula')||'')===vtFiltroCelula)
     .map(v=>vtCuenta(v)).filter(Boolean))].sort();
   selC.innerHTML='<option value="">Todas las cuentas</option>'+cuentasFiltradas.map(c=>`<option value="${c}"${c===curC?' selected':''}>${c}</option>`).join('');
   vtRenderAll();
@@ -2635,7 +2659,7 @@ function anFiltrarPer(p,btn){
   anPeriodo=p; anPg=1; anRender();
 }
 function anLimpiar(){
-  anEstado='todos'; anCelula='todas'; anPeriodo='todo';
+  anEstado='todos'; anCelula='todas'; anPeriodo='todo'; anCiclo='todos';
   document.querySelectorAll('[data-an]').forEach(b=>b.className='spill');
   document.querySelector('[data-an="todos"]').className='spill on';
   document.querySelectorAll('[data-ancelula]').forEach(b=>b.className='spill');
@@ -2646,14 +2670,35 @@ function anLimpiar(){
   const selP=document.getElementById('an-sel-producto'); if(selP) selP.value='';
   document.getElementById('an-dfrom').value='';
   document.getElementById('an-dto').value='';
+  anActualizarCiclos_(contratosData);
   anRender();
 }
 function anOnMarcaCambia(){
   const m=document.getElementById('an-sel-marca')?.value||'';
   const selP=document.getElementById('an-sel-producto');
   const cur=selP?.value||'';
-  const prods=[...new Set(contratosData.filter(c=>!m||(c.MARCA_NOMBRE||'').trim()===m).map(c=>(c.PRODUCTO||'').trim()).filter(Boolean))].sort();
+  const filtrados=contratosData.filter(c=>!m||(c.MARCA_NOMBRE||'').trim()===m);
+  const prods=[...new Set(filtrados.map(c=>(c.PRODUCTO||'').trim()).filter(Boolean))].sort();
   if(selP) selP.innerHTML='<option value="">Todos los productos</option>'+prods.map(p=>`<option value="${p}"${p===cur?' selected':''}>${p}</option>`).join('');
+  anActualizarCiclos_(filtrados);
+  anRender();
+}
+// Refresca el dropdown de ciclos según los contratos visibles (marca/producto seleccionados)
+function anActualizarCiclos_(ctrsBase){
+  const selCiclo=document.getElementById('an-sel-ciclo');
+  if(!selCiclo) return;
+  const ciclos=[...new Set((ctrsBase||contratosData).map(c=>String(c.CICLO_NUM||'1')).filter(Boolean))].sort((a,b)=>+a-+b);
+  const prev=selCiclo.value;
+  selCiclo.innerHTML='<option value="todos">Todos los ciclos</option>'+ciclos.map(n=>`<option value="${n}">Ciclo ${n}</option>`).join('');
+  if(ciclos.includes(prev)){selCiclo.value=prev;}
+  else{selCiclo.value='todos'; anCiclo='todos';}
+}
+// Cambio de producto: refresca ciclos y re-renderiza
+function anOnProductoCambia(){
+  const m=document.getElementById('an-sel-marca')?.value||'';
+  const p=document.getElementById('an-sel-producto')?.value||'';
+  const filtrados=contratosData.filter(c=>(!m||(c.MARCA_NOMBRE||'').trim()===m)&&(!p||(c.PRODUCTO||'').trim()===p));
+  anActualizarCiclos_(filtrados);
   anRender();
 }
 function anFiltrarCiclo(){
@@ -3723,9 +3768,7 @@ function mostrarTabAnalisis(){
   const marcas=[...new Set(contratosData.map(c=>(c.MARCA_NOMBRE||'').trim()).filter(Boolean))].sort();
   const selM=document.getElementById('an-sel-marca');
   if(selM) selM.innerHTML='<option value="">Todas las marcas</option>'+marcas.map(m=>`<option value="${m}">${m}</option>`).join('');
-  const ciclos=[...new Set(contratosData.map(c=>String(c.CICLO_NUM||'1')).filter(Boolean))].sort((a,b)=>+a-+b);
-  const selCiclo=document.getElementById('an-sel-ciclo');
-  if(selCiclo) selCiclo.innerHTML='<option value="todos">Todos los ciclos</option>'+ciclos.map(n=>`<option value="${n}">Ciclo ${n}</option>`).join('');
+  anActualizarCiclos_(contratosData); // usa el helper que respeta selección previa
   anOnMarcaCambia();
   anRender();
 }
