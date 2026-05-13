@@ -2755,33 +2755,76 @@ function anGetVentas(ctrsFiltrados){
   });
 }
 
-// ── Ventas de un ciclo específico (filtra por fecha del ciclo) ────────
+// ── Fecha del primer video publicado de un ciclo (desde ClickUp) ─────
+// Usa CICLO_OFFSET para saber qué videos pertenecen a este ciclo,
+// luego toma la fecha de publicación del primero.
+function _primerFechaCiclo(c){
+  if(!allData.length) return null;
+  const sku=(c.SKU||'').trim(), cel=normCelPosts((c.CELULA_ID||'').trim());
+  const offset=parseInt(c.CICLO_OFFSET||0), videos=parseInt(c.VIDEOS_MES||0);
+  const tareas=allData.filter(r=>{
+    const rSku=(r.SKU_PRODUCTO||'').trim(), rCel=normCelPosts((r.CELULA||'').trim());
+    return rSku===sku&&rCel===cel&&estadosQueCuentan.has((r.ESTADO||'').toLowerCase().replace(/ /g,'_'));
+  }).sort((a,b)=>(pfc_(a.FECHA_PUBLICADO||'')||new Date(0))-(pfc_(b.FECHA_PUBLICADO||'')||new Date(0)));
+  const videosCiclo=tareas.slice(offset, offset+videos);
+  if(!videosCiclo.length) return null;
+  return pfc_(videosCiclo[0].FECHA_PUBLICADO||'');
+}
+
+// ── Ventas de un ciclo específico ─────────────────────────────────────
+// Inicio del ciclo = fecha del primer video publicado del ciclo (ClickUp)
+//   fallback: FECHA_INICIO_PROG del contrato → fin del ciclo anterior + 1 día
+// Fin del ciclo   = fecha del primer video del ciclo SIGUIENTE (exclusivo)
+//   Para el ÚLTIMO ciclo: sin límite → incluye ventas hasta hoy
+// Así la suma de ciclos siempre coincide con el GMV total.
 function anGetVentasParaCiclo_(c, allVts){
   const sku=(c.SKU||'').trim();
   const cel=normCelPosts((c.CELULA_ID||'').trim());
   const cicloNum=parseInt(c.CICLO_NUM||1);
-  const finDate=pfc_(c.FECHA_FIN_PROG||c.FECHA_FIN_REAL||'');
-  const iniDate=pfc_(c.FECHA_INICIO_PROG||c.FECHA_INICIO_REAL||'');
-  // ¿Hay más ciclos para este mismo SKU+Célula?
+
   const hermanos=contratosData.filter(x=>(x.SKU||'').trim()===sku&&normCelPosts((x.CELULA_ID||'').trim())===cel);
   const multiCiclo=hermanos.length>1;
-  // Fecha inicio efectiva: usa FECHA_INICIO si existe; si no, día siguiente al fin del ciclo anterior
-  let startDate=iniDate;
+  const maxCiclo=multiCiclo?Math.max(...hermanos.map(x=>parseInt(x.CICLO_NUM||1))):cicloNum;
+  const isLastCiclo=cicloNum>=maxCiclo;
+
+  // ── Fecha INICIO: primer video publicado del ciclo ──
+  let startDate=_primerFechaCiclo(c);
+  // fallback 1: FECHA_INICIO del contrato
+  if(!startDate) startDate=pfc_(c.FECHA_INICIO_PROG||c.FECHA_INICIO_REAL||'');
+  // fallback 2: día siguiente al fin del ciclo anterior
   if(!startDate&&multiCiclo&&cicloNum>1){
     const prev=hermanos.find(x=>parseInt(x.CICLO_NUM||1)===cicloNum-1);
     const prevFin=prev?pfc_(prev.FECHA_FIN_PROG||prev.FECHA_FIN_REAL||''):null;
     if(prevFin) startDate=new Date(prevFin.getTime()+86400000);
   }
+
+  // ── Fecha FIN (exclusiva): primer video publicado del ciclo SIGUIENTE ──
+  // El último ciclo no tiene límite superior → incluye todas las ventas recientes
+  let endDate=null;
+  if(!isLastCiclo){
+    const next=hermanos.find(x=>parseInt(x.CICLO_NUM||1)===cicloNum+1);
+    if(next){
+      endDate=_primerFechaCiclo(next);
+      // fallback: FECHA_INICIO del siguiente ciclo
+      if(!endDate) endDate=pfc_(next.FECHA_INICIO_PROG||next.FECHA_INICIO_REAL||'');
+      // fallback: fin del ciclo actual + 1 día
+      if(!endDate){
+        const curFin=pfc_(c.FECHA_FIN_PROG||c.FECHA_FIN_REAL||'');
+        if(curFin) endDate=new Date(curFin.getTime()+86400000);
+      }
+    }
+  }
+
   return allVts.filter(v=>{
     const vSku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
     if(vSku!==sku) return false;
     const vCelRaw=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
     if(vCelRaw&&cel&&normCelPosts(vCelRaw)!==cel) return false;
-    if(multiCiclo||startDate||finDate){
+    if(multiCiclo||startDate||endDate){
       const f=parseFechaVenta_(v);
-      if(!f) return !multiCiclo; // sin fecha en venta: excluir si hay múltiples ciclos
+      if(!f) return !multiCiclo;
       if(startDate&&f<startDate) return false;
-      if(finDate&&f>new Date(finDate.getTime()+86399999)) return false;
+      if(endDate&&f>=endDate) return false; // exclusivo
     }
     return true;
   });
