@@ -2787,27 +2787,31 @@ function anGetVentasParaCiclo_(c, allVts){
   const maxCiclo=multiCiclo?Math.max(...hermanos.map(x=>parseInt(x.CICLO_NUM||1))):cicloNum;
   const isLastCiclo=cicloNum>=maxCiclo;
 
-  // ── Fecha INICIO: primer video publicado del ciclo ──
-  let startDate=_primerFechaCiclo(c);
-  // fallback 1: FECHA_INICIO del contrato
-  if(!startDate) startDate=pfc_(c.FECHA_INICIO_PROG||c.FECHA_INICIO_REAL||'');
-  // fallback 2: día siguiente al fin del ciclo anterior
-  if(!startDate&&multiCiclo&&cicloNum>1){
-    const prev=hermanos.find(x=>parseInt(x.CICLO_NUM||1)===cicloNum-1);
-    const prevFin=prev?pfc_(prev.FECHA_FIN_PROG||prev.FECHA_FIN_REAL||''):null;
-    if(prevFin) startDate=new Date(prevFin.getTime()+86400000);
+  // ── Fecha INICIO del ciclo ──
+  // El PRIMER ciclo (cicloNum===1) no tiene restricción de inicio:
+  // absorbe todas las ventas anteriores al Ciclo 2 (ventas previas al contrato,
+  // sin fecha, etc.) para que Ciclo1 + Ciclo2 + ... = total exacto.
+  // Los ciclos 2, 3, … usan el primer video publicado de ese ciclo como corte.
+  let startDate=null;
+  if(multiCiclo&&cicloNum>1){
+    startDate=_primerFechaCiclo(c);
+    if(!startDate) startDate=pfc_(c.FECHA_INICIO_PROG||c.FECHA_INICIO_REAL||'');
+    if(!startDate){
+      const prev=hermanos.find(x=>parseInt(x.CICLO_NUM||1)===cicloNum-1);
+      const prevFin=prev?pfc_(prev.FECHA_FIN_PROG||prev.FECHA_FIN_REAL||''):null;
+      if(prevFin) startDate=new Date(prevFin.getTime()+86400000);
+    }
   }
 
-  // ── Fecha FIN (exclusiva): primer video publicado del ciclo SIGUIENTE ──
-  // El último ciclo no tiene límite superior → incluye todas las ventas recientes
+  // ── Fecha FIN (exclusiva) ──
+  // Último ciclo: sin límite → incluye ventas hasta hoy.
+  // Resto: corte = primer video publicado del ciclo siguiente.
   let endDate=null;
   if(!isLastCiclo){
     const next=hermanos.find(x=>parseInt(x.CICLO_NUM||1)===cicloNum+1);
     if(next){
       endDate=_primerFechaCiclo(next);
-      // fallback: FECHA_INICIO del siguiente ciclo
       if(!endDate) endDate=pfc_(next.FECHA_INICIO_PROG||next.FECHA_INICIO_REAL||'');
-      // fallback: fin del ciclo actual + 1 día
       if(!endDate){
         const curFin=pfc_(c.FECHA_FIN_PROG||c.FECHA_FIN_REAL||'');
         if(curFin) endDate=new Date(curFin.getTime()+86400000);
@@ -2820,11 +2824,12 @@ function anGetVentasParaCiclo_(c, allVts){
     if(vSku!==sku) return false;
     const vCelRaw=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
     if(vCelRaw&&cel&&normCelPosts(vCelRaw)!==cel) return false;
-    if(multiCiclo||startDate||endDate){
+    if(endDate||startDate){
       const f=parseFechaVenta_(v);
-      if(!f) return !multiCiclo;
+      // Sin fecha: va al primer ciclo (que no tiene startDate)
+      if(!f) return !startDate;
       if(startDate&&f<startDate) return false;
-      if(endDate&&f>=endDate) return false; // exclusivo
+      if(endDate&&f>=endDate) return false;
     }
     return true;
   });
