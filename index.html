@@ -2731,17 +2731,59 @@ function anGetRango(){
   return null;
 }
 
-// ── Ventas filtradas por SKUs de contratos activos + período ──────
+// ── Ventas filtradas por SKUs+Célula de contratos activos + período ──────
 function anGetVentas(ctrsFiltrados){
   const skus=new Set(ctrsFiltrados.map(c=>(c.SKU||'').trim()).filter(Boolean));
+  // Pares SKU||Célula para filtrar ventas cuando el dato de célula esté disponible
+  const skuCelPairs=new Set(ctrsFiltrados.map(c=>{
+    const s=(c.SKU||'').trim(), cl=normCelPosts((c.CELULA_ID||'').trim());
+    return s&&cl?s+'||'+cl:'';
+  }).filter(Boolean));
   const rango=anGetRango();
   return ventasData.filter(v=>{
     const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
     if(skus.size>0&&!skus.has(sku)) return false;
+    // Filtrar por célula si el dato de ventas la trae
+    const vCelRaw=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
+    if(vCelRaw && skuCelPairs.size>0){
+      if(!skuCelPairs.has(sku+'||'+normCelPosts(vCelRaw))) return false;
+    }
     if(!rango) return true;
     const f=parseFechaVenta_(v);
     if(!f) return true;
     return f>=rango[0]&&f<=rango[1];
+  });
+}
+
+// ── Ventas de un ciclo específico (filtra por fecha del ciclo) ────────
+function anGetVentasParaCiclo_(c, allVts){
+  const sku=(c.SKU||'').trim();
+  const cel=normCelPosts((c.CELULA_ID||'').trim());
+  const cicloNum=parseInt(c.CICLO_NUM||1);
+  const finDate=pfc_(c.FECHA_FIN_PROG||c.FECHA_FIN_REAL||'');
+  const iniDate=pfc_(c.FECHA_INICIO_PROG||c.FECHA_INICIO_REAL||'');
+  // ¿Hay más ciclos para este mismo SKU+Célula?
+  const hermanos=contratosData.filter(x=>(x.SKU||'').trim()===sku&&normCelPosts((x.CELULA_ID||'').trim())===cel);
+  const multiCiclo=hermanos.length>1;
+  // Fecha inicio efectiva: usa FECHA_INICIO si existe; si no, día siguiente al fin del ciclo anterior
+  let startDate=iniDate;
+  if(!startDate&&multiCiclo&&cicloNum>1){
+    const prev=hermanos.find(x=>parseInt(x.CICLO_NUM||1)===cicloNum-1);
+    const prevFin=prev?pfc_(prev.FECHA_FIN_PROG||prev.FECHA_FIN_REAL||''):null;
+    if(prevFin) startDate=new Date(prevFin.getTime()+86400000);
+  }
+  return allVts.filter(v=>{
+    const vSku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    if(vSku!==sku) return false;
+    const vCelRaw=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
+    if(vCelRaw&&cel&&normCelPosts(vCelRaw)!==cel) return false;
+    if(multiCiclo||startDate||finDate){
+      const f=parseFechaVenta_(v);
+      if(!f) return !multiCiclo; // sin fecha en venta: excluir si hay múltiples ciclos
+      if(startDate&&f<startDate) return false;
+      if(finDate&&f>new Date(finDate.getTime()+86399999)) return false;
+    }
+    return true;
   });
 }
 
@@ -3088,48 +3130,17 @@ function anRenderCobros_(ctrs,fmtU){
 function anRenderDetalle_(ctrs,vts,fmtU){
   const orden=document.getElementById('an-orden')?.value||'ingreso_desc';
 
-  // GMV por célula+SKU (clave: "CELULA_ID||SKU")
-  const gmvOrgKey={}, gmvAdsKey={}, commOrgKey={}, commAdsKey={};
-  vts.forEach(v=>{
-    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
-    if(!sku) return;
-    const cel=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
-    const k=cel+'||'+sku;
-    gmvOrgKey[k]=(gmvOrgKey[k]||0)+vtGMVOrg(v);
-    gmvAdsKey[k]=(gmvAdsKey[k]||0)+vtGMVAds(v);
-    commOrgKey[k]=(commOrgKey[k]||0)+vtCommOrgV(v);
-    commAdsKey[k]=(commAdsKey[k]||0)+vtCommAdsV(v);
-  });
-  // Fallback por solo SKU cuando la ventas no tiene celula
-  const fbOrg={}, fbAds={}, fbCO={}, fbCA={};
-  vts.forEach(v=>{
-    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
-    if(!sku) return;
-    fbOrg[sku]=(fbOrg[sku]||0)+vtGMVOrg(v);
-    fbAds[sku]=(fbAds[sku]||0)+vtGMVAds(v);
-    fbCO[sku]=(fbCO[sku]||0)+vtCommOrgV(v);
-    fbCA[sku]=(fbCA[sku]||0)+vtCommAdsV(v);
-  });
-  // Fallback Order_Type: si no hay distinción org/ads, poner GMV total en org
-  vts.forEach(v=>{
-    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
-    const cel=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
-    if(!sku) return;
-    const k=cel+'||'+sku;
-    if((gmvOrgKey[k]||0)===0&&(gmvAdsKey[k]||0)===0) gmvOrgKey[k]=(gmvOrgKey[k]||0)+vtGMV(v);
-    if((fbOrg[sku]||0)===0&&(fbAds[sku]||0)===0) fbOrg[sku]=(fbOrg[sku]||0)+vtGMV(v);
-  });
-  // Determinar si los datos tienen información de célula
-  const hasCelInfo=Object.keys(gmvOrgKey).some(k=>k.split('||')[0]!=='');
-
   const getIn=c=>parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,]/g,''))||0;
+  // GMV por ciclo: filtra ventas por rango de fechas del ciclo (separa correctamente ciclos del mismo SKU+Célula)
   const getGMV=c=>{
-    const sku=(c.SKU||'').trim(), cel=(c.CELULA_ID||'').trim();
-    const k=cel+'||'+sku;
-    if(hasCelInfo){
-      return {gOrg:gmvOrgKey[k]||0, gAds:gmvAdsKey[k]||0, cOrg:commOrgKey[k]||0, cAds:commAdsKey[k]||0};
-    }
-    return {gOrg:fbOrg[sku]||0, gAds:fbAds[sku]||0, cOrg:fbCO[sku]||0, cAds:fbCA[sku]||0};
+    const vtsCiclo=anGetVentasParaCiclo_(c, vts);
+    let gOrg=vtsCiclo.reduce((a,v)=>a+vtGMVOrg(v),0);
+    let gAds=vtsCiclo.reduce((a,v)=>a+vtGMVAds(v),0);
+    const cOrg=vtsCiclo.reduce((a,v)=>a+vtCommOrgV(v),0);
+    const cAds=vtsCiclo.reduce((a,v)=>a+vtCommAdsV(v),0);
+    // Fallback si no hay distinción org/ads
+    if(gOrg===0&&gAds===0) gOrg=vtsCiclo.reduce((a,v)=>a+vtGMV(v),0);
+    return {gOrg, gAds, cOrg, cAds};
   };
 
   const sorted=[...ctrs].sort((a,b)=>{
