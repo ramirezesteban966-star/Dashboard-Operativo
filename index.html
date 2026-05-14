@@ -960,6 +960,7 @@ tr:hover td{background:var(--blue-light)}
                 <option value="250">250 filas</option>
               </select>
               <button class="btn btn-sm" onclick="anExportOrders_()">↓ CSV Orders</button>
+              <button class="btn btn-sm" onclick="anExportOrdersPDF_()" style="background:#0C447C;color:#fff;border-color:#0C447C">📄 PDF Orders</button>
             </div>
           </div>
           <div class="twrap">
@@ -1004,6 +1005,28 @@ tr:hover td{background:var(--blue-light)}
     </div>
   </div>
 </div>
+<!-- Modal personalizar informe (Orders + Links Posts) -->
+<div class="modal-overlay hidden" id="modal-cfg-informe" onclick="if(event.target.id==='modal-cfg-informe')cerrarCfgInforme_()">
+  <div class="modal-box" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-cfg-informe-title">Personalizar Informe</div>
+      <button class="modal-close" onclick="cerrarCfgInforme_()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:14px">Elegí qué columnas y secciones incluir en el informe.</p>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="btn btn-sm" onclick="cfgInformeSelTodos_(true)">✓ Todos</button>
+        <button class="btn btn-sm" onclick="cfgInformeSelTodos_(false)">✗ Ninguno</button>
+      </div>
+      <div id="modal-cfg-informe-cols" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:18px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--border)">
+        <button class="btn" onclick="cerrarCfgInforme_()">Cancelar</button>
+        <button class="btn btn-primary" id="modal-cfg-informe-btn" style="background:#0C447C;border-color:#0C447C">📄 Generar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal configurar informe agrupado -->
 <div class="modal-overlay hidden" id="modal-informe" onclick="if(event.target.id==='modal-informe')cerrarModalInforme()">
   <div class="modal-box" style="max-width:620px;max-height:82vh;display:flex;flex-direction:column">
@@ -3382,6 +3405,19 @@ async function copiarLinks(idx){
 
 function generarInforme_(idx){
   const c=window.__anCtrsForPosts?.[idx]; if(!c) return;
+  abrirCfgInforme_('Personalizar Informe — Links Posts','links_posts',[
+    {id:'sec_videos',   label:'📋 Sección tabla de videos', checked:true},
+    {id:'col_num',      label:'# Número',                  checked:true},
+    {id:'col_nombre',   label:'Nombre del video',          checked:true},
+    {id:'col_cuenta',   label:'Cuenta',                    checked:true},
+    {id:'col_fecha',    label:'Fecha publicado',           checked:true},
+    {id:'col_link',     label:'Link del post',             checked:true},
+    {id:'sec_ventas',   label:'💰 Sección ventas / KPIs',  checked:true},
+    {id:'sec_orders',   label:'📦 Sección IDs de órdenes', checked:true},
+  ], cfg=>_generarInformeConCfg_(idx,cfg));
+}
+function _generarInformeConCfg_(idx,cfg){
+  const c=window.__anCtrsForPosts?.[idx]; if(!c) return;
   const sku=(c.SKU||'').trim(), cel=normCelPosts((c.CELULA_ID||'').trim());
   const videosMes=parseInt(c.VIDEOS_MES||0), offset=parseInt(c.CICLO_OFFSET||0);
   const cicloNum=c.CICLO_NUM||1;
@@ -3427,16 +3463,24 @@ function generarInforme_(idx){
   const maxG=Math.max(gmvOrg,gmvAds,1);
   const wOrg=Math.round(gmvOrg/maxG*100), wAds=Math.round(gmvAds/maxG*100);
 
+  // Columnas habilitadas (cfg puede ser undefined si se llama sin modal)
+  const C=cfg||{col_num:true,col_nombre:true,col_cuenta:true,col_fecha:true,col_link:true,sec_videos:true,sec_ventas:true,sec_orders:true};
+  const thNum=C.col_num?`<th style="width:36px;text-align:center">#</th>`:'';
+  const thNom=C.col_nombre?`<th>Video</th>`:'';
+  const thCta=C.col_cuenta?`<th style="width:110px">Cuenta</th>`:'';
+  const thFec=C.col_fecha?`<th style="width:100px">Publicado</th>`:'';
+  const thLnk=C.col_link?`<th>Post Link</th>`:'';
+  const thRow=thNum+thNom+thCta+thFec+thLnk;
+
   const videosHtml=videosCiclo.map((r,i)=>{
     const pl=getPostLink(r), fecha=r.FECHA_PUBLICADO||r._fd||'';
     const cuenta=r.CUENTA||'—';
-    return`<tr style="border-bottom:1px solid #F1F5F9">
-      <td style="padding:9px 8px;text-align:center;font-size:11px;color:#94A3B8;width:36px">${offset+i+1}</td>
-      <td style="padding:9px 8px;font-size:12px;color:#334155">${(r.NOMBRE||'—').slice(0,50)}</td>
-      <td style="padding:9px 8px;font-size:11px;color:#64748B;white-space:nowrap">${cuenta}</td>
-      <td style="padding:9px 8px;font-size:11px;color:#94A3B8;white-space:nowrap">${fecha}</td>
-      <td style="padding:9px 8px;white-space:nowrap">${pl?`<a href="${pl}" target="_blank" style="color:#185FA5;font-weight:600;font-size:12px;text-decoration:underline">${pl.length>40?pl.slice(0,40)+'…':pl}</a>`:'<span style="color:#CBD5E1;font-size:11px">—</span>'}</td>
-    </tr>`;
+    const tdNum=C.col_num?`<td style="padding:9px 8px;text-align:center;font-size:11px;color:#94A3B8;width:36px">${offset+i+1}</td>`:'';
+    const tdNom=C.col_nombre?`<td style="padding:9px 8px;font-size:12px;color:#334155">${(r.NOMBRE||'—').slice(0,50)}</td>`:'';
+    const tdCta=C.col_cuenta?`<td style="padding:9px 8px;font-size:11px;color:#64748B;white-space:nowrap">${cuenta}</td>`:'';
+    const tdFec=C.col_fecha?`<td style="padding:9px 8px;font-size:11px;color:#94A3B8;white-space:nowrap">${fecha}</td>`:'';
+    const tdLnk=C.col_link?`<td style="padding:9px 8px;white-space:nowrap">${pl?`<a href="${pl}" target="_blank" style="color:#185FA5;font-weight:600;font-size:12px;text-decoration:underline">${pl.length>40?pl.slice(0,40)+'…':pl}</a>`:'<span style="color:#CBD5E1;font-size:11px">—</span>'}</td>`:'';
+    return`<tr style="border-bottom:1px solid #F1F5F9">${tdNum}${tdNom}${tdCta}${tdFec}${tdLnk}</tr>`;
   }).join('');
 
   const ordersHtml=orderIds.slice(0,100).map(oid=>`<div style="font-family:monospace;font-size:11px;padding:5px 8px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;color:#334155;user-select:all">${oid}</div>`).join('');
@@ -3502,7 +3546,7 @@ th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
   </div>
 </div>
 
-${hasSales?`<div class="success-banner">
+${C.sec_ventas?`${hasSales?`<div class="success-banner">
   <div style="font-size:24px;margin-bottom:6px">🎉</div>
   <div style="font-size:16px;font-weight:700;color:#065F46">¡Ciclo exitoso con ${fmtM(gmvTot)} en ventas generadas!</div>
   <div style="font-size:12px;color:#047857;margin-top:4px">${units.toLocaleString()} unidades · ${orderIds.length} órdenes · ${pctComm}% comisión promedio</div>
@@ -3532,18 +3576,18 @@ ${hasSales&&(gmvOrg>0||gmvAds>0)?`<div class="section">
 </div>`:''}
 
 ${!hasSales?noSalesHtml:''}
+`:''}
 
-<div class="section">
+${C.sec_videos?`<div class="section">
   <div class="sec-title">Videos del ciclo — ${posteados} de ${videosMes} publicados</div>
-  ${videosCiclo.length?`<table><thead><tr><th style="width:36px">#</th><th>Nombre del video</th><th style="width:110px">Cuenta</th><th style="width:90px">Publicado</th><th>Link</th></tr></thead><tbody>${videosHtml}</tbody></table>`:'<div style="color:#94A3B8;font-size:12px;padding:16px 0;text-align:center">Sin videos en este ciclo aún.</div>'}
-</div>
+  ${videosCiclo.length?`<table><thead><tr>${thRow}</tr></thead><tbody>${videosHtml}</tbody></table>`:'<div style="color:#94A3B8;font-size:12px;padding:16px 0;text-align:center">Sin videos en este ciclo aún.</div>'}
+</div>`:''}
 
-${orderIds.length?`<div class="section">
+${C.sec_orders?`${orderIds.length?`<div class="section">
   <div class="sec-title">Order IDs — ${orderIds.length} órdenes</div>
   <div class="orders-grid">${ordersHtml}</div>
   ${orderIds.length>100?`<div style="font-size:11px;color:#94A3B8;margin-top:10px">Mostrando primeras 100 de ${orderIds.length} órdenes.</div>`:''}
-</div>`:''}
-
+</div>`:''}`:''}
 <div class="section" style="background:#EFF6FF;border-color:#BFDBFE">
   <div class="sec-title" style="color:#3B82F6">Información del contrato</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">
@@ -3588,6 +3632,37 @@ function abrirModalInforme(){
   document.getElementById('modal-informe').classList.remove('hidden');
 }
 function cerrarModalInforme(){document.getElementById('modal-informe').classList.add('hidden');}
+
+// ── Modal personalizar informe ─────────────────────────────────────
+let _cfgInformeCallback=null, _cfgInformeCols=[], _cfgInformeKey='';
+// Persiste la última config usada por tipo de informe
+const _cfgInformeMemoria={};
+
+function abrirCfgInforme_(titulo, key, cols, callback){
+  _cfgInformeCallback=callback; _cfgInformeCols=cols; _cfgInformeKey=key;
+  // Restaurar selección guardada si existe
+  const mem=_cfgInformeMemoria[key]||{};
+  document.getElementById('modal-cfg-informe-title').textContent=titulo;
+  document.getElementById('modal-cfg-informe-cols').innerHTML=cols.map(c=>{
+    const checked=key in _cfgInformeMemoria ? (mem[c.id]!==false) : c.checked;
+    const esSeccion=c.id.startsWith('sec_');
+    return`<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;padding:7px 10px;background:var(--bg);border-radius:var(--radius);border:1px solid ${esSeccion?'var(--border2)':'var(--border)'};${esSeccion?'grid-column:1/-1;background:#EBF3FD':''}">
+      <input type="checkbox" id="cfg-col-${c.id}" ${checked?'checked':''} style="accent-color:#0C447C;width:14px;height:14px;flex-shrink:0">
+      <span>${c.label}</span>
+    </label>`;
+  }).join('');
+  document.getElementById('modal-cfg-informe-btn').onclick=ejecutarCfgInforme_;
+  document.getElementById('modal-cfg-informe').classList.remove('hidden');
+}
+function cerrarCfgInforme_(){document.getElementById('modal-cfg-informe').classList.add('hidden');_cfgInformeCallback=null;}
+function cfgInformeSelTodos_(v){document.querySelectorAll('#modal-cfg-informe-cols input[type=checkbox]').forEach(cb=>cb.checked=v);}
+function ejecutarCfgInforme_(){
+  const cfg={};
+  _cfgInformeCols.forEach(c=>{cfg[c.id]=document.getElementById('cfg-col-'+c.id)?.checked??c.checked;});
+  _cfgInformeMemoria[_cfgInformeKey]=cfg; // guardar para la próxima vez
+  cerrarCfgInforme_();
+  if(_cfgInformeCallback) _cfgInformeCallback(cfg);
+}
 function selTodosInforme(v){document.querySelectorAll('.informe-chk').forEach(cb=>cb.checked=v);}
 function generarInformeDesdeModal(){
   const sel=[...document.querySelectorAll('.informe-chk:checked')].map(cb=>parseInt(cb.value));
@@ -3814,6 +3889,183 @@ function anExportOrders_(){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csvData],{type:'text/csv;charset=utf-8'}));
   a.download=`orders_scalify_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+// ── PDF Orders ────────────────────────────────────────────────────
+function anExportOrdersPDF_(){
+  if(!ventasData.length){alert('Cargá los datos de ventas primero.');return;}
+  abrirCfgInforme_('Personalizar — Orders ID PDF','orders_pdf',[
+    {id:'sec_kpis',     label:'💹 Sección KPIs resumen',  checked:true},
+    {id:'col_orderid',  label:'Order ID',                 checked:true},
+    {id:'col_fecha',    label:'Fecha',                    checked:true},
+    {id:'col_marca',    label:'Marca',                    checked:true},
+    {id:'col_producto', label:'Producto',                 checked:true},
+    {id:'col_sku',      label:'SKU',                      checked:true},
+    {id:'col_celula',   label:'Célula',                   checked:true},
+    {id:'col_gmv',      label:'GMV',                      checked:true},
+    {id:'col_tipo',     label:'Tipo',                     checked:true},
+    {id:'col_comision', label:'Comisión',                 checked:true},
+  ], _generarPDFOrders_);
+}
+
+function _generarPDFOrders_(cfg){
+  const C=cfg||{sec_kpis:true,col_orderid:true,col_fecha:true,col_marca:true,col_producto:true,col_sku:true,col_celula:true,col_gmv:true,col_tipo:true,col_comision:true};
+  const ctrs=anGetCtrs();
+  const skus=new Set(ctrs.map(c=>(c.SKU||'').trim()).filter(Boolean));
+  const rango=anGetRango();
+  const fMarca=(document.getElementById('an-orders-marca')?.value||'').toLowerCase();
+  const fCelula=(document.getElementById('an-orders-celula')?.value||'').toLowerCase();
+  const fTipo=(document.getElementById('an-orders-tipo')?.value||'').toLowerCase();
+  const rows=ventasData.filter(v=>{
+    const sku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
+    if(skus.size>0&&!skus.has(sku)) return false;
+    if(rango){const f=parseFechaVenta_(v);if(!f||f<rango[0]||f>rango[1]) return false;}
+    if(fMarca&&vtMarca(v).toLowerCase()!==fMarca) return false;
+    if(fCelula){const cv=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').toLowerCase();if(cv!==fCelula) return false;}
+    if(fTipo==='organic'&&!vtIsOrg(v)) return false;
+    if(fTipo==='ads'&&!vtIsAds(v)) return false;
+    return true;
+  });
+  if(!rows.length){alert('Sin órdenes con los filtros aplicados.');return;}
+
+  // Métricas resumen
+  const gmvTotal=rows.reduce((a,v)=>a+vtGMV(v),0);
+  const commTotal=rows.reduce((a,v)=>a+vtComm(v),0);
+  const gmvOrg=rows.reduce((a,v)=>a+vtGMVOrg(v),0);
+  const gmvAds=rows.reduce((a,v)=>a+vtGMVAds(v),0);
+  const fmtM=n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const today=new Date();
+  const fechaRep=today.getDate().toString().padStart(2,'0')+'/'+(today.getMonth()+1).toString().padStart(2,'0')+'/'+today.getFullYear();
+
+  // Filtros aplicados (etiqueta)
+  const filtrosLabel=[
+    fMarca?'Marca: '+fMarca:'',
+    fCelula?'Célula: '+fCelula:'',
+    fTipo?'Tipo: '+fTipo:'',
+    rango?'Período: '+rango[0].toLocaleDateString('es')+'–'+rango[1].toLocaleDateString('es'):'',
+  ].filter(Boolean).join(' · ')||'Todos los datos';
+
+  // Marcas únicas en el resultado
+  const marcasLabel=[...new Set(rows.map(v=>vtMarca(v)).filter(Boolean))].join(', ')||'—';
+
+  // Columnas de cabecera condicionales
+  const thOId=C.col_orderid?`<th>Order ID</th>`:'';
+  const thFec=C.col_fecha?`<th>Fecha</th>`:'';
+  const thMrc=C.col_marca?`<th>Marca</th>`:'';
+  const thPrd=C.col_producto?`<th>Producto</th>`:'';
+  const thSku=C.col_sku?`<th>SKU</th>`:'';
+  const thCel=C.col_celula?`<th>Célula</th>`:'';
+  const thGmv=C.col_gmv?`<th style="text-align:right">GMV</th>`:'';
+  const thTip=C.col_tipo?`<th>Tipo</th>`:'';
+  const thCom=C.col_comision?`<th style="text-align:right">Comisión</th>`:'';
+  const theadRow=thOId+thFec+thMrc+thPrd+thSku+thCel+thGmv+thTip+thCom;
+
+  // colspan para el pie: columnas antes de GMV
+  const preGmvCount=[C.col_orderid,C.col_fecha,C.col_marca,C.col_producto,C.col_sku,C.col_celula].filter(Boolean).length;
+  const tfootLabel=preGmvCount>0?`<td colspan="${preGmvCount}" style="padding:8px 8px;font-size:11px;font-weight:700;color:#334155">TOTAL (${rows.length} órdenes)</td>`:'';
+  const tfootGmv=C.col_gmv?`<td style="padding:8px 8px;font-size:12px;font-weight:800;color:#0F6E56;text-align:right">${fmtM(gmvTotal)}</td>`:'';
+  const tfootTip=C.col_tipo?`<td></td>`:'';
+  const tfootCom=C.col_comision?`<td style="padding:8px 8px;font-size:12px;font-weight:800;color:#5B21B6;text-align:right">${fmtM(commTotal)}</td>`:'';
+
+  const filas=rows.map((v,i)=>{
+    const oid=anGetOrderId(v)||'—';
+    const fecha=parseFechaVenta_(v);
+    const fechaStr=fecha?fecha.getDate().toString().padStart(2,'0')+'/'+(fecha.getMonth()+1).toString().padStart(2,'0')+'/'+fecha.getFullYear():'—';
+    const marca=vtMarca(v)||'—';
+    const prod=vtProd(v)||'—';
+    const sku=vtSKU(v)||'—';
+    const cel=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'—');
+    const gmv=vtGMV(v);
+    const tipo=vtIsOrg(v)?'Orgánico':vtIsAds(v)?'Shop Ads':(vtOrderType(v)||'—');
+    const comm=vtComm(v);
+    const bg=i%2===0?'#FFFFFF':'#F8FAFC';
+    const tdOId=C.col_orderid?`<td style="padding:6px 8px;font-family:monospace;font-size:10px;color:#64748B;white-space:nowrap">${oid}</td>`:'';
+    const tdFec=C.col_fecha?`<td style="padding:6px 8px;font-size:11px;white-space:nowrap">${fechaStr}</td>`:'';
+    const tdMrc=C.col_marca?`<td style="padding:6px 8px;font-size:11px;font-weight:600">${marca.slice(0,16)}</td>`:'';
+    const tdPrd=C.col_producto?`<td style="padding:6px 8px;font-size:11px">${prod.slice(0,22)}</td>`:'';
+    const tdSku=C.col_sku?`<td style="padding:6px 8px;font-size:10px;color:#94A3B8">${sku}</td>`:'';
+    const tdCel=C.col_celula?`<td style="padding:6px 8px;font-size:11px">${cel}</td>`:'';
+    const tdGmv=C.col_gmv?`<td style="padding:6px 8px;font-size:11px;text-align:right;font-weight:700;color:#0F6E56">${gmv>0?fmtM(gmv):'—'}</td>`:'';
+    const tdTip=C.col_tipo?`<td style="padding:6px 8px;font-size:11px;color:${vtIsOrg(v)?'#0F6E56':vtIsAds(v)?'#185FA5':'#94A3B8'}">${tipo}</td>`:'';
+    const tdCom=C.col_comision?`<td style="padding:6px 8px;font-size:11px;text-align:right;color:#5B21B6">${comm>0?fmtM(comm):'—'}</td>`:'';
+    return`<tr style="background:${bg};border-bottom:1px solid #F1F5F9">${tdOId}${tdFec}${tdMrc}${tdPrd}${tdSku}${tdCel}${tdGmv}${tdTip}${tdCom}</tr>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<title>Orders ID — ${marcasLabel}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#F1F5F9;color:#0F1729;font-size:13px}
+.page{max-width:1100px;margin:0 auto;padding:24px 20px}
+.header{background:linear-gradient(135deg,#0C447C,#185FA5);color:#fff;border-radius:14px;padding:28px 32px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px}
+.header-left h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.header-left p{font-size:12px;opacity:.8;margin-top:4px}
+.header-right{text-align:right;font-size:11px;opacity:.85}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:14px;text-align:center;border-top:3px solid currentColor;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.kpi-v{font-size:20px;font-weight:800;line-height:1.1}
+.kpi-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94A3B8;margin-top:3px}
+.section{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:0;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden}
+.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;padding:14px 16px 10px;border-bottom:1px solid #F1F5F9;background:#FAFBFC}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94A3B8;padding:8px 8px;border-bottom:2px solid #F1F5F9;text-align:left;background:#FAFBFC}
+.footer{text-align:center;padding:16px;color:#94A3B8;font-size:10px;margin-top:12px;border-top:1px solid #E2E8F0}
+.filtros-tag{display:inline-block;background:#EBF3FD;color:#185FA5;border:1px solid #BFDBFE;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:500;margin-bottom:16px}
+@media print{
+  body{background:#fff}
+  button{display:none!important}
+  .page{padding:8px}
+  .header{border-radius:8px}
+}
+</style></head><body>
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <h1>📦 Orders ID</h1>
+      <p>${marcasLabel} · ${rows.length.toLocaleString()} órdenes</p>
+    </div>
+    <div class="header-right">
+      <div style="font-weight:700;font-size:13px">SCALIFY</div>
+      <div>Generado: ${fechaRep}</div>
+    </div>
+  </div>
+
+  <div class="filtros-tag">🔍 Filtros: ${filtrosLabel}</div>
+
+  ${C.sec_kpis?`<div class="kpis">
+    <div class="kpi" style="color:#0F6E56"><div class="kpi-v" style="color:#0F6E56">${fmtM(gmvTotal)}</div><div class="kpi-l">GMV Total</div></div>
+    <div class="kpi" style="color:#0F6E56"><div class="kpi-v" style="color:#0F6E56">${fmtM(gmvOrg)}</div><div class="kpi-l">GMV Orgánico</div></div>
+    <div class="kpi" style="color:#185FA5"><div class="kpi-v" style="color:#185FA5">${fmtM(gmvAds)}</div><div class="kpi-l">GMV Ads</div></div>
+    <div class="kpi" style="color:#5B21B6"><div class="kpi-v" style="color:#5B21B6">${fmtM(commTotal)}</div><div class="kpi-l">Comisión Total</div></div>
+    <div class="kpi" style="color:#185FA5"><div class="kpi-v" style="color:#185FA5">${rows.length.toLocaleString()}</div><div class="kpi-l">Órdenes</div></div>
+    <div class="kpi" style="color:#B45309"><div class="kpi-v" style="color:#B45309">${gmvTotal>0?((commTotal/gmvTotal)*100).toFixed(1)+'%':'—'}</div><div class="kpi-l">% Comisión</div></div>
+  </div>`:''}
+
+  <div class="section">
+    <div class="sec-title">Detalle de órdenes (${rows.length.toLocaleString()})</div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr>${theadRow}</tr></thead>
+      <tbody>${filas}</tbody>
+      <tfoot><tr style="background:#F8FAFC;border-top:2px solid #E2E8F0">
+        ${tfootLabel}${tfootGmv}${tfootTip}${tfootCom}
+      </tr></tfoot>
+    </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    SCALIFY · Orders ID Export · ${fechaRep} · ${rows.length} órdenes · GMV Total ${fmtM(gmvTotal)}
+  </div>
+  <div style="text-align:center;margin-top:10px">
+    <button onclick="window.print()" style="background:#0C447C;color:#fff;border:none;padding:10px 28px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🖨️ Imprimir / Guardar PDF</button>
+  </div>
+</div>
+</body></html>`;
+
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+  else alert('Habilitá los popups del navegador para generar el PDF.');
 }
 
 // ── Init análisis ─────────────────────────────────────────────────
