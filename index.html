@@ -2077,6 +2077,7 @@ const vtMes    = v=>{
   return s?s.slice(0,7):'';
 };;
 const vtCuenta = v=>vg(v,'Cuenta_Archivo','Cuenta Archivo','Account')||'';
+const vtVideoLink = v=>vg(v,'Video_Link','VideoLink','video_link','Content_Link','ContentLink','Content Link','Video Link','Creator_Video_Link','Enlace_Video','Link_Video','URL_Video','url_video')||'';
 const vtFecha = v => parseFechaVenta_(v);
 
 // Calcular rango de período
@@ -3902,6 +3903,8 @@ function anExportOrdersPDF_(){
     {id:'col_producto', label:'Producto',                 checked:true},
     {id:'col_sku',      label:'SKU',                      checked:true},
     {id:'col_celula',   label:'Célula',                   checked:true},
+    {id:'col_cuenta',   label:'Cuenta TikTok',            checked:true},
+    {id:'col_videolink',label:'Link al video',            checked:true},
     {id:'col_gmv',      label:'GMV',                      checked:true},
     {id:'col_tipo',     label:'Tipo',                     checked:true},
     {id:'col_comision', label:'Comisión',                 checked:true},
@@ -3909,7 +3912,7 @@ function anExportOrdersPDF_(){
 }
 
 function _generarPDFOrders_(cfg){
-  const C=cfg||{sec_kpis:true,col_orderid:true,col_fecha:true,col_marca:true,col_producto:true,col_sku:true,col_celula:true,col_gmv:true,col_tipo:true,col_comision:true};
+  const C=cfg||{sec_kpis:true,col_orderid:true,col_fecha:true,col_marca:true,col_producto:true,col_sku:true,col_celula:true,col_cuenta:true,col_videolink:true,col_gmv:true,col_tipo:true,col_comision:true};
   const ctrs=anGetCtrs();
   const skus=new Set(ctrs.map(c=>(c.SKU||'').trim()).filter(Boolean));
   const rango=anGetRango();
@@ -3955,13 +3958,15 @@ function _generarPDFOrders_(cfg){
   const thPrd=C.col_producto?`<th>Producto</th>`:'';
   const thSku=C.col_sku?`<th>SKU</th>`:'';
   const thCel=C.col_celula?`<th>Célula</th>`:'';
+  const thCta=C.col_cuenta?`<th>Cuenta TikTok</th>`:'';
+  const thVid=C.col_videolink?`<th>Link Video</th>`:'';
   const thGmv=C.col_gmv?`<th style="text-align:right">GMV</th>`:'';
   const thTip=C.col_tipo?`<th>Tipo</th>`:'';
   const thCom=C.col_comision?`<th style="text-align:right">Comisión</th>`:'';
-  const theadRow=thOId+thFec+thMrc+thPrd+thSku+thCel+thGmv+thTip+thCom;
+  const theadRow=thOId+thFec+thMrc+thPrd+thSku+thCel+thCta+thVid+thGmv+thTip+thCom;
 
   // colspan para el pie: columnas antes de GMV
-  const preGmvCount=[C.col_orderid,C.col_fecha,C.col_marca,C.col_producto,C.col_sku,C.col_celula].filter(Boolean).length;
+  const preGmvCount=[C.col_orderid,C.col_fecha,C.col_marca,C.col_producto,C.col_sku,C.col_celula,C.col_cuenta,C.col_videolink].filter(Boolean).length;
   const tfootLabel=preGmvCount>0?`<td colspan="${preGmvCount}" style="padding:8px 8px;font-size:11px;font-weight:700;color:#334155">TOTAL (${rows.length} órdenes)</td>`:'';
   const tfootGmv=C.col_gmv?`<td style="padding:8px 8px;font-size:12px;font-weight:800;color:#0F6E56;text-align:right">${fmtM(gmvTotal)}</td>`:'';
   const tfootTip=C.col_tipo?`<td></td>`:'';
@@ -3979,16 +3984,20 @@ function _generarPDFOrders_(cfg){
     const tipo=vtIsOrg(v)?'Orgánico':vtIsAds(v)?'Shop Ads':(vtOrderType(v)||'—');
     const comm=vtComm(v);
     const bg=i%2===0?'#FFFFFF':'#F8FAFC';
+    const cuenta=vtCuenta(v)||'—';
+    const vlink=vtVideoLink(v)||'';
     const tdOId=C.col_orderid?`<td style="padding:6px 8px;font-family:monospace;font-size:10px;color:#64748B;white-space:nowrap">${oid}</td>`:'';
     const tdFec=C.col_fecha?`<td style="padding:6px 8px;font-size:11px;white-space:nowrap">${fechaStr}</td>`:'';
     const tdMrc=C.col_marca?`<td style="padding:6px 8px;font-size:11px;font-weight:600">${marca.slice(0,16)}</td>`:'';
     const tdPrd=C.col_producto?`<td style="padding:6px 8px;font-size:11px">${prod.slice(0,22)}</td>`:'';
     const tdSku=C.col_sku?`<td style="padding:6px 8px;font-size:10px;color:#94A3B8">${sku}</td>`:'';
     const tdCel=C.col_celula?`<td style="padding:6px 8px;font-size:11px">${cel}</td>`:'';
+    const tdCta=C.col_cuenta?`<td style="padding:6px 8px;font-size:11px;color:#475569">${cuenta}</td>`:'';
+    const tdVid=C.col_videolink?`<td style="padding:6px 8px;font-size:10px;white-space:nowrap">${vlink?`<a href="${vlink}" target="_blank" style="color:#185FA5;font-weight:600;text-decoration:underline">${vlink.length>30?vlink.slice(0,30)+'…':vlink}</a>`:'<span style="color:#CBD5E1">—</span>'}</td>`:'';
     const tdGmv=C.col_gmv?`<td style="padding:6px 8px;font-size:11px;text-align:right;font-weight:700;color:#0F6E56">${gmv>0?fmtM(gmv):'—'}</td>`:'';
     const tdTip=C.col_tipo?`<td style="padding:6px 8px;font-size:11px;color:${vtIsOrg(v)?'#0F6E56':vtIsAds(v)?'#185FA5':'#94A3B8'}">${tipo}</td>`:'';
     const tdCom=C.col_comision?`<td style="padding:6px 8px;font-size:11px;text-align:right;color:#5B21B6">${comm>0?fmtM(comm):'—'}</td>`:'';
-    return`<tr style="background:${bg};border-bottom:1px solid #F1F5F9">${tdOId}${tdFec}${tdMrc}${tdPrd}${tdSku}${tdCel}${tdGmv}${tdTip}${tdCom}</tr>`;
+    return`<tr style="background:${bg};border-bottom:1px solid #F1F5F9">${tdOId}${tdFec}${tdMrc}${tdPrd}${tdSku}${tdCel}${tdCta}${tdVid}${tdGmv}${tdTip}${tdCom}</tr>`;
   }).join('');
 
   const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
