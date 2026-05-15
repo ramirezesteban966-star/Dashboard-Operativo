@@ -3661,8 +3661,9 @@ function ejecutarCfgInforme_(){
   const cfg={};
   _cfgInformeCols.forEach(c=>{cfg[c.id]=document.getElementById('cfg-col-'+c.id)?.checked??c.checked;});
   _cfgInformeMemoria[_cfgInformeKey]=cfg; // guardar para la próxima vez
+  const cb=_cfgInformeCallback;   // guardar ref ANTES de cerrar (cerrar pone callback en null)
   cerrarCfgInforme_();
-  if(_cfgInformeCallback) _cfgInformeCallback(cfg);
+  if(cb) cb(cfg);
 }
 function selTodosInforme(v){document.querySelectorAll('.informe-chk').forEach(cb=>cb.checked=v);}
 function generarInformeDesdeModal(){
@@ -3670,11 +3671,24 @@ function generarInformeDesdeModal(){
   const ctrs=(window.__modalInformeCtrs||[]).filter((_,i)=>sel.includes(i));
   cerrarModalInforme();
   if(!ctrs.length){alert('Seleccioná al menos un contrato.');return;}
-  _generarInformePorCtrs(ctrs);
+  if(!allData.length){alert('Cargá los datos de ClickUp primero.');return;}
+  abrirCfgInforme_('Personalizar Informe Agrupado','informe_agrupado',[
+    {id:'sec_ventas',   label:'💰 KPIs de ventas',        checked:true},
+    {id:'sec_videos',   label:'📋 Tabla de videos',        checked:true},
+    {id:'col_num',      label:'# Número',                  checked:true},
+    {id:'col_nombre',   label:'Nombre del video',          checked:true},
+    {id:'col_cuenta',   label:'Cuenta',                    checked:true},
+    {id:'col_producto', label:'Producto',                  checked:true},
+    {id:'col_fecha',    label:'Fecha publicado',           checked:true},
+    {id:'col_link',     label:'Link del post',             checked:true},
+    {id:'sec_orders',   label:'📦 Order IDs',              checked:true},
+  ], cfg=>_generarInformePorCtrs(ctrs,cfg));
 }
 
-function _generarInformePorCtrs(ctrs){
+function _generarInformePorCtrs(ctrs, cfg){
   if(!allData.length){alert('Cargá los datos de ClickUp primero.');return;}
+
+  const C=cfg||{sec_ventas:true,sec_videos:true,col_num:true,col_nombre:true,col_cuenta:true,col_producto:true,col_fecha:true,col_link:true,sec_orders:true};
 
   const marcas=[...new Set(ctrs.map(c=>c.MARCA_NOMBRE||'').filter(Boolean))];
   const cels=[...new Set(ctrs.map(c=>c.CELULA_ID||'').filter(Boolean))];
@@ -3707,7 +3721,7 @@ function _generarInformePorCtrs(ctrs){
     const vSku=(vg(v,'SKU_Scalify','Sku_Scalify','SKU_SCALIFY','sku_scalify')||'').trim();
     if(!skuSet.has(vSku)) return false;
     const vCelRaw=(vg(v,'Celula_Scalify','celula_scalify','CELULA_SCALIFY','Celula')||'').trim();
-    if(!vCelRaw) return true; // sin célula en ventas → incluir si SKU coincide
+    if(!vCelRaw) return true;
     return skuCelPairs.has(`${vSku}||${normCelPosts(vCelRaw)}`);
   });
 
@@ -3724,18 +3738,48 @@ function _generarInformePorCtrs(ctrs){
   const today=new Date();
   const fechaRep=today.getDate().toString().padStart(2,'0')+'/'+(today.getMonth()+1).toString().padStart(2,'0')+'/'+today.getFullYear();
 
+  // Cabeceras y filas de video condicionales
+  const thNum=C.col_num?`<th style="width:30px">#</th>`:'';
+  const thNom=C.col_nombre?`<th>Nombre del video</th>`:'';
+  const thCta=C.col_cuenta?`<th style="width:110px">Cuenta</th>`:'';
+  const thPrd=C.col_producto?`<th style="width:120px">Producto</th>`:'';
+  const thFec=C.col_fecha?`<th style="width:90px">Publicado</th>`:'';
+  const thLnk=C.col_link?`<th>Link</th>`:'';
+  const thRow=thNum+thNom+thCta+thPrd+thFec+thLnk;
+
   const videosHtml=allVideosCiclo.map((r,i)=>{
     const pl=getPostLink(r), fecha=r.FECHA_PUBLICADO||r._fd||'';
-    return`<tr style="border-bottom:1px solid #F1F5F9">
-      <td style="padding:8px 6px;text-align:center;font-size:11px;color:#94A3B8;width:30px">${i+1}</td>
-      <td style="padding:8px 6px;font-size:12px;color:#334155">${(r.NOMBRE||'—').slice(0,45)}</td>
-      <td style="padding:8px 6px;font-size:11px;color:#64748B;white-space:nowrap">${r.CUENTA||'—'}</td>
-      <td style="padding:8px 6px;font-size:11px;color:#64748B;white-space:nowrap">${(r._producto||'').slice(0,20)}</td>
-      <td style="padding:8px 6px;font-size:11px;color:#94A3B8;white-space:nowrap">${fecha}</td>
-      <td style="padding:8px 6px;white-space:nowrap">${pl?`<a href="${pl}" target="_blank" style="color:#185FA5;font-weight:600;font-size:11px;text-decoration:underline">${pl.length>35?pl.slice(0,35)+'…':pl}</a>`:'<span style="color:#CBD5E1;font-size:11px">—</span>'}</td>
-    </tr>`;
+    const tdNum=C.col_num?`<td style="padding:8px 6px;text-align:center;font-size:11px;color:#94A3B8;width:30px">${i+1}</td>`:'';
+    const tdNom=C.col_nombre?`<td style="padding:8px 6px;font-size:12px;color:#334155">${(r.NOMBRE||'—').slice(0,45)}</td>`:'';
+    const tdCta=C.col_cuenta?`<td style="padding:8px 6px;font-size:11px;color:#64748B;white-space:nowrap">${r.CUENTA||'—'}</td>`:'';
+    const tdPrd=C.col_producto?`<td style="padding:8px 6px;font-size:11px;color:#64748B;white-space:nowrap">${(r._producto||'').slice(0,20)}</td>`:'';
+    const tdFec=C.col_fecha?`<td style="padding:8px 6px;font-size:11px;color:#94A3B8;white-space:nowrap">${fecha}</td>`:'';
+    const tdLnk=C.col_link?`<td style="padding:8px 6px;white-space:nowrap">${pl?`<a href="${pl}" target="_blank" style="color:#185FA5;font-weight:600;font-size:11px;text-decoration:underline">${pl.length>35?pl.slice(0,35)+'…':pl}</a>`:'<span style="color:#CBD5E1;font-size:11px">—</span>'}</td>`:'';
+    return`<tr style="border-bottom:1px solid #F1F5F9">${tdNum}${tdNom}${tdCta}${tdPrd}${tdFec}${tdLnk}</tr>`;
   }).join('');
   const ordersHtml=orderIds.slice(0,100).map(oid=>`<div style="font-family:monospace;font-size:11px;padding:5px 8px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;color:#334155;user-select:all">${oid}</div>`).join('');
+
+  // Secciones condicionales pre-compiladas (evita backticks triples en el template)
+  const secVentasHtml=C.sec_ventas?`<div class="kpis">
+  <div class="kpi" style="color:#185FA5"><div class="kpi-v" style="color:#185FA5">${fmtM(gmvTot)}</div><div class="kpi-l">GMV Total</div></div>
+  <div class="kpi" style="color:#0F6E56"><div class="kpi-v" style="color:#0F6E56">${fmtM(gmvOrg)}</div><div class="kpi-l">GMV Orgánico</div></div>
+  <div class="kpi" style="color:#2563EB"><div class="kpi-v" style="color:#2563EB">${fmtM(gmvAds)}</div><div class="kpi-l">GMV Shop Ads</div></div>
+  <div class="kpi" style="color:#5B21B6"><div class="kpi-v" style="color:#5B21B6">${orderIds.length}</div><div class="kpi-l"># Órdenes</div></div>
+  <div class="kpi" style="color:#B45309"><div class="kpi-v" style="color:#B45309">${units.toLocaleString()}</div><div class="kpi-l">Unidades</div></div>
+  <div class="kpi" style="color:#1E7E3A"><div class="kpi-v" style="color:#1E7E3A">${totalPosteados}/${totalVideosMes}</div><div class="kpi-l">Videos</div></div>
+  <div class="kpi" style="color:#0F6E56"><div class="kpi-v" style="color:#0F6E56">$${ingreso.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="kpi-l">Ingreso</div></div>
+</div>`:'';
+
+  const secVideosHtml=C.sec_videos?(allVideosCiclo.length?`<div class="section">
+  <div class="sec-title">Videos — ${totalPosteados} de ${totalVideosMes} publicados (${pct}%)</div>
+  <table><thead><tr>${thRow}</tr></thead><tbody>${videosHtml}</tbody></table>
+</div>`:`<div class="section"><div class="sec-title">Videos</div><div style="color:#94A3B8;font-size:12px;padding:16px 0;text-align:center">Sin videos en este ciclo aún.</div></div>`):'';
+
+  const secOrdersHtml=C.sec_orders&&orderIds.length?`<div class="section">
+  <div class="sec-title">Order IDs — ${orderIds.length} órdenes</div>
+  <div class="orders-grid">${ordersHtml}</div>
+  ${orderIds.length>100?`<div style="font-size:11px;color:#94A3B8;margin-top:10px">Mostrando primeras 100 de ${orderIds.length} órdenes.</div>`:''}
+</div>`:'';
 
   const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -3774,26 +3818,9 @@ th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
     <div style="font-size:11px;opacity:.65;margin-top:3px">${totalPosteados}/${totalVideosMes} videos · ${units.toLocaleString()} unidades</div>
   </div>
 </div>
-<div class="kpis">
-  <div class="kpi" style="color:#185FA5"><div class="kpi-v" style="color:#185FA5">${fmtM(gmvTot)}</div><div class="kpi-l">GMV Total</div></div>
-  <div class="kpi" style="color:#0F6E56"><div class="kpi-v" style="color:#0F6E56">${fmtM(gmvOrg)}</div><div class="kpi-l">GMV Orgánico</div></div>
-  <div class="kpi" style="color:#2563EB"><div class="kpi-v" style="color:#2563EB">${fmtM(gmvAds)}</div><div class="kpi-l">GMV Shop Ads</div></div>
-  <div class="kpi" style="color:#5B21B6"><div class="kpi-v" style="color:#5B21B6">${orderIds.length}</div><div class="kpi-l"># Órdenes</div></div>
-  <div class="kpi" style="color:#B45309"><div class="kpi-v" style="color:#B45309">${units.toLocaleString()}</div><div class="kpi-l">Unidades</div></div>
-  <div class="kpi" style="color:#1E7E3A"><div class="kpi-v" style="color:#1E7E3A">${totalPosteados}/${totalVideosMes}</div><div class="kpi-l">Videos</div></div>
-  <div class="kpi" style="color:#0F6E56"><div class="kpi-v" style="color:#0F6E56">$${ingreso.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="kpi-l">Ingreso</div></div>
-</div>
-<div class="section">
-  <div class="sec-title">Videos — ${totalPosteados} de ${totalVideosMes} publicados (${pct}%)</div>
-  ${allVideosCiclo.length?`<table><thead><tr>
-    <th style="width:30px">#</th><th>Nombre del video</th><th style="width:110px">Cuenta</th><th style="width:120px">Producto</th><th style="width:90px">Publicado</th><th>Link</th>
-  </tr></thead><tbody>${videosHtml}</tbody></table>`:'<div style="color:#94A3B8;font-size:12px;padding:16px 0;text-align:center">Sin videos en este ciclo aún.</div>'}
-</div>
-${orderIds.length?`<div class="section">
-  <div class="sec-title">Order IDs — ${orderIds.length} órdenes</div>
-  <div class="orders-grid">${ordersHtml}</div>
-  ${orderIds.length>100?`<div style="font-size:11px;color:#94A3B8;margin-top:10px">Mostrando primeras 100 de ${orderIds.length} órdenes.</div>`:''}
-</div>`:''}
+${secVentasHtml}
+${secVideosHtml}
+${secOrdersHtml}
 <div class="footer">Generado por <strong>SCALIFY Dashboard</strong> · ${fechaRep}<br>Informe confidencial preparado exclusivamente para <strong>${marcaLabel}</strong>.</div>
 </div></body></html>`;
 
