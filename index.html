@@ -715,6 +715,12 @@ tr:hover td{background:var(--blue-light)}
           <button class="btn btn-sm" style="background:var(--red);color:#fff;border-color:var(--red)" onclick="vtLimpiarFiltros()">✕ Limpiar</button>
           <button class="btn btn-sm" onclick="vtExportarCSV()">↓ CSV</button>
         </div>
+        <div class="vt-filtros-row" style="align-items:center;gap:6px">
+          <span class="strip-lbl">Tipo:</span>
+          <button class="spill on" data-vc="todos" onclick="vtFiltrarConvenio('',this)">Todos</button>
+          <button class="spill"    data-vc="con"   onclick="vtFiltrarConvenio('con',this)">✅ Con convenio</button>
+          <button class="spill"    data-vc="sin"   onclick="vtFiltrarConvenio('sin',this)">○ Sin convenio</button>
+        </div>
         <!-- Chips de filtros activos -->
         <div class="vt-chips" id="vt-chips" style="display:none"></div>
       </div>
@@ -724,9 +730,10 @@ tr:hover td{background:var(--blue-light)}
 
       <!-- ── SELECTOR DE VISTA ── -->
       <div class="vt-vista-tabs">
-        <button class="vt-vista-tab active" data-vista="resumen" onclick="vtCambiarVista('resumen',this)">📊 Resumen</button>
-        <button class="vt-vista-tab" data-vista="ciclos"  onclick="vtCambiarVista('ciclos',this)">🔄 Por ciclo de contrato</button>
-        <button class="vt-vista-tab" data-vista="detalle" onclick="vtCambiarVista('detalle',this)">📋 Detalle completo</button>
+        <button class="vt-vista-tab active" data-vista="resumen"   onclick="vtCambiarVista('resumen',this)">📊 Resumen</button>
+        <button class="vt-vista-tab" data-vista="ciclos"    onclick="vtCambiarVista('ciclos',this)">🔄 Por ciclo de contrato</button>
+        <button class="vt-vista-tab" data-vista="detalle"   onclick="vtCambiarVista('detalle',this)">📋 Detalle completo</button>
+        <button class="vt-vista-tab" data-vista="gmvvideo"  onclick="vtCambiarVista('gmvvideo',this)">📈 GMV por video</button>
       </div>
 
       <!-- ── VISTA: RESUMEN ── -->
@@ -765,6 +772,26 @@ tr:hover td{background:var(--blue-light)}
           Muestra el GMV generado durante cada ciclo de contrato. <strong>Verde</strong> = ciclo activo en Gerencia Comercial. <strong>Gris</strong> = sin contrato asociado.
         </div>
         <div id="vt-ciclos-content"></div>
+      </div>
+
+      <!-- ── VISTA: GMV POR VIDEO ── -->
+      <div id="vt-vista-gmvvideo" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 4px">
+          <span class="strip-lbl">Agrupar por:</span>
+          <select id="vt-gmvv-grupo" onchange="vtRenderGMVVideo(vtFiltrar())" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+            <option value="sku">Producto / SKU</option>
+            <option value="marca">Marca</option>
+            <option value="celula">Célula</option>
+          </select>
+          <span class="strip-lbl" style="margin-left:8px">Ordenar:</span>
+          <select id="vt-gmvv-orden" onchange="vtRenderGMVVideo(vtFiltrar())" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+            <option value="ratio_desc">GMV/video ↓</option>
+            <option value="gmv_desc">GMV total ↓</option>
+            <option value="videos_desc">Videos publicados ↓</option>
+            <option value="nombre_az">Nombre A→Z</option>
+          </select>
+        </div>
+        <div id="vt-gmvv-content"></div>
       </div>
 
       <!-- ── VISTA: DETALLE ── -->
@@ -2098,6 +2125,14 @@ function vtGetRango(){
 }
 
 let vtFiltroCelula='';
+let vtFiltroConvenio=''; // 'con' | 'sin' | ''
+
+function vtFiltrarConvenio(val, btn){
+  document.querySelectorAll('[data-vc]').forEach(b=>b.className='spill');
+  if(btn) btn.className='spill on';
+  vtFiltroConvenio=val;
+  vtRenderAll();
+}
 
 function vtOnCelulaCambia(){
   vtFiltroCelula=document.getElementById('vt-sel-celula').value;
@@ -2124,6 +2159,11 @@ function vtFiltrar(){
     if(prod&&vtProd(v).toLowerCase()!==prod) return false;
     if(cuenta&&vtCuenta(v).toLowerCase()!==cuenta) return false;
     if(celula){const cv=String(vg(v,'Celula_Scalify','celula_scalify','Celula')||'').toLowerCase();if(cv!==celula) return false;}
+    if(vtFiltroConvenio){
+      const tieneConvenio=vtSKU(v)&&contratosData.some(c=>(c.SKU||'')===(vtSKU(v)||''));
+      if(vtFiltroConvenio==='con'&&!tieneConvenio) return false;
+      if(vtFiltroConvenio==='sin'&&tieneConvenio) return false;
+    }
     return true;
   });
 }
@@ -2179,7 +2219,7 @@ function vtPoblarSelectores(){
 }
 
 function vtLimpiarFiltros(){
-  vtFiltroMarca=''; vtFiltroProd=''; vtFiltroCuenta=''; vtFiltroCelula='';
+  vtFiltroMarca=''; vtFiltroProd=''; vtFiltroCuenta=''; vtFiltroCelula=''; vtFiltroConvenio='';
   document.getElementById('vt-sel-marca').value='';
   document.getElementById('vt-sel-producto').value='';
   document.getElementById('vt-sel-cuenta').value='';
@@ -2188,6 +2228,8 @@ function vtLimpiarFiltros(){
   document.getElementById('vt-dto').value='';
   document.querySelectorAll('[data-vp]').forEach(b=>b.className='spill');
   document.querySelector('[data-vp="todo"]').className='spill on';
+  document.querySelectorAll('[data-vc]').forEach(b=>b.className='spill');
+  const vcTodos=document.querySelector('[data-vc="todos"]');if(vcTodos)vcTodos.className='spill on';
   vtPeriodo='todo';
   document.getElementById('vt-custom-range').classList.add('hidden');
   vtRenderAll();
@@ -2197,12 +2239,13 @@ function vtCambiarVista(vista,btn){
   document.querySelectorAll('.vt-vista-tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
   vtVista=vista;
-  ['resumen','ciclos','detalle'].forEach(v=>{
+  ['resumen','ciclos','detalle','gmvvideo'].forEach(v=>{
     const el=document.getElementById('vt-vista-'+v);
     if(el) el.classList[v===vista?'remove':'add']('hidden');
   });
-  if(vista==='ciclos') vtRenderCiclos();
-  if(vista==='detalle') vtRenderDetalle();
+  if(vista==='ciclos')   vtRenderCiclos();
+  if(vista==='detalle')  vtRenderDetalle();
+  if(vista==='gmvvideo') vtRenderGMVVideo(vtFiltrar());
 }
 
 function vtOrdenar(datos){
@@ -2227,9 +2270,10 @@ function vtRenderAll(){
   vtActualizarChips();
   const datos=vtOrdenar(vtFiltrar());
   vtRenderKPIs(datos);
-  if(vtVista==='resumen') vtRenderResumen(datos);
-  if(vtVista==='ciclos')  vtRenderCiclos(datos);
-  if(vtVista==='detalle') vtRenderDetalle();
+  if(vtVista==='resumen')  vtRenderResumen(datos);
+  if(vtVista==='ciclos')   vtRenderCiclos(datos);
+  if(vtVista==='detalle')  vtRenderDetalle();
+  if(vtVista==='gmvvideo') vtRenderGMVVideo(datos);
 }
 
 function vtActualizarChips(){
@@ -2238,6 +2282,7 @@ function vtActualizarChips(){
   if(vtFiltroMarca) items.push({label:'Marca: '+vtFiltroMarca, clear:()=>{vtFiltroMarca='';document.getElementById('vt-sel-marca').value='';vtRenderAll();}});
   if(vtFiltroProd)  items.push({label:'Producto: '+(vtFiltroProd.length>20?vtFiltroProd.slice(0,19)+'…':vtFiltroProd), clear:()=>{vtFiltroProd='';document.getElementById('vt-sel-producto').value='';vtRenderAll();}});
   if(vtFiltroCuenta) items.push({label:'Cuenta: '+vtFiltroCuenta, clear:()=>{vtFiltroCuenta='';document.getElementById('vt-sel-cuenta').value='';vtRenderAll();}});
+  if(vtFiltroConvenio) items.push({label:'Tipo: '+(vtFiltroConvenio==='con'?'Con convenio':'Sin convenio'), clear:()=>{vtFiltroConvenio='';document.querySelectorAll('[data-vc]').forEach(b=>b.className='spill');const vct=document.querySelector('[data-vc="todos"]');if(vct)vct.className='spill on';vtRenderAll();}});
   chips.style.display=items.length?'flex':'none';
   chips.innerHTML=items.map((it,i)=>`<span class="vt-chip" onclick="vtChipClear(${i})"><span>${it.label}</span><span>×</span></span>`).join('');
   chips._items=items;
@@ -2407,6 +2452,122 @@ function vtClickBarLabel(panelId, valor){
     document.getElementById('vt-sel-cuenta').value=vtFiltroCuenta;
   }
   vtRenderAll();
+}
+
+// ── VISTA GMV POR VIDEO ──────────────────────────────────────
+function vtRenderGMVVideo(datos){
+  const el=document.getElementById('vt-gmvv-content');
+  if(!el) return;
+  const grupo=document.getElementById('vt-gmvv-grupo')?.value||'sku';
+  const orden=document.getElementById('vt-gmvv-orden')?.value||'ratio_desc';
+
+  // Agrupar ventas por la dimensión seleccionada
+  const map=new Map();
+  datos.forEach(v=>{
+    let key, label, brand='';
+    if(grupo==='sku'){
+      key=vtSKU(v)||vtProd(v)||'Sin SKU';
+      label=vtProd(v)||key;
+      brand=vtMarca(v);
+    } else if(grupo==='marca'){
+      key=vtMarca(v)||'Sin marca';
+      label=key;
+    } else {
+      key=String(vg(v,'Celula_Scalify','celula_scalify','Celula')||'').trim()||'Sin célula';
+      label=key;
+      brand=vtMarca(v);
+    }
+    if(!map.has(key)) map.set(key,{key,label,brand,gmv:0,units:0});
+    const r=map.get(key);
+    r.gmv+=vtGMV(v);
+    r.units+=vtUnits(v);
+  });
+
+  // Obtener cantidad de videos publicados por grupo
+  // Fuente 1: allData (ClickUp) — más preciso
+  // Fuente 2: contratosData sumando POSTEADOS_CICLO — fallback
+  const hayClickUp=allData&&allData.length>0;
+  const hayContratos=contratosData&&contratosData.length>0;
+
+  const rows=[...map.values()].map(row=>{
+    let videos=null;
+    if(hayClickUp){
+      const est=estadosQueCuentan||new Set(['publicado','en_proceso_publicacion','complete','active']);
+      videos=allData.filter(t=>{
+        const e=(t.ESTADO||t.estado||t.status||'').toLowerCase();
+        if(!est.has(e)) return false;
+        if(grupo==='sku')    return (t.SKU_Scalify||t.SKU||'')===(row.key);
+        if(grupo==='marca')  return (t.MARCA_NOMBRE||t.Marca_Nombre||t.marca||'')===(row.key);
+        if(grupo==='celula') return (t.CELULA_ID||t.Celula_ID||t.celula||'')===(row.key);
+        return false;
+      }).length;
+    }
+    if((videos===null||videos===0)&&hayContratos){
+      const sum=contratosData
+        .filter(c=>{
+          if(grupo==='sku')    return (c.SKU||'')===(row.key);
+          if(grupo==='marca')  return (c.MARCA_NOMBRE||'')===(row.key);
+          if(grupo==='celula') return (c.CELULA_ID||'')===(row.key);
+          return false;
+        })
+        .reduce((s,c)=>s+(parseInt(c.POSTEADOS_CICLO)||0),0);
+      if(sum>0) videos=sum;
+    }
+    const ratio=(videos&&videos>0)?row.gmv/videos:null;
+    return {...row,videos,ratio};
+  });
+
+  // Ordenar
+  rows.sort((a,b)=>{
+    switch(orden){
+      case 'ratio_desc':  return (b.ratio??-Infinity)-(a.ratio??-Infinity);
+      case 'gmv_desc':    return b.gmv-a.gmv;
+      case 'videos_desc': return (b.videos??0)-(a.videos??0);
+      case 'nombre_az':   return a.label.localeCompare(b.label);
+      default: return 0;
+    }
+  });
+
+  if(!rows.length){
+    el.innerHTML='<div class="alert alert-info">No hay datos con los filtros actuales.</div>';
+    return;
+  }
+
+  const maxRatio=Math.max(...rows.filter(r=>r.ratio!==null).map(r=>r.ratio),0);
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtUSD=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+  const colHdr=grupo==='sku'?'Producto / SKU':grupo==='marca'?'Marca':'Célula';
+
+  el.innerHTML=`
+  <div class="tpanel" style="margin-top:8px">
+    <table class="vtable" style="width:100%;table-layout:auto">
+      <thead><tr>
+        <th style="text-align:left">${colHdr}</th>
+        ${grupo==='sku'?'<th style="text-align:left;color:var(--text2)">Marca</th>':''}
+        <th style="text-align:right">GMV total</th>
+        <th style="text-align:right">Unidades</th>
+        <th style="text-align:right">Videos pub.</th>
+        <th style="text-align:right">GMV / video</th>
+        <th style="min-width:110px">Rendimiento</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(r=>{
+          const barPct=(r.ratio&&maxRatio>0)?Math.round(r.ratio/maxRatio*100):0;
+          const ratioColor=r.ratio?r.ratio>=maxRatio*0.6?'var(--green)':r.ratio>=maxRatio*0.3?'var(--amber)':'var(--red)':'var(--text2)';
+          return `<tr>
+            <td style="font-weight:500">${esc(r.label)}</td>
+            ${grupo==='sku'?`<td style="color:var(--text2);font-size:12px">${esc(r.brand)}</td>`:''}
+            <td style="text-align:right;font-weight:600">${fmtUSD(r.gmv)}</td>
+            <td style="text-align:right;color:var(--text2)">${r.units.toLocaleString()}</td>
+            <td style="text-align:right">${r.videos!==null?r.videos:'<span style="color:var(--text2)">—</span>'}</td>
+            <td style="text-align:right;font-weight:700;color:${ratioColor}">${r.ratio!==null?fmtUSD(r.ratio):'<span style="color:var(--text2)">—</span>'}</td>
+            <td style="padding-right:8px">${r.ratio!==null?`<div style="background:var(--border);border-radius:4px;height:7px;overflow:hidden"><div style="background:${ratioColor};height:100%;width:${barPct}%;transition:width .3s"></div></div>`:'<span style="color:var(--text2);font-size:11px">Sin datos</span>'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    ${!hayClickUp&&!hayContratos?'<div class="alert alert-info" style="margin-top:10px">⚠️ Cargá los datos de ClickUp o Contratos para ver la cantidad de videos publicados y el ratio GMV/video.</div>':''}
+  </div>`;
 }
 
 // ── VISTA CICLOS ─────────────────────────────────────────────
