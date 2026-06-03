@@ -2475,7 +2475,6 @@ function vtRenderGMVVideo(datos){
     } else {
       key=String(vg(v,'Celula_Scalify','celula_scalify','Celula')||'').trim()||'Sin célula';
       label=key;
-      brand=vtMarca(v);
     }
     if(!map.has(key)) map.set(key,{key,label,brand,gmv:0,units:0});
     const r=map.get(key);
@@ -2483,25 +2482,56 @@ function vtRenderGMVVideo(datos){
     r.units+=vtUnits(v);
   });
 
-  // Obtener cantidad de videos publicados por grupo
-  // Fuente 1: allData (ClickUp) — más preciso
-  // Fuente 2: contratosData sumando POSTEADOS_CICLO — fallback
+  // Rango de fechas activo (para filtrar también los videos por período)
+  const rango=vtGetRango();
+
+  // Helper: parsear FECHA_PUBLICADO de allData (viene como string dd/MM/yyyy o similar)
+  function parseFechaPub(raw){
+    if(!raw) return null;
+    if(raw instanceof Date) return raw;
+    const s=String(raw).trim();
+    let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(m) return new Date(+m[3],+m[2]-1,+m[1]);
+    m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+    return null;
+  }
+
+  // Contar videos de allData filtrados por rango de fecha y grupo
+  // Campos exactos en allData: ESTADO, SKU_PRODUCTO, MARCA, CELULA, PRODUCTO, FECHA_PUBLICADO
   const hayClickUp=allData&&allData.length>0;
   const hayContratos=contratosData&&contratosData.length>0;
+  const est=estadosQueCuentan||new Set(['publicado','en_proceso_publicacion','complete','active']);
+
+  // Pre-filtrar allData por período si hay rango activo
+  const tareasEnPeriodo=hayClickUp
+    ? allData.filter(t=>{
+        const e=(t.ESTADO||'').toLowerCase();
+        if(!est.has(e)) return false;
+        if(!rango) return true; // sin filtro de fecha → todos
+        const f=parseFechaPub(t.FECHA_PUBLICADO);
+        return f&&f>=rango[0]&&f<=rango[1];
+      })
+    : [];
 
   const rows=[...map.values()].map(row=>{
     let videos=null;
+
+    // Fuente 1: allData (ClickUp) con campos exactos — respeta filtro de fecha
     if(hayClickUp){
-      const est=estadosQueCuentan||new Set(['publicado','en_proceso_publicacion','complete','active']);
-      videos=allData.filter(t=>{
-        const e=(t.ESTADO||t.estado||t.status||'').toLowerCase();
-        if(!est.has(e)) return false;
-        if(grupo==='sku')    return (t.SKU_Scalify||t.SKU||'')===(row.key);
-        if(grupo==='marca')  return (t.MARCA_NOMBRE||t.Marca_Nombre||t.marca||'')===(row.key);
-        if(grupo==='celula') return (t.CELULA_ID||t.Celula_ID||t.celula||'')===(row.key);
+      videos=tareasEnPeriodo.filter(t=>{
+        if(grupo==='sku')    return (t.SKU_PRODUCTO||'')===(row.key);
+        if(grupo==='marca')  return (t.MARCA||'')===(row.key);
+        if(grupo==='celula') return (t.CELULA||'')===(row.key);
         return false;
       }).length;
+      // Si no matcheó por SKU, intentar por nombre de producto
+      if(videos===0&&grupo==='sku'){
+        videos=tareasEnPeriodo.filter(t=>(t.PRODUCTO||'')===(row.label)).length;
+      }
     }
+
+    // Fuente 2: contratosData POSTEADOS_CICLO — solo si no hay ClickUp o dio 0
     if((videos===null||videos===0)&&hayContratos){
       const sum=contratosData
         .filter(c=>{
@@ -2513,6 +2543,7 @@ function vtRenderGMVVideo(datos){
         .reduce((s,c)=>s+(parseInt(c.POSTEADOS_CICLO)||0),0);
       if(sum>0) videos=sum;
     }
+
     const ratio=(videos&&videos>0)?row.gmv/videos:null;
     return {...row,videos,ratio};
   });
@@ -2537,6 +2568,7 @@ function vtRenderGMVVideo(datos){
   const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const fmtUSD=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
   const colHdr=grupo==='sku'?'Producto / SKU':grupo==='marca'?'Marca':'Célula';
+  const periodoLbl=rango?` (filtrado por período)`:'';
 
   el.innerHTML=`
   <div class="tpanel" style="margin-top:8px">
@@ -2546,7 +2578,7 @@ function vtRenderGMVVideo(datos){
         ${grupo==='sku'?'<th style="text-align:left;color:var(--text2)">Marca</th>':''}
         <th style="text-align:right">GMV total</th>
         <th style="text-align:right">Unidades</th>
-        <th style="text-align:right">Videos pub.</th>
+        <th style="text-align:right" title="Videos publicados${periodoLbl}">Videos pub.${rango?'<br><span style="font-size:10px;font-weight:400;color:var(--text2)">en período</span>':''}</th>
         <th style="text-align:right">GMV / video</th>
         <th style="min-width:110px">Rendimiento</th>
       </tr></thead>
@@ -2559,14 +2591,14 @@ function vtRenderGMVVideo(datos){
             ${grupo==='sku'?`<td style="color:var(--text2);font-size:12px">${esc(r.brand)}</td>`:''}
             <td style="text-align:right;font-weight:600">${fmtUSD(r.gmv)}</td>
             <td style="text-align:right;color:var(--text2)">${r.units.toLocaleString()}</td>
-            <td style="text-align:right">${r.videos!==null?r.videos:'<span style="color:var(--text2)">—</span>'}</td>
+            <td style="text-align:right">${r.videos!==null&&r.videos>0?r.videos:r.videos===0?'<span style="color:var(--text2)">0</span>':'<span style="color:var(--text2)">—</span>'}</td>
             <td style="text-align:right;font-weight:700;color:${ratioColor}">${r.ratio!==null?fmtUSD(r.ratio):'<span style="color:var(--text2)">—</span>'}</td>
-            <td style="padding-right:8px">${r.ratio!==null?`<div style="background:var(--border);border-radius:4px;height:7px;overflow:hidden"><div style="background:${ratioColor};height:100%;width:${barPct}%;transition:width .3s"></div></div>`:'<span style="color:var(--text2);font-size:11px">Sin datos</span>'}</td>
+            <td style="padding-right:8px">${r.ratio!==null?`<div style="background:var(--border);border-radius:4px;height:7px;overflow:hidden"><div style="background:${ratioColor};height:100%;width:${barPct}%;transition:width .3s"></div></div>`:'<span style="color:var(--text2);font-size:11px">Sin videos</span>'}</td>
           </tr>`;
         }).join('')}
       </tbody>
     </table>
-    ${!hayClickUp&&!hayContratos?'<div class="alert alert-info" style="margin-top:10px">⚠️ Cargá los datos de ClickUp o Contratos para ver la cantidad de videos publicados y el ratio GMV/video.</div>':''}
+    ${!hayClickUp?'<div class="alert alert-info" style="margin-top:10px">⚠️ Cargá los datos de ClickUp (tab Operativo) para ver la cantidad de videos publicados y calcular el ratio GMV/video.</div>':''}
   </div>`;
 }
 
