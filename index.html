@@ -733,7 +733,8 @@ tr:hover td{background:var(--blue-light)}
         <button class="vt-vista-tab active" data-vista="resumen"   onclick="vtCambiarVista('resumen',this)">📊 Resumen</button>
         <button class="vt-vista-tab" data-vista="ciclos"    onclick="vtCambiarVista('ciclos',this)">🔄 Por ciclo de contrato</button>
         <button class="vt-vista-tab" data-vista="detalle"   onclick="vtCambiarVista('detalle',this)">📋 Detalle completo</button>
-        <button class="vt-vista-tab" data-vista="gmvvideo"  onclick="vtCambiarVista('gmvvideo',this)">📈 GMV por video</button>
+        <button class="vt-vista-tab" data-vista="gmvvideo"   onclick="vtCambiarVista('gmvvideo',this)">📈 GMV por video</button>
+        <button class="vt-vista-tab" data-vista="tendencia" onclick="vtCambiarVista('tendencia',this)">📅 Tendencia</button>
       </div>
 
       <!-- ── VISTA: RESUMEN ── -->
@@ -790,8 +791,23 @@ tr:hover td{background:var(--blue-light)}
             <option value="videos_desc">Videos publicados ↓</option>
             <option value="nombre_az">Nombre A→Z</option>
           </select>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;margin-left:12px;color:var(--text2)">
+            <input type="checkbox" id="vt-gmvv-retainer" onchange="vtRenderGMVVideo(vtFiltrar())" style="cursor:pointer">
+            Incluir retainer contratos en ingreso/video
+          </label>
         </div>
         <div id="vt-gmvv-content"></div>
+      </div>
+
+      <!-- ── VISTA: TENDENCIA ── -->
+      <div id="vt-vista-tendencia" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 4px">
+          <span class="strip-lbl">Granularidad:</span>
+          <button class="spill on" data-vg="semana"  onclick="vtGranularidad('semana',this)">Semana</button>
+          <button class="spill"    data-vg="mes"     onclick="vtGranularidad('mes',this)">Mes</button>
+          <button class="spill"    data-vg="dia"     onclick="vtGranularidad('dia',this)">Día</button>
+        </div>
+        <div id="vt-tend-content"></div>
       </div>
 
       <!-- ── VISTA: DETALLE ── -->
@@ -2239,13 +2255,14 @@ function vtCambiarVista(vista,btn){
   document.querySelectorAll('.vt-vista-tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
   vtVista=vista;
-  ['resumen','ciclos','detalle','gmvvideo'].forEach(v=>{
+  ['resumen','ciclos','detalle','gmvvideo','tendencia'].forEach(v=>{
     const el=document.getElementById('vt-vista-'+v);
     if(el) el.classList[v===vista?'remove':'add']('hidden');
   });
-  if(vista==='ciclos')   vtRenderCiclos();
-  if(vista==='detalle')  vtRenderDetalle();
-  if(vista==='gmvvideo') vtRenderGMVVideo(vtFiltrar());
+  if(vista==='ciclos')    vtRenderCiclos();
+  if(vista==='detalle')   vtRenderDetalle();
+  if(vista==='gmvvideo')  vtRenderGMVVideo(vtFiltrar());
+  if(vista==='tendencia') vtRenderTendencia(vtFiltrar());
 }
 
 function vtOrdenar(datos){
@@ -2270,10 +2287,11 @@ function vtRenderAll(){
   vtActualizarChips();
   const datos=vtOrdenar(vtFiltrar());
   vtRenderKPIs(datos);
-  if(vtVista==='resumen')  vtRenderResumen(datos);
-  if(vtVista==='ciclos')   vtRenderCiclos(datos);
-  if(vtVista==='detalle')  vtRenderDetalle();
-  if(vtVista==='gmvvideo') vtRenderGMVVideo(datos);
+  if(vtVista==='resumen')   vtRenderResumen(datos);
+  if(vtVista==='ciclos')    vtRenderCiclos(datos);
+  if(vtVista==='detalle')   vtRenderDetalle();
+  if(vtVista==='gmvvideo')  vtRenderGMVVideo(datos);
+  if(vtVista==='tendencia') vtRenderTendencia(datos);
 }
 
 function vtActualizarChips(){
@@ -2454,101 +2472,99 @@ function vtClickBarLabel(panelId, valor){
   vtRenderAll();
 }
 
+// ── Helper normalización celula (igual que cruzarContratosConClickUp) ──
+function _vtNormCel(c){if(!c)return'';const m=String(c).match(/#?(\d+)$/);return m?'Celula '+parseInt(m[1]):c;}
+
+// ── Conteo de videos publicados desde allData (misma lógica que cruce) ──
+function _vtContarVideos(grupo, key, label, rango){
+  if(!allData||!allData.length) return null;
+  let count=0;
+  allData.forEach(t=>{
+    const est=(t.ESTADO||'').toLowerCase().replace(/ /g,'_');
+    if(!estadosQueCuentan.has(est)) return;
+    if(rango){
+      const f=parseDate(t.FECHA_PUBLICADO||t.FECHA_ACTUALIZACION||'');
+      if(!f||f<rango[0]||f>rango[1]) return;
+    }
+    if(grupo==='sku'){
+      if((t.SKU_PRODUCTO||'').trim()===key||(t.PRODUCTO||'').trim()===label) count++;
+    } else if(grupo==='marca'){
+      if((t.MARCA||'').trim()===key) count++;
+    } else { // celula
+      if(_vtNormCel((t.CELULA||'').trim())===key) count++;
+    }
+  });
+  return count;
+}
+
 // ── VISTA GMV POR VIDEO ──────────────────────────────────────
 function vtRenderGMVVideo(datos){
   const el=document.getElementById('vt-gmvv-content');
   if(!el) return;
   const grupo=document.getElementById('vt-gmvv-grupo')?.value||'sku';
   const orden=document.getElementById('vt-gmvv-orden')?.value||'ratio_desc';
+  const inclRetainer=document.getElementById('vt-gmvv-retainer')?.checked||false;
+  const rango=vtGetRango();
+  const hayClickUp=!!(allData&&allData.length);
+  const hayContratos=!!(contratosData&&contratosData.length);
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtUSD=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
 
-  // Agrupar ventas por la dimensión seleccionada
+  // Agrupar ventas por dimensión
   const map=new Map();
   datos.forEach(v=>{
-    let key, label, brand='';
+    let key,label,brand='';
     if(grupo==='sku'){
-      key=vtSKU(v)||vtProd(v)||'Sin SKU';
-      label=vtProd(v)||key;
+      key=(vtSKU(v)||vtProd(v)||'Sin SKU').trim();
+      label=(vtProd(v)||key).trim();
       brand=vtMarca(v);
     } else if(grupo==='marca'){
-      key=vtMarca(v)||'Sin marca';
+      key=(vtMarca(v)||'Sin marca').trim();
       label=key;
     } else {
-      key=String(vg(v,'Celula_Scalify','celula_scalify','Celula')||'').trim()||'Sin célula';
+      key=_vtNormCel(String(vg(v,'Celula_Scalify','celula_scalify','Celula')||'').trim())||'Sin célula';
       label=key;
     }
     if(!map.has(key)) map.set(key,{key,label,brand,gmv:0,units:0});
     const r=map.get(key);
-    r.gmv+=vtGMV(v);
-    r.units+=vtUnits(v);
+    r.gmv+=vtGMV(v); r.units+=vtUnits(v);
   });
 
-  // Rango de fechas activo (para filtrar también los videos por período)
-  const rango=vtGetRango();
-
-  // Helper: parsear FECHA_PUBLICADO de allData (viene como string dd/MM/yyyy o similar)
-  function parseFechaPub(raw){
-    if(!raw) return null;
-    if(raw instanceof Date) return raw;
-    const s=String(raw).trim();
-    let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if(m) return new Date(+m[3],+m[2]-1,+m[1]);
-    m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if(m) return new Date(+m[1],+m[2]-1,+m[3]);
-    return null;
+  // Calcular retainer por grupo desde contratosData
+  function getRetainer(key){
+    if(!inclRetainer||!hayContratos) return 0;
+    return contratosData
+      .filter(c=>{
+        if(grupo==='sku')    return (c.SKU||'').trim()===key;
+        if(grupo==='marca')  return (c.MARCA_NOMBRE||'').trim()===key;
+        if(grupo==='celula') return _vtNormCel((c.CELULA_ID||'').trim())===key;
+        return false;
+      })
+      .reduce((s,c)=>s+(parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,\s]/g,''))||0),0);
   }
 
-  // Contar videos de allData filtrados por rango de fecha y grupo
-  // Campos exactos en allData: ESTADO, SKU_PRODUCTO, MARCA, CELULA, PRODUCTO, FECHA_PUBLICADO
-  const hayClickUp=allData&&allData.length>0;
-  const hayContratos=contratosData&&contratosData.length>0;
-  const est=estadosQueCuentan||new Set(['publicado','en_proceso_publicacion','complete','active']);
-
-  // Pre-filtrar allData por período si hay rango activo
-  const tareasEnPeriodo=hayClickUp
-    ? allData.filter(t=>{
-        const e=(t.ESTADO||'').toLowerCase();
-        if(!est.has(e)) return false;
-        if(!rango) return true; // sin filtro de fecha → todos
-        const f=parseFechaPub(t.FECHA_PUBLICADO);
-        return f&&f>=rango[0]&&f<=rango[1];
-      })
-    : [];
-
+  // Construir filas con video count usando la misma lógica que cruzarContratosConClickUp
   const rows=[...map.values()].map(row=>{
-    let videos=null;
-
-    // Fuente 1: allData (ClickUp) con campos exactos — respeta filtro de fecha
-    if(hayClickUp){
-      videos=tareasEnPeriodo.filter(t=>{
-        if(grupo==='sku')    return (t.SKU_PRODUCTO||'')===(row.key);
-        if(grupo==='marca')  return (t.MARCA||'')===(row.key);
-        if(grupo==='celula') return (t.CELULA||'')===(row.key);
-        return false;
-      }).length;
-      // Si no matcheó por SKU, intentar por nombre de producto
-      if(videos===0&&grupo==='sku'){
-        videos=tareasEnPeriodo.filter(t=>(t.PRODUCTO||'')===(row.label)).length;
-      }
-    }
-
-    // Fuente 2: contratosData POSTEADOS_CICLO — solo si no hay ClickUp o dio 0
-    if((videos===null||videos===0)&&hayContratos){
+    let videos=_vtContarVideos(grupo,row.key,row.label,rango);
+    // Fallback: contratosData POSTEADOS_CICLO si ClickUp no dio nada
+    if((!videos)&&hayContratos){
       const sum=contratosData
         .filter(c=>{
-          if(grupo==='sku')    return (c.SKU||'')===(row.key);
-          if(grupo==='marca')  return (c.MARCA_NOMBRE||'')===(row.key);
-          if(grupo==='celula') return (c.CELULA_ID||'')===(row.key);
+          if(grupo==='sku')    return (c.SKU||'').trim()===row.key;
+          if(grupo==='marca')  return (c.MARCA_NOMBRE||'').trim()===row.key;
+          if(grupo==='celula') return _vtNormCel((c.CELULA_ID||'').trim())===row.key;
           return false;
         })
         .reduce((s,c)=>s+(parseInt(c.POSTEADOS_CICLO)||0),0);
       if(sum>0) videos=sum;
     }
-
-    const ratio=(videos&&videos>0)?row.gmv/videos:null;
-    return {...row,videos,ratio};
+    const retainer=getRetainer(row.key);
+    const ingresoTotal=row.gmv+retainer;
+    const ratio=videos>0?ingresoTotal/videos:null;
+    const ratioGMV=videos>0?row.gmv/videos:null;
+    return {...row,videos:videos??null,retainer,ingresoTotal,ratio,ratioGMV};
   });
 
-  // Ordenar
   rows.sort((a,b)=>{
     switch(orden){
       case 'ratio_desc':  return (b.ratio??-Infinity)-(a.ratio??-Infinity);
@@ -2559,46 +2575,171 @@ function vtRenderGMVVideo(datos){
     }
   });
 
-  if(!rows.length){
-    el.innerHTML='<div class="alert alert-info">No hay datos con los filtros actuales.</div>';
-    return;
-  }
+  if(!rows.length){el.innerHTML='<div class="alert alert-info">No hay datos con los filtros actuales.</div>';return;}
 
-  const maxRatio=Math.max(...rows.filter(r=>r.ratio!==null).map(r=>r.ratio),0);
-  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const fmtUSD=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+  const maxRatio=Math.max(...rows.filter(r=>r.ratio!==null).map(r=>r.ratio),1);
   const colHdr=grupo==='sku'?'Producto / SKU':grupo==='marca'?'Marca':'Célula';
-  const periodoLbl=rango?` (filtrado por período)`:'';
+  const hdrPeriodo=rango?'<br><span style="font-size:10px;font-weight:400;color:var(--text2)">en período</span>':'';
 
   el.innerHTML=`
   <div class="tpanel" style="margin-top:8px">
     <table class="vtable" style="width:100%;table-layout:auto">
       <thead><tr>
-        <th style="text-align:left">${colHdr}</th>
-        ${grupo==='sku'?'<th style="text-align:left;color:var(--text2)">Marca</th>':''}
-        <th style="text-align:right">GMV total</th>
-        <th style="text-align:right">Unidades</th>
-        <th style="text-align:right" title="Videos publicados${periodoLbl}">Videos pub.${rango?'<br><span style="font-size:10px;font-weight:400;color:var(--text2)">en período</span>':''}</th>
-        <th style="text-align:right">GMV / video</th>
-        <th style="min-width:110px">Rendimiento</th>
+        <th>${colHdr}</th>
+        ${grupo==='sku'?'<th style="color:var(--text2)">Marca</th>':''}
+        <th style="text-align:right">GMV</th>
+        ${inclRetainer?'<th style="text-align:right;color:var(--teal)">Retainer</th><th style="text-align:right;color:var(--teal)">Ingreso total</th>':''}
+        <th style="text-align:right">Uds.</th>
+        <th style="text-align:right">Videos pub.${hdrPeriodo}</th>
+        <th style="text-align:right">${inclRetainer?'Ingreso':'GMV'}/video</th>
+        <th style="min-width:100px">Rendimiento</th>
       </tr></thead>
       <tbody>
         ${rows.map(r=>{
           const barPct=(r.ratio&&maxRatio>0)?Math.round(r.ratio/maxRatio*100):0;
-          const ratioColor=r.ratio?r.ratio>=maxRatio*0.6?'var(--green)':r.ratio>=maxRatio*0.3?'var(--amber)':'var(--red)':'var(--text2)';
+          const rc=r.ratio?r.ratio>=maxRatio*0.6?'var(--green)':r.ratio>=maxRatio*0.3?'var(--amber)':'var(--red)':'var(--text2)';
+          const vCell=r.videos!==null?r.videos:'<span style="color:var(--text2)">—</span>';
+          const rCell=r.ratio!==null?`<span style="font-weight:700;color:${rc}">${fmtUSD(r.ratio)}</span>`:'<span style="color:var(--text2)">—</span>';
           return `<tr>
             <td style="font-weight:500">${esc(r.label)}</td>
             ${grupo==='sku'?`<td style="color:var(--text2);font-size:12px">${esc(r.brand)}</td>`:''}
             <td style="text-align:right;font-weight:600">${fmtUSD(r.gmv)}</td>
+            ${inclRetainer?`<td style="text-align:right;color:var(--teal)">${r.retainer>0?fmtUSD(r.retainer):'<span style="color:var(--border2)">—</span>'}</td><td style="text-align:right;font-weight:600;color:var(--teal)">${r.retainer>0?fmtUSD(r.ingresoTotal):fmtUSD(r.gmv)}</td>`:''}
             <td style="text-align:right;color:var(--text2)">${r.units.toLocaleString()}</td>
-            <td style="text-align:right">${r.videos!==null&&r.videos>0?r.videos:r.videos===0?'<span style="color:var(--text2)">0</span>':'<span style="color:var(--text2)">—</span>'}</td>
-            <td style="text-align:right;font-weight:700;color:${ratioColor}">${r.ratio!==null?fmtUSD(r.ratio):'<span style="color:var(--text2)">—</span>'}</td>
-            <td style="padding-right:8px">${r.ratio!==null?`<div style="background:var(--border);border-radius:4px;height:7px;overflow:hidden"><div style="background:${ratioColor};height:100%;width:${barPct}%;transition:width .3s"></div></div>`:'<span style="color:var(--text2);font-size:11px">Sin videos</span>'}</td>
+            <td style="text-align:right">${vCell}</td>
+            <td style="text-align:right">${rCell}</td>
+            <td>${r.ratio!==null?`<div style="background:var(--border);border-radius:4px;height:7px;overflow:hidden"><div style="background:${rc};height:100%;width:${barPct}%;transition:width .3s"></div></div>`:'<span style="color:var(--text2);font-size:11px">Sin videos</span>'}</td>
           </tr>`;
         }).join('')}
       </tbody>
     </table>
-    ${!hayClickUp?'<div class="alert alert-info" style="margin-top:10px">⚠️ Cargá los datos de ClickUp (tab Operativo) para ver la cantidad de videos publicados y calcular el ratio GMV/video.</div>':''}
+    ${!hayClickUp?'<div class="alert alert-info" style="margin-top:10px">⚠️ Cargá los datos de ClickUp (tab Operativo) para ver la cantidad de videos publicados.</div>':''}
+    ${inclRetainer&&!hayContratos?'<div class="alert alert-info" style="margin-top:6px">⚠️ Cargá los contratos (tab Gerencia Comercial) para ver el retainer.</div>':''}
+  </div>`;
+}
+
+// ── VISTA TENDENCIA ──────────────────────────────────────────
+let vtGran='semana'; // granularidad activa
+function vtGranularidad(g,btn){
+  document.querySelectorAll('[data-vg]').forEach(b=>b.className='spill');
+  if(btn) btn.className='spill on';
+  vtGran=g;
+  vtRenderTendencia(vtFiltrar());
+}
+
+function vtRenderTendencia(datos){
+  const el=document.getElementById('vt-tend-content');
+  if(!el) return;
+  if(!datos.length){el.innerHTML='<div class="alert alert-info">Sin datos para mostrar.</div>';return;}
+
+  const gran=vtGran||'semana';
+  const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Función para obtener bucket temporal de una venta
+  function getBucket(v){
+    const f=vtFecha(v);
+    if(!f||isNaN(f)) return null;
+    if(gran==='dia'){
+      return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');
+    }
+    if(gran==='mes'){
+      return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0');
+    }
+    // semana ISO
+    const d=new Date(Date.UTC(f.getFullYear(),f.getMonth(),f.getDate()));
+    const dayNum=d.getUTCDay()||7;
+    d.setUTCDate(d.getUTCDate()+4-dayNum);
+    const yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    const weekNum=Math.ceil((((d-yearStart)/86400000)+1)/7);
+    return d.getUTCFullYear()+'-W'+String(weekNum).padStart(2,'0');
+  }
+  function bucketLabel(b){
+    if(!b) return b;
+    if(gran==='mes'){const [y,m]=b.split('-');const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return ms[+m-1]+' '+y;}
+    if(gran==='semana'){const m=b.match(/^(\d{4})-W(\d{2})$/);if(m) return 'Sem '+parseInt(m[2])+'/'+m[1].slice(2);}
+    if(gran==='dia'){const [y,mo,d]=b.split('-');const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return +d+' '+ms[+mo-1];}
+    return b;
+  }
+
+  // Agrupar ventas por bucket
+  const mapGMV=new Map(), mapComm=new Map(), mapUds=new Map();
+  datos.forEach(v=>{
+    const b=getBucket(v);
+    if(!b) return;
+    mapGMV.set(b,(mapGMV.get(b)||0)+vtGMV(v));
+    mapComm.set(b,(mapComm.get(b)||0)+vtComm(v));
+    mapUds.set(b,(mapUds.get(b)||0)+vtUnits(v));
+  });
+
+  const buckets=[...mapGMV.keys()].sort();
+  if(!buckets.length){el.innerHTML='<div class="alert alert-info">Sin datos para mostrar.</div>';return;}
+
+  const gmvVals=buckets.map(b=>mapGMV.get(b)||0);
+  const commVals=buckets.map(b=>mapComm.get(b)||0);
+  const udsVals=buckets.map(b=>mapUds.get(b)||0);
+
+  // Calcular videos publicados por bucket desde allData (para GMV/video en el tiempo)
+  const hayClickUp=!!(allData&&allData.length);
+  const mapVids=new Map();
+  if(hayClickUp){
+    allData.forEach(t=>{
+      const est=(t.ESTADO||'').toLowerCase().replace(/ /g,'_');
+      if(!estadosQueCuentan.has(est)) return;
+      const f=parseDate(t.FECHA_PUBLICADO||t.FECHA_ACTUALIZACION||'');
+      if(!f) return;
+      // Obtener bucket para la fecha del video
+      let b;
+      if(gran==='dia') b=f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');
+      else if(gran==='mes') b=f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0');
+      else{const d=new Date(Date.UTC(f.getFullYear(),f.getMonth(),f.getDate()));const dn=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-dn);const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1));const wn=Math.ceil((((d-ys)/86400000)+1)/7);b=d.getUTCFullYear()+'-W'+String(wn).padStart(2,'0');}
+      // Solo buckets que existen en ventas
+      if(mapGMV.has(b)) mapVids.set(b,(mapVids.get(b)||0)+1);
+    });
+  }
+
+  // ── Función SVG de línea ──────────────────────────────────────
+  function svgChart(vals,color,label,fmtFn){
+    const W=700,H=160,pad={t:12,r:20,b:32,l:60};
+    const iW=W-pad.l-pad.r, iH=H-pad.t-pad.b;
+    const maxV=Math.max(...vals,1);
+    const minV=0;
+    const xs=i=>pad.l+i*(iW/(Math.max(vals.length-1,1)));
+    const ys=v=>pad.t+iH-(v-minV)/(maxV-minV)*iH;
+    const pts=vals.map((v,i)=>`${xs(i)},${ys(v)}`).join(' ');
+    const area=`M${xs(0)},${ys(0)} `+vals.map((v,i)=>`L${xs(i)},${ys(v)}`).join(' ')+` L${xs(vals.length-1)},${pad.t+iH} L${xs(0)},${pad.t+iH} Z`;
+    // etiquetas eje X (solo mostrar ~6 labels)
+    const step=Math.max(1,Math.floor(buckets.length/6));
+    const xLabels=buckets.filter((_,i)=>i%step===0||i===buckets.length-1).map(b=>{const i=buckets.indexOf(b);return`<text x="${xs(i)}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--text2)">${esc(bucketLabel(b))}</text>`;}).join('');
+    // etiquetas eje Y (3 niveles)
+    const yLabels=[0,0.5,1].map(p=>{const v=minV+(maxV-minV)*p;return`<text x="${pad.l-6}" y="${ys(v)+4}" text-anchor="end" font-size="10" fill="var(--text2)">${fmtFn(v)}</text><line x1="${pad.l}" y1="${ys(v)}" x2="${pad.l+iW}" y2="${ys(v)}" stroke="var(--border)" stroke-width="0.5"/>`;}).join('');
+    // dots y tooltips
+    const dots=vals.map((v,i)=>`<circle cx="${xs(i)}" cy="${ys(v)}" r="4" fill="${color}" opacity="0.85"><title>${bucketLabel(buckets[i])}: ${fmtFn(v)}</title></circle>`).join('');
+    return`<div style="margin-bottom:24px">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px">${label}</div>
+      <div style="overflow-x:auto">
+      <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="max-width:100%">
+        <defs><linearGradient id="g${color.replace(/[^a-z]/gi,'')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.25"/><stop offset="100%" stop-color="${color}" stop-opacity="0.02"/></linearGradient></defs>
+        ${yLabels}
+        <path d="${area}" fill="url(#g${color.replace(/[^a-z]/gi,'')})" />
+        <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
+        ${xLabels}
+        ${dots}
+      </svg></div></div>`;
+  }
+
+  const fUSD=v=>'$'+Math.round(v).toLocaleString('en-US');
+  const fN=v=>Math.round(v).toLocaleString('en-US');
+
+  // GMV/video por bucket
+  const ratioVals=buckets.map(b=>{const vids=mapVids.get(b)||0;const g=mapGMV.get(b)||0;return vids>0?g/vids:0;});
+  const hayRatios=ratioVals.some(r=>r>0);
+
+  el.innerHTML=`<div style="padding:8px 0">
+    ${svgChart(gmvVals,'var(--teal)','GMV en el tiempo',fUSD)}
+    ${svgChart(udsVals,'var(--blue)','Unidades vendidas',fN)}
+    ${commVals.some(c=>c>0)?svgChart(commVals,'var(--green)','Comisiones en el tiempo',fUSD):''}
+    ${hayClickUp&&hayRatios?svgChart(ratioVals,'var(--purple)','GMV promedio por video publicado (en período)',fUSD):''}
+    ${!hayClickUp&&hayRatios===false?'<div class="alert alert-info">Cargá ClickUp para ver GMV/video en el tiempo.</div>':''}
   </div>`;
 }
 
