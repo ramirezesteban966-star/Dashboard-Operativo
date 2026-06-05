@@ -196,6 +196,16 @@ tr:hover td{background:var(--blue-light)}
 .vt-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .vt-filtros-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
 .vt-filtros-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;margin-bottom:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+/* Multi-select dropdown cuenta */
+.vt-ms-wrap{position:relative;display:inline-block}
+.vt-ms-btn{font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;min-width:148px;justify-content:space-between;color:var(--text);font-family:inherit}
+.vt-ms-btn:hover{border-color:var(--border2);background:var(--bg)}
+.vt-ms-btn.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+.vt-ms-opts{position:absolute;top:calc(100% + 4px);left:0;z-index:300;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:0 4px 20px rgba(15,23,41,.14);min-width:190px;max-height:260px;overflow-y:auto;padding:4px 0}
+.vt-ms-item{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;color:var(--text);user-select:none}
+.vt-ms-item:hover{background:var(--bg)}
+.vt-ms-item input[type=checkbox]{cursor:pointer;accent-color:var(--blue);width:14px;height:14px;flex-shrink:0}
+.vt-ms-sep{height:1px;background:var(--border);margin:4px 0}
 
 /* KPI cards grandes */
 .vt-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
@@ -699,9 +709,13 @@ tr:hover td{background:var(--blue-light)}
             <option value="Celula 4">Célula 4</option>
             <option value="Celula 5">Célula 5</option>
           </select>
-          <select id="vt-sel-cuenta" onchange="vtFiltroCuenta=this.value;vtRenderAll()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:120px">
-            <option value="">Todas las cuentas</option>
-          </select>
+          <div class="vt-ms-wrap" id="vt-ms-cuenta-wrap">
+            <button class="vt-ms-btn" id="vt-ms-cuenta-btn" onclick="vtToggleCuentaDropdown(event)">
+              <span id="vt-ms-cuenta-lbl">Todas las cuentas</span>
+              <span style="font-size:9px;color:var(--text3)">▾</span>
+            </button>
+            <div class="vt-ms-opts hidden" id="vt-ms-cuenta-opts"></div>
+          </div>
           <span class="strip-lbl">Orden:</span>
           <select id="vt-orden" onchange="vtRenderAll()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
             <option value="gmv_desc">GMV ↓</option>
@@ -2020,7 +2034,8 @@ function semLabel(s){
 
 // Estado global ventas
 let vtPeriodo='todo', vtVista='resumen', vtPg=1;
-let vtFiltroMarca='', vtFiltroProd='', vtFiltroCuenta='';
+let vtFiltroMarca='', vtFiltroProd='';
+let vtCuentasSeleccionadas=new Set(); // vacío = todas
 
 // Helpers para leer campos con nombres variables de TikTok
 function vg(v,...keys){
@@ -2154,16 +2169,84 @@ function vtFiltrarConvenio(val, btn){
   vtRenderAll();
 }
 
-function vtOnCelulaCambia(){
-  vtFiltroCelula=document.getElementById('vt-sel-celula').value;
-  // Filtrar cuentas por célula
-  const selC=document.getElementById('vt-sel-cuenta');
-  const curC=selC.value;
-  // Usar Celula_Scalify si existe en los datos
-  const cuentasFiltradas=[...new Set(ventasData
+// ── Multi-select cuentas ─────────────────────────────────────
+function vtToggleCuentaDropdown(evt){
+  evt&&evt.stopPropagation();
+  const opts=document.getElementById('vt-ms-cuenta-opts');if(!opts)return;
+  const open=!opts.classList.contains('hidden');
+  opts.classList.toggle('hidden',open);
+  if(!open){
+    // Cerrar al hacer click fuera
+    setTimeout(()=>{
+      const h=e=>{
+        if(!document.getElementById('vt-ms-cuenta-wrap')?.contains(e.target)){
+          opts.classList.add('hidden');
+          document.removeEventListener('click',h);
+        }
+      };
+      document.addEventListener('click',h);
+    },10);
+  }
+}
+
+function vtCuentaToggleAll(checked){
+  vtCuentasSeleccionadas.clear();
+  document.querySelectorAll('.vt-ms-cuenta-chk').forEach(c=>{c.checked=false;});
+  _vtActualizarCuentaBtn();
+  vtRenderAll();
+}
+
+function vtCuentaToggle(cuenta,checked){
+  if(checked) vtCuentasSeleccionadas.add(cuenta);
+  else vtCuentasSeleccionadas.delete(cuenta);
+  // Sincronizar "Todas" checkbox
+  const total=document.querySelectorAll('.vt-ms-cuenta-chk').length;
+  const allChk=document.getElementById('vt-ms-all-chk');
+  if(allChk) allChk.checked=(vtCuentasSeleccionadas.size===0||vtCuentasSeleccionadas.size===total);
+  _vtActualizarCuentaBtn();
+  vtRenderAll();
+}
+
+function _vtActualizarCuentaBtn(){
+  const lbl=document.getElementById('vt-ms-cuenta-lbl');
+  const btn=document.getElementById('vt-ms-cuenta-btn');
+  if(!lbl) return;
+  const n=vtCuentasSeleccionadas.size;
+  lbl.textContent=n===0?'Todas las cuentas':n===1?[...vtCuentasSeleccionadas][0]:n+' cuentas';
+  if(btn) btn.classList.toggle('active',n>0);
+}
+
+function vtPoblarCuentasMS(){
+  const opts=document.getElementById('vt-ms-cuenta-opts');if(!opts)return;
+  const cuentas=[...new Set(ventasData
     .filter(v=>!vtFiltroCelula||(vg(v,'Celula_Scalify','celula_scalify','Celula')||'')===vtFiltroCelula)
     .map(v=>vtCuenta(v)).filter(Boolean))].sort();
-  selC.innerHTML='<option value="">Todas las cuentas</option>'+cuentasFiltradas.map(c=>`<option value="${c}"${c===curC?' selected':''}>${c}</option>`).join('');
+  const safeId=s=>s.replace(/[^a-z0-9]/gi,'_');
+  const safeVal=s=>s.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+  opts.innerHTML=`
+    <div class="vt-ms-item">
+      <input type="checkbox" id="vt-ms-all-chk" ${vtCuentasSeleccionadas.size===0?'checked':''} onchange="vtCuentaToggleAll(this.checked)">
+      <label for="vt-ms-all-chk" style="cursor:pointer;font-weight:600">Todas las cuentas</label>
+    </div>
+    <div class="vt-ms-sep"></div>
+    ${cuentas.map(c=>`
+      <div class="vt-ms-item">
+        <input type="checkbox" class="vt-ms-cuenta-chk" value="${safeVal(c)}"
+          id="ms-c-${safeId(c)}" ${vtCuentasSeleccionadas.has(c)?'checked':''}
+          onchange="vtCuentaToggle('${safeVal(c)}',this.checked)">
+        <label for="ms-c-${safeId(c)}" style="cursor:pointer">${c}</label>
+      </div>`).join('')}`;
+}
+
+function vtOnCelulaCambia(){
+  vtFiltroCelula=document.getElementById('vt-sel-celula').value;
+  // Cuentas que no existen en la nueva célula → limpiarlas de la selección
+  const cuentasValidas=new Set(ventasData
+    .filter(v=>!vtFiltroCelula||(vg(v,'Celula_Scalify','celula_scalify','Celula')||'')===vtFiltroCelula)
+    .map(v=>vtCuenta(v)).filter(Boolean));
+  vtCuentasSeleccionadas.forEach(c=>{ if(!cuentasValidas.has(c)) vtCuentasSeleccionadas.delete(c); });
+  vtPoblarCuentasMS();
+  _vtActualizarCuentaBtn();
   vtRenderAll();
 }
 
@@ -2171,13 +2254,12 @@ function vtFiltrar(){
   const rango=vtGetRango();
   const marca=vtFiltroMarca.toLowerCase();
   const prod=vtFiltroProd.toLowerCase();
-  const cuenta=vtFiltroCuenta.toLowerCase();
   const celula=vtFiltroCelula.toLowerCase();
   return ventasData.filter(v=>{
     if(rango){const f=vtFecha(v);if(!f||f<rango[0]||f>rango[1]) return false;}
     if(marca&&vtMarca(v).toLowerCase()!==marca) return false;
     if(prod&&vtProd(v).toLowerCase()!==prod) return false;
-    if(cuenta&&vtCuenta(v).toLowerCase()!==cuenta) return false;
+    if(vtCuentasSeleccionadas.size>0&&!vtCuentasSeleccionadas.has(vtCuenta(v))) return false;
     if(celula){const cv=String(vg(v,'Celula_Scalify','celula_scalify','Celula')||'').toLowerCase();if(cv!==celula) return false;}
     if(vtFiltroConvenio){
       const tieneConvenio=vtSKU(v)&&contratosData.some(c=>(c.SKU||'')===(vtSKU(v)||''));
@@ -2233,16 +2315,15 @@ function vtPoblarSelectores(){
   // Productos
   const prods=[...new Set(ventasData.map(v=>vtProd(v)).filter(Boolean))].sort();
   document.getElementById('vt-sel-producto').innerHTML='<option value="">Todos los productos</option>'+prods.map(p=>`<option value="${p}">${p}</option>`).join('');
-  // Cuentas
-  const cuentas=[...new Set(ventasData.map(v=>vtCuenta(v)).filter(Boolean))].sort();
-  document.getElementById('vt-sel-cuenta').innerHTML='<option value="">Todas las cuentas</option>'+cuentas.map(c=>`<option value="${c}">${c}</option>`).join('');
+  // Cuentas — multi-select
+  vtPoblarCuentasMS();
 }
 
 function vtLimpiarFiltros(){
-  vtFiltroMarca=''; vtFiltroProd=''; vtFiltroCuenta=''; vtFiltroCelula=''; vtFiltroConvenio='';
+  vtFiltroMarca=''; vtFiltroProd=''; vtCuentasSeleccionadas.clear(); vtFiltroCelula=''; vtFiltroConvenio='';
   document.getElementById('vt-sel-marca').value='';
   document.getElementById('vt-sel-producto').value='';
-  document.getElementById('vt-sel-cuenta').value='';
+  vtPoblarCuentasMS(); _vtActualizarCuentaBtn();
   const sc=document.getElementById('vt-sel-celula');if(sc)sc.value='';
   document.getElementById('vt-dfrom').value='';
   document.getElementById('vt-dto').value='';
@@ -2303,7 +2384,10 @@ function vtActualizarChips(){
   const items=[];
   if(vtFiltroMarca) items.push({label:'Marca: '+vtFiltroMarca, clear:()=>{vtFiltroMarca='';document.getElementById('vt-sel-marca').value='';vtRenderAll();}});
   if(vtFiltroProd)  items.push({label:'Producto: '+(vtFiltroProd.length>20?vtFiltroProd.slice(0,19)+'…':vtFiltroProd), clear:()=>{vtFiltroProd='';document.getElementById('vt-sel-producto').value='';vtRenderAll();}});
-  if(vtFiltroCuenta) items.push({label:'Cuenta: '+vtFiltroCuenta, clear:()=>{vtFiltroCuenta='';document.getElementById('vt-sel-cuenta').value='';vtRenderAll();}});
+  if(vtCuentasSeleccionadas.size>0){
+    const lbl=vtCuentasSeleccionadas.size===1?'Cuenta: '+[...vtCuentasSeleccionadas][0]:vtCuentasSeleccionadas.size+' cuentas';
+    items.push({label:lbl, clear:()=>{vtCuentasSeleccionadas.clear();vtPoblarCuentasMS();_vtActualizarCuentaBtn();vtRenderAll();}});
+  }
   if(vtFiltroConvenio) items.push({label:'Tipo: '+(vtFiltroConvenio==='con'?'Con convenio':'Sin convenio'), clear:()=>{vtFiltroConvenio='';document.querySelectorAll('[data-vc]').forEach(b=>b.className='spill');const vct=document.querySelector('[data-vc="todos"]');if(vct)vct.className='spill on';vtRenderAll();}});
   chips.style.display=items.length?'flex':'none';
   chips.innerHTML=items.map((it,i)=>`<span class="vt-chip" onclick="vtChipClear(${i})"><span>${it.label}</span><span>×</span></span>`).join('');
@@ -2470,8 +2554,9 @@ function vtClickBarLabel(panelId, valor){
     vtFiltroProd=valor==='Sin mapeo'?'':valor;
     document.getElementById('vt-sel-producto').value=vtFiltroProd;
   } else if(panelId==='vt-por-cuenta-gmv'){
-    vtFiltroCuenta=valor;
-    document.getElementById('vt-sel-cuenta').value=vtFiltroCuenta;
+    vtCuentasSeleccionadas.clear();
+    if(valor) vtCuentasSeleccionadas.add(valor);
+    vtPoblarCuentasMS(); _vtActualizarCuentaBtn();
   }
   vtRenderAll();
 }
@@ -2576,31 +2661,33 @@ function vtRenderGMVVideo(datos){
     r.gmv+=vtGMV(v); r.units+=vtUnits(v);
   });
 
+  // Helper: filtrar contratos respetando célula y marca activas
+  function _filtrarContratos(key){
+    return contratosData.filter(c=>{
+      // Aplicar filtros activos de ventas a los contratos
+      if(vtFiltroCelula && _vtNormCel((c.CELULA_ID||'').trim())!==_vtNormCel(vtFiltroCelula)) return false;
+      if(grupo!=='marca' && vtFiltroMarca && _normStr(c.MARCA_NOMBRE||'')!==_normStr(vtFiltroMarca)) return false;
+      // Filtro por la dimensión de agrupación
+      if(grupo==='sku')    return (c.SKU||'').trim()===key;
+      if(grupo==='marca')  return _normStr(c.MARCA_NOMBRE||'')===_normStr(key);
+      if(grupo==='celula') return _vtNormCel((c.CELULA_ID||'').trim())===_vtNormCel(key);
+      return false;
+    });
+  }
+
   // Calcular retainer por grupo desde contratosData
   function getRetainer(key){
     if(!inclRetainer||!hayContratos) return 0;
-    return contratosData
-      .filter(c=>{
-        if(grupo==='sku')    return (c.SKU||'').trim()===key;
-        if(grupo==='marca')  return (c.MARCA_NOMBRE||'').trim()===key;
-        if(grupo==='celula') return _vtNormCel((c.CELULA_ID||'').trim())===key;
-        return false;
-      })
+    return _filtrarContratos(key)
       .reduce((s,c)=>s+(parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,\s]/g,''))||0),0);
   }
 
   // Construir filas con video count usando la misma lógica que cruzarContratosConClickUp
   const rows=[...map.values()].map(row=>{
     let videos=_vtContarVideos(grupo,row.key,row.label,rango);
-    // Fallback: contratosData POSTEADOS_CICLO si ClickUp no dio nada
+    // Fallback: contratosData POSTEADOS_CICLO si ClickUp no dio nada (también filtrado por célula)
     if((!videos)&&hayContratos){
-      const sum=contratosData
-        .filter(c=>{
-          if(grupo==='sku')    return (c.SKU||'').trim()===row.key;
-          if(grupo==='marca')  return (c.MARCA_NOMBRE||'').trim()===row.key;
-          if(grupo==='celula') return _vtNormCel((c.CELULA_ID||'').trim())===row.key;
-          return false;
-        })
+      const sum=_filtrarContratos(row.key)
         .reduce((s,c)=>s+(parseInt(c.POSTEADOS_CICLO)||0),0);
       if(sum>0) videos=sum;
     }
@@ -2747,29 +2834,37 @@ function vtRenderTendencia(datos){
   if(!buckets.length){el.innerHTML='<div class="alert alert-info">Sin datos para mostrar.</div>';return;}
 
   // ── Calcular retainer por bucket (proporcional a videos publicados) ──
-  // Retainer por video de un SKU = INGRESO_FIJO_USD / VIDEOS_MES del contrato
+  // Retainer por video = INGRESO_FIJO_USD / VIDEOS_MES, atribuido a cada video publicado.
+  // Respeta los filtros activos de célula y marca.
   const mapRet=new Map();
   if(inclRetainer&&hayContratos&&hayClickUp){
-    // Construir mapa: SKU_PRODUCTO → retainer por video desde contratos
+    // Construir mapa SKU → retainer/video, filtrado por célula/marca activos
     const retPorSKU={};
     contratosData.forEach(c=>{
+      // Solo contratos que pertenecen a la célula/marca filtrada
+      if(vtFiltroCelula && _vtNormCel((c.CELULA_ID||'').trim())!==_vtNormCel(vtFiltroCelula)) return;
+      if(vtFiltroMarca && _normStr(c.MARCA_NOMBRE||'')!==_normStr(vtFiltroMarca)) return;
+      if(vtFiltroProd && _normStr(c.SKU||'')!==_normStr(vtFiltroProd) &&
+         _normStr(c.PRODUCTO||'')!==_normStr(vtFiltroProd)) return;
       const sku=(c.SKU||'').trim();const vm=parseInt(c.VIDEOS_MES)||0;
       const ing=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,\s]/g,''))||0;
       if(!sku||!vm||!ing) return;
       if(!retPorSKU[sku]) retPorSKU[sku]={total:0,videos:0};
       retPorSKU[sku].total+=ing; retPorSKU[sku].videos+=vm;
     });
-    // Para cada video publicado (en período de ventas), sumar retainer al bucket
+    // Para cada video publicado (filtrado por célula/marca), acumular retainer en su bucket
     allData.forEach(t=>{
       const est=(t.ESTADO||'').toLowerCase().replace(/ /g,'_');
       if(!estadosQueCuentan.has(est)) return;
+      // Aplicar mismo filtro de célula/marca que los videos
+      if(vtFiltroCelula && _vtNormCel((t.CELULA||'').trim())!==_vtNormCel(vtFiltroCelula)) return;
+      if(vtFiltroMarca && _normStr(t.MARCA||'')!==_normStr(vtFiltroMarca)) return;
       const f=parseDate(t.FECHA_PUBLICADO||t.FECHA_ACTUALIZACION||'');
       if(!f) return;
       const b=getBucket(f);if(!b) return;
       const sku=(t.SKU_PRODUCTO||'').trim();
       const rv=retPorSKU[sku];if(!rv||!rv.videos) return;
-      const retVideo=rv.total/rv.videos;
-      mapRet.set(b,(mapRet.get(b)||0)+retVideo);
+      mapRet.set(b,(mapRet.get(b)||0)+rv.total/rv.videos);
     });
   }
 
