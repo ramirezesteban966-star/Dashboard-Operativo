@@ -801,11 +801,15 @@ tr:hover td{background:var(--blue-light)}
 
       <!-- ── VISTA: TENDENCIA ── -->
       <div id="vt-vista-tendencia" class="hidden">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 4px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 8px;border-bottom:1px solid var(--border);margin-bottom:12px">
           <span class="strip-lbl">Granularidad:</span>
           <button class="spill on" data-vg="semana"  onclick="vtGranularidad('semana',this)">Semana</button>
           <button class="spill"    data-vg="mes"     onclick="vtGranularidad('mes',this)">Mes</button>
           <button class="spill"    data-vg="dia"     onclick="vtGranularidad('dia',this)">Día</button>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;margin-left:16px;color:var(--text2)">
+            <input type="checkbox" id="vt-tend-retainer" onchange="vtRenderTendencia(vtFiltrar())" style="cursor:pointer">
+            Incluir retainer contratos
+          </label>
         </div>
         <div id="vt-tend-content"></div>
       </div>
@@ -2472,12 +2476,17 @@ function vtClickBarLabel(panelId, valor){
   vtRenderAll();
 }
 
-// ── Helper normalización celula (igual que cruzarContratosConClickUp) ──
-function _vtNormCel(c){if(!c)return'';const m=String(c).match(/#?(\d+)$/);return m?'Celula '+parseInt(m[1]):c;}
+// ── Normalización de strings para matching robusto ──
+function _vtNormCel(c){if(!c)return'';const m=String(c).match(/#?(\d+)$/);return m?'Celula '+parseInt(m[1]):String(c).trim();}
+function _normStr(s){return String(s||'').trim().toLowerCase().replace(/[\s\-_]+/g,' ');}
 
-// ── Conteo de videos publicados desde allData (misma lógica que cruce) ──
+// ── Conteo de videos publicados desde allData ──
+// Usa la misma lógica exacta que cruzarContratosConClickUp + normalización para evitar
+// desajustes de mayúsculas/espacios entre ClickUp y TikTok ventas.
 function _vtContarVideos(grupo, key, label, rango){
   if(!allData||!allData.length) return null;
+  const nKey=_normStr(key);
+  const nLabel=_normStr(label);
   let count=0;
   allData.forEach(t=>{
     const est=(t.ESTADO||'').toLowerCase().replace(/ /g,'_');
@@ -2487,15 +2496,37 @@ function _vtContarVideos(grupo, key, label, rango){
       if(!f||f<rango[0]||f>rango[1]) return;
     }
     if(grupo==='sku'){
-      if((t.SKU_PRODUCTO||'').trim()===key||(t.PRODUCTO||'').trim()===label) count++;
+      // Matching múltiple: SKU_PRODUCTO y/o PRODUCTO (normalizado)
+      const tSKU=_normStr(t.SKU_PRODUCTO);
+      const tProd=_normStr(t.PRODUCTO);
+      if(tSKU===nKey||tProd===nLabel||tProd===nKey||tSKU===nLabel) count++;
     } else if(grupo==='marca'){
-      if((t.MARCA||'').trim()===key) count++;
-    } else { // celula
-      if(_vtNormCel((t.CELULA||'').trim())===key) count++;
+      if(_normStr(t.MARCA)===nKey) count++;
+    } else {
+      if(_vtNormCel((t.CELULA||'').trim())===_vtNormCel(key)) count++;
     }
   });
   return count;
 }
+
+// ── Tooltip global para charts ───────────────────────────────
+function _vtTipShow(evt,html){
+  let t=document.getElementById('_vt_tip');
+  if(!t){t=document.createElement('div');t.id='_vt_tip';
+    t.style.cssText='position:fixed;z-index:9999;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:12px;pointer-events:none;box-shadow:0 4px 20px rgba(15,23,41,.18);max-width:260px;line-height:1.6;transition:opacity .1s ease';
+    document.body.appendChild(t);}
+  t.innerHTML=html;t.style.opacity='1';_vtTipMove(evt);
+}
+function _vtTipMove(evt){
+  const t=document.getElementById('_vt_tip');if(!t)return;
+  const x=evt.clientX+16,y=evt.clientY-8;
+  t.style.left=Math.min(x,window.innerWidth-270)+'px';
+  t.style.top=Math.max(8,Math.min(y,window.innerHeight-110))+'px';
+}
+function _vtTipHide(){const t=document.getElementById('_vt_tip');if(t)t.style.opacity='0';}
+
+// Datos de charts almacenados para tooltips (evita poner JSON en DOM)
+window._vtCharts={};
 
 // ── VISTA GMV POR VIDEO ──────────────────────────────────────
 function vtRenderGMVVideo(datos){
@@ -2619,7 +2650,7 @@ function vtRenderGMVVideo(datos){
 }
 
 // ── VISTA TENDENCIA ──────────────────────────────────────────
-let vtGran='semana'; // granularidad activa
+let vtGran='semana';
 function vtGranularidad(g,btn){
   document.querySelectorAll('[data-vg]').forEach(b=>b.className='spill');
   if(btn) btn.className='spill on';
@@ -2633,53 +2664,82 @@ function vtRenderTendencia(datos){
   if(!datos.length){el.innerHTML='<div class="alert alert-info">Sin datos para mostrar.</div>';return;}
 
   const gran=vtGran||'semana';
-  const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inclRetainer=document.getElementById('vt-tend-retainer')?.checked||false;
+  const hayClickUp=!!(allData&&allData.length);
+  const hayContratos=!!(contratosData&&contratosData.length);
+  const fUSD=v=>'$'+Math.round(v).toLocaleString('en-US');
+  const fN=v=>Math.round(v).toLocaleString('en-US');
+  const fRat=v=>v>0?'$'+v.toLocaleString('en-US',{maximumFractionDigits:0}):'-';
 
-  // Función para obtener bucket temporal de una venta
-  function getBucket(v){
-    const f=vtFecha(v);
+  // ── Helpers de bucket ────────────────────────────────────────
+  function getBucket(f){
     if(!f||isNaN(f)) return null;
-    if(gran==='dia'){
-      return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');
-    }
-    if(gran==='mes'){
-      return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0');
-    }
-    // semana ISO
+    if(gran==='dia') return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');
+    if(gran==='mes') return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0');
     const d=new Date(Date.UTC(f.getFullYear(),f.getMonth(),f.getDate()));
-    const dayNum=d.getUTCDay()||7;
-    d.setUTCDate(d.getUTCDate()+4-dayNum);
-    const yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
-    const weekNum=Math.ceil((((d-yearStart)/86400000)+1)/7);
-    return d.getUTCFullYear()+'-W'+String(weekNum).padStart(2,'0');
+    const dn=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-dn);
+    const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    const wn=Math.ceil((((d-ys)/86400000)+1)/7);
+    return d.getUTCFullYear()+'-W'+String(wn).padStart(2,'0');
   }
   function bucketLabel(b){
     if(!b) return b;
-    if(gran==='mes'){const [y,m]=b.split('-');const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return ms[+m-1]+' '+y;}
-    if(gran==='semana'){const m=b.match(/^(\d{4})-W(\d{2})$/);if(m) return 'Sem '+parseInt(m[2])+'/'+m[1].slice(2);}
-    if(gran==='dia'){const [y,mo,d]=b.split('-');const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return +d+' '+ms[+mo-1];}
+    const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    if(gran==='mes'){const[y,m]=b.split('-');return ms[+m-1]+' '+y.slice(2);}
+    if(gran==='semana'){const m=b.match(/^(\d{4})-W(\d{2})$/);if(m)return'S'+parseInt(m[2])+'/'+m[1].slice(2);}
+    if(gran==='dia'){const[y,mo,d]=b.split('-');return +d+' '+ms[+mo-1];}
+    return b;
+  }
+  function bucketFull(b){
+    if(!b) return b;
+    const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    if(gran==='mes'){const[y,m]=b.split('-');return ms[+m-1]+' '+y;}
+    if(gran==='semana'){const m=b.match(/^(\d{4})-W(\d{2})$/);if(m)return'Semana '+parseInt(m[2])+', '+m[1];}
+    if(gran==='dia'){const[y,mo,d]=b.split('-');return +d+' '+ms[+mo-1]+' '+y;}
     return b;
   }
 
-  // Agrupar ventas por bucket
-  const mapGMV=new Map(), mapComm=new Map(), mapUds=new Map();
+  // ── Agrupar ventas y comisiones por bucket ────────────────────
+  const mapGMV=new Map(),mapComm=new Map(),mapUds=new Map(),mapOrds=new Map();
   datos.forEach(v=>{
-    const b=getBucket(v);
-    if(!b) return;
+    const b=getBucket(vtFecha(v));if(!b)return;
     mapGMV.set(b,(mapGMV.get(b)||0)+vtGMV(v));
     mapComm.set(b,(mapComm.get(b)||0)+vtComm(v));
     mapUds.set(b,(mapUds.get(b)||0)+vtUnits(v));
+    const oid=vg(v,'Order_ID','Order ID');
+    if(oid){if(!mapOrds.has(b))mapOrds.set(b,new Set());mapOrds.get(b).add(oid);}
   });
-
   const buckets=[...mapGMV.keys()].sort();
   if(!buckets.length){el.innerHTML='<div class="alert alert-info">Sin datos para mostrar.</div>';return;}
 
-  const gmvVals=buckets.map(b=>mapGMV.get(b)||0);
-  const commVals=buckets.map(b=>mapComm.get(b)||0);
-  const udsVals=buckets.map(b=>mapUds.get(b)||0);
+  // ── Calcular retainer por bucket (proporcional a videos publicados) ──
+  // Retainer por video de un SKU = INGRESO_FIJO_USD / VIDEOS_MES del contrato
+  const mapRet=new Map();
+  if(inclRetainer&&hayContratos&&hayClickUp){
+    // Construir mapa: SKU_PRODUCTO → retainer por video desde contratos
+    const retPorSKU={};
+    contratosData.forEach(c=>{
+      const sku=(c.SKU||'').trim();const vm=parseInt(c.VIDEOS_MES)||0;
+      const ing=parseFloat(String(c.INGRESO_FIJO_USD||'0').replace(/[$,\s]/g,''))||0;
+      if(!sku||!vm||!ing) return;
+      if(!retPorSKU[sku]) retPorSKU[sku]={total:0,videos:0};
+      retPorSKU[sku].total+=ing; retPorSKU[sku].videos+=vm;
+    });
+    // Para cada video publicado (en período de ventas), sumar retainer al bucket
+    allData.forEach(t=>{
+      const est=(t.ESTADO||'').toLowerCase().replace(/ /g,'_');
+      if(!estadosQueCuentan.has(est)) return;
+      const f=parseDate(t.FECHA_PUBLICADO||t.FECHA_ACTUALIZACION||'');
+      if(!f) return;
+      const b=getBucket(f);if(!b) return;
+      const sku=(t.SKU_PRODUCTO||'').trim();
+      const rv=retPorSKU[sku];if(!rv||!rv.videos) return;
+      const retVideo=rv.total/rv.videos;
+      mapRet.set(b,(mapRet.get(b)||0)+retVideo);
+    });
+  }
 
-  // Calcular videos publicados por bucket desde allData (para GMV/video en el tiempo)
-  const hayClickUp=!!(allData&&allData.length);
+  // ── Calcular videos publicados por bucket ──────────────────────
   const mapVids=new Map();
   if(hayClickUp){
     allData.forEach(t=>{
@@ -2687,60 +2747,173 @@ function vtRenderTendencia(datos){
       if(!estadosQueCuentan.has(est)) return;
       const f=parseDate(t.FECHA_PUBLICADO||t.FECHA_ACTUALIZACION||'');
       if(!f) return;
-      // Obtener bucket para la fecha del video
-      let b;
-      if(gran==='dia') b=f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');
-      else if(gran==='mes') b=f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0');
-      else{const d=new Date(Date.UTC(f.getFullYear(),f.getMonth(),f.getDate()));const dn=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-dn);const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1));const wn=Math.ceil((((d-ys)/86400000)+1)/7);b=d.getUTCFullYear()+'-W'+String(wn).padStart(2,'0');}
-      // Solo buckets que existen en ventas
-      if(mapGMV.has(b)) mapVids.set(b,(mapVids.get(b)||0)+1);
+      const b=getBucket(f);if(!b) return;
+      // Filtrar por los mismos criterios de ventas (marca/producto/celula si están activos)
+      if(vtFiltroMarca&&_normStr(t.MARCA)!==_normStr(vtFiltroMarca)) return;
+      if(vtFiltroProd&&_normStr(t.PRODUCTO)!==_normStr(vtFiltroProd)&&_normStr(t.SKU_PRODUCTO)!==_normStr(vtFiltroProd)) return;
+      if(vtFiltroCelula&&_vtNormCel((t.CELULA||'').trim())!==_vtNormCel(vtFiltroCelula)) return;
+      mapVids.set(b,(mapVids.get(b)||0)+1);
     });
   }
 
-  // ── Función SVG de línea ──────────────────────────────────────
-  function svgChart(vals,color,label,fmtFn){
-    const W=700,H=160,pad={t:12,r:20,b:32,l:60};
-    const iW=W-pad.l-pad.r, iH=H-pad.t-pad.b;
-    const maxV=Math.max(...vals,1);
-    const minV=0;
-    const xs=i=>pad.l+i*(iW/(Math.max(vals.length-1,1)));
-    const ys=v=>pad.t+iH-(v-minV)/(maxV-minV)*iH;
-    const pts=vals.map((v,i)=>`${xs(i)},${ys(v)}`).join(' ');
-    const area=`M${xs(0)},${ys(0)} `+vals.map((v,i)=>`L${xs(i)},${ys(v)}`).join(' ')+` L${xs(vals.length-1)},${pad.t+iH} L${xs(0)},${pad.t+iH} Z`;
-    // etiquetas eje X (solo mostrar ~6 labels)
-    const step=Math.max(1,Math.floor(buckets.length/6));
-    const xLabels=buckets.filter((_,i)=>i%step===0||i===buckets.length-1).map(b=>{const i=buckets.indexOf(b);return`<text x="${xs(i)}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--text2)">${esc(bucketLabel(b))}</text>`;}).join('');
-    // etiquetas eje Y (3 niveles)
-    const yLabels=[0,0.5,1].map(p=>{const v=minV+(maxV-minV)*p;return`<text x="${pad.l-6}" y="${ys(v)+4}" text-anchor="end" font-size="10" fill="var(--text2)">${fmtFn(v)}</text><line x1="${pad.l}" y1="${ys(v)}" x2="${pad.l+iW}" y2="${ys(v)}" stroke="var(--border)" stroke-width="0.5"/>`;}).join('');
-    // dots y tooltips
-    const dots=vals.map((v,i)=>`<circle cx="${xs(i)}" cy="${ys(v)}" r="4" fill="${color}" opacity="0.85"><title>${bucketLabel(buckets[i])}: ${fmtFn(v)}</title></circle>`).join('');
-    return`<div style="margin-bottom:24px">
-      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px">${label}</div>
-      <div style="overflow-x:auto">
-      <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="max-width:100%">
-        <defs><linearGradient id="g${color.replace(/[^a-z]/gi,'')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.25"/><stop offset="100%" stop-color="${color}" stop-opacity="0.02"/></linearGradient></defs>
-        ${yLabels}
-        <path d="${area}" fill="url(#g${color.replace(/[^a-z]/gi,'')})" />
-        <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
-        ${xLabels}
-        ${dots}
-      </svg></div></div>`;
+  // ── Valores calculados por bucket ─────────────────────────────
+  const gmvVals=buckets.map(b=>mapGMV.get(b)||0);
+  const retVals=buckets.map(b=>mapRet.get(b)||0);
+  const commVals=buckets.map(b=>mapComm.get(b)||0);
+  const udsVals=buckets.map(b=>mapUds.get(b)||0);
+  const vidVals=buckets.map(b=>mapVids.get(b)||0);
+  const ingresoVals=gmvVals.map((g,i)=>g+(retVals[i]||0));
+  const ratioVals=buckets.map((b,i)=>vidVals[i]>0?ingresoVals[i]/vidVals[i]:0);
+
+  // Stats generales
+  const totalGMV=gmvVals.reduce((a,b)=>a+b,0);
+  const totalRet=retVals.reduce((a,b)=>a+b,0);
+  const totalComm=commVals.reduce((a,b)=>a+b,0);
+  const avgGMV=totalGMV/Math.max(buckets.length,1);
+  const maxGMV=Math.max(...gmvVals);
+
+  // ── Función para construir un chart SVG interactivo ──────────────
+  function mkChart(chartId, series, title, subtitle){
+    // series = [{label, vals, color, fmt, dashed}]
+    // Calcular máximo combinado
+    const allV=series.flatMap(s=>s.vals).filter(v=>isFinite(v)&&v>0);
+    if(!allV.length) return '';
+    const maxV=Math.max(...allV)*1.08;
+    const W=Math.max(600,buckets.length*32+120),H=220;
+    const pad={t:24,r:20,b:44,l:70};
+    const iW=W-pad.l-pad.r,iH=H-pad.t-pad.b;
+    const n=buckets.length;
+    const xs=i=>pad.l+i*(iW/Math.max(n-1,1));
+    const ys=v=>pad.t+iH-Math.max(0,Math.min(v,maxV))/maxV*iH;
+
+    // Grid lines y eje Y
+    const yTicks=4;
+    const gridLines=[...Array(yTicks+1)].map((_,k)=>{
+      const v=maxV*k/yTicks;
+      const y=ys(v);
+      const lbl=series[0].fmt(v);
+      return `<line x1="${pad.l}" y1="${y}" x2="${pad.l+iW}" y2="${y}" stroke="var(--border)" stroke-width="${k===0?1.5:0.7}" stroke-dasharray="${k===0?'':'4,3'}"/>
+              <text x="${pad.l-6}" y="${y+4}" text-anchor="end" font-size="10" fill="var(--text3)">${lbl}</text>`;
+    }).join('');
+
+    // Eje X labels (máximo ~8)
+    const step=Math.max(1,Math.ceil(n/8));
+    const xLabels=buckets.map((b,i)=>{
+      if(i%step!==0&&i!==n-1) return '';
+      return `<text x="${xs(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--text3)">${bucketLabel(b)}</text>`;
+    }).join('');
+
+    // Para cada serie: area + line + dots
+    let seriesHtml='';
+    const gid=`vt_grad_${chartId}_`;
+    let defs=`<defs>`;
+    series.forEach((s,si)=>{
+      const cId=gid+si;
+      defs+=`<linearGradient id="${cId}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${s.color}" stop-opacity="0.3"/>
+        <stop offset="85%" stop-color="${s.color}" stop-opacity="0.03"/>
+      </linearGradient>`;
+    });
+    defs+='</defs>';
+
+    series.forEach((s,si)=>{
+      if(!s.vals.some(v=>v>0)) return;
+      const cId=gid+si;
+      // Smooth bezier path
+      const smooth=s.vals.map((v,i)=>{
+        if(i===0) return `M${xs(0)},${ys(s.vals[0])}`;
+        const x0=xs(i-1),y0=ys(s.vals[i-1]),x1=xs(i),y1=ys(v);
+        const cx=(x0+x1)/2;
+        return `C${cx},${y0} ${cx},${y1} ${x1},${y1}`;
+      }).join(' ');
+      const areaClose=`L${xs(n-1)},${pad.t+iH} L${xs(0)},${pad.t+iH} Z`;
+      seriesHtml+=`<path d="${smooth} ${areaClose}" fill="url(#${cId})" opacity="0.9"/>`;
+      seriesHtml+=`<path d="${smooth}" fill="none" stroke="${s.color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" ${s.dashed?'stroke-dasharray="6,3"':''}/>`;
+      // Dots (invisibles con radio grande para hover, pequeños visibles)
+      s.vals.forEach((v,i)=>{
+        if(v<=0) return;
+        seriesHtml+=`<circle cx="${xs(i)}" cy="${ys(v)}" r="3.5" fill="${s.color}" opacity="0.9"/>`;
+      });
+    });
+
+    // Zonas hover: barras verticales invisibles por cada bucket
+    const hoverZones=buckets.map((b,i)=>{
+      const xc=xs(i);
+      const zoneW=Math.max(iW/n,16);
+      const tipLines=series.map(s=>s.vals[i]>0?`<span style="color:${s.color}">●</span> ${s.label}: <strong>${s.fmt(s.vals[i])}</strong>`:'').filter(Boolean).join('<br>');
+      const vidLine=vidVals[i]>0?`<br><span style="color:var(--text3)">● Videos pub.: ${vidVals[i]}</span>`:'';
+      const tipHtml=`<div style="font-weight:700;margin-bottom:4px;color:var(--text)">${bucketFull(b)}</div>${tipLines}${vidLine}`;
+      const safeHtml=tipHtml.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+      return `<rect x="${xc-zoneW/2}" y="${pad.t}" width="${zoneW}" height="${iH}" fill="transparent" style="cursor:crosshair"
+        onmouseenter="event.stopPropagation();_vtTipShow(event,'${safeHtml}');this.previousSibling&&(this.previousSibling.style.opacity='1')"
+        onmousemove="_vtTipMove(event)"
+        onmouseleave="_vtTipHide()"/>
+        <line class="vt-crosshair" x1="${xc}" y1="${pad.t}" x2="${xc}" y2="${pad.t+iH}" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3,3" style="pointer-events:none;opacity:0" id="vcl_${chartId}_${i}"/>`;
+    }).join('');
+
+    // Leyenda
+    const legend=series.filter(s=>s.vals.some(v=>v>0)).map(s=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)"><span style="width:12px;height:3px;background:${s.color};border-radius:2px;display:inline-block"></span>${s.label}</span>`).join('');
+
+    // KPIs rápidos bajo el chart
+    const total=series[0].vals.reduce((a,b)=>a+b,0);
+    const avg=total/Math.max(n,1);
+    const max=Math.max(...series[0].vals);
+    // Tendencia simple: pendiente lineal
+    const xi=buckets.map((_,i)=>i), yi=series[0].vals;
+    const xm=xi.reduce((a,b)=>a+b,0)/xi.length;
+    const ym=yi.reduce((a,b)=>a+b,0)/yi.length;
+    const slope=xi.reduce((s,x,i)=>s+(x-xm)*(yi[i]-ym),0)/Math.max(xi.reduce((s,x)=>s+(x-xm)**2,0),1);
+    const tendSign=slope>avgGMV*0.02?'↗':'↘';
+    const tendColor=slope>0?'var(--green)':'var(--red)';
+
+    return `<div style="margin-bottom:28px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+        <div>
+          <span style="font-size:14px;font-weight:700;color:var(--text)">${title}</span>
+          ${subtitle?`<span style="font-size:11px;color:var(--text3);margin-left:8px">${subtitle}</span>`:''}
+        </div>
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--text2)">Total: <strong style="color:var(--text)">${series[0].fmt(total)}</strong></span>
+          <span style="font-size:11px;color:var(--text2)">Promedio: <strong style="color:var(--text)">${series[0].fmt(avg)}</strong></span>
+          <span style="font-size:11px;color:var(--text2)">Máx: <strong style="color:var(--text)">${series[0].fmt(max)}</strong></span>
+          <span style="font-size:11px;font-weight:700;color:${tendColor}">${tendSign} ${slope>0?'+':''}${series[0].fmt(Math.abs(slope))}/período</span>
+          ${legend?`<div style="display:flex;gap:10px">${legend}</div>`:''}
+        </div>
+      </div>
+      <div style="overflow-x:auto;border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--surface);padding:4px 0">
+        <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;min-width:${Math.min(W,400)}px">
+          ${defs}
+          ${gridLines}
+          ${seriesHtml}
+          ${hoverZones}
+          ${xLabels}
+        </svg>
+      </div>
+    </div>`;
   }
 
-  const fUSD=v=>'$'+Math.round(v).toLocaleString('en-US');
-  const fN=v=>Math.round(v).toLocaleString('en-US');
+  // ── Construir los charts ──────────────────────────────────────
+  const seriesGMV=[{label:'GMV',vals:gmvVals,color:'var(--teal)',fmt:fUSD}];
+  if(inclRetainer&&retVals.some(v=>v>0)) seriesGMV.push({label:'Retainer',vals:retVals,color:'var(--purple)',fmt:fUSD,dashed:true});
 
-  // GMV/video por bucket
-  const ratioVals=buckets.map(b=>{const vids=mapVids.get(b)||0;const g=mapGMV.get(b)||0;return vids>0?g/vids:0;});
-  const hayRatios=ratioVals.some(r=>r>0);
+  const gmvSubtitle=inclRetainer&&retVals.some(v=>v>0)?`Retainer total período: ${fUSD(totalRet)}`:'';
+  const commSubtitle=`${fUSD(totalComm)} total acumulado`;
 
-  el.innerHTML=`<div style="padding:8px 0">
-    ${svgChart(gmvVals,'var(--teal)','GMV en el tiempo',fUSD)}
-    ${svgChart(udsVals,'var(--blue)','Unidades vendidas',fN)}
-    ${commVals.some(c=>c>0)?svgChart(commVals,'var(--green)','Comisiones en el tiempo',fUSD):''}
-    ${hayClickUp&&hayRatios?svgChart(ratioVals,'var(--purple)','GMV promedio por video publicado (en período)',fUSD):''}
-    ${!hayClickUp&&hayRatios===false?'<div class="alert alert-info">Cargá ClickUp para ver GMV/video en el tiempo.</div>':''}
-  </div>`;
+  let html=`<div>
+    ${mkChart('gmv',seriesGMV,'GMV en el tiempo',gmvSubtitle)}
+    ${mkChart('uds',[{label:'Unidades',vals:udsVals,color:'var(--blue)',fmt:fN}],'Unidades vendidas','')}
+    ${commVals.some(v=>v>0)?mkChart('comm',[{label:'Comisión orgánica',vals:commVals,color:'var(--green)',fmt:fUSD}],'Comisiones en el tiempo',commSubtitle):''}
+  `;
+
+  if(hayClickUp&&ratioVals.some(v=>v>0)){
+    const seriesRatio=[{label:inclRetainer?'Ingreso/video':'GMV/video',vals:ratioVals,color:'var(--amber)',fmt:fUSD}];
+    html+=mkChart('ratio',seriesRatio,inclRetainer?'Ingreso promedio por video (GMV + Retainer)':'GMV promedio por video publicado','Hover para ver valor por período');
+  } else if(!hayClickUp){
+    html+=`<div class="alert alert-info">Cargá los datos de ClickUp (tab Operativo) para ver el gráfico de GMV/video en el tiempo.</div>`;
+  }
+
+  html+=`</div>`;
+  el.innerHTML=html;
 }
 
 // ── VISTA CICLOS ─────────────────────────────────────────────
