@@ -2481,28 +2481,43 @@ function _vtNormCel(c){if(!c)return'';const m=String(c).match(/#?(\d+)$/);return
 function _normStr(s){return String(s||'').trim().toLowerCase().replace(/[\s\-_]+/g,' ');}
 
 // ── Conteo de videos publicados desde allData ──
-// Usa la misma lógica exacta que cruzarContratosConClickUp + normalización para evitar
-// desajustes de mayúsculas/espacios entre ClickUp y TikTok ventas.
+// Usa la misma lógica que cruzarContratosConClickUp + normalización.
+// MUY IMPORTANTE: aplica los mismos filtros activos de ventas (célula, marca, producto)
+// para que el conteo corresponda exactamente al subconjunto de datos filtrado.
 function _vtContarVideos(grupo, key, label, rango){
   if(!allData||!allData.length) return null;
   const nKey=_normStr(key);
   const nLabel=_normStr(label);
   let count=0;
   allData.forEach(t=>{
+    // 1. Solo estados que cuentan
     const est=(t.ESTADO||'').toLowerCase().replace(/ /g,'_');
     if(!estadosQueCuentan.has(est)) return;
+    // 2. Filtro de fecha si hay rango activo
     if(rango){
       const f=parseDate(t.FECHA_PUBLICADO||t.FECHA_ACTUALIZACION||'');
       if(!f||f<rango[0]||f>rango[1]) return;
     }
+    // 3. Aplicar los mismos filtros activos de ventas — así el conteo coincide
+    //    con el subconjunto visible en la tabla
+    if(vtFiltroCelula){
+      if(_vtNormCel((t.CELULA||'').trim())!==_vtNormCel(vtFiltroCelula)) return;
+    }
+    if(grupo!=='marca'&&vtFiltroMarca){
+      if(_normStr(t.MARCA)!==_normStr(vtFiltroMarca)) return;
+    }
+    if(grupo!=='sku'&&vtFiltroProd){
+      if(_normStr(t.PRODUCTO)!==_normStr(vtFiltroProd)&&
+         _normStr(t.SKU_PRODUCTO)!==_normStr(vtFiltroProd)) return;
+    }
+    // 4. Matching por la dimensión de agrupación
     if(grupo==='sku'){
-      // Matching múltiple: SKU_PRODUCTO y/o PRODUCTO (normalizado)
       const tSKU=_normStr(t.SKU_PRODUCTO);
       const tProd=_normStr(t.PRODUCTO);
       if(tSKU===nKey||tProd===nLabel||tProd===nKey||tSKU===nLabel) count++;
     } else if(grupo==='marca'){
       if(_normStr(t.MARCA)===nKey) count++;
-    } else {
+    } else { // celula
       if(_vtNormCel((t.CELULA||'').trim())===_vtNormCel(key)) count++;
     }
   });
@@ -2682,11 +2697,23 @@ function vtRenderTendencia(datos){
     const wn=Math.ceil((((d-ys)/86400000)+1)/7);
     return d.getUTCFullYear()+'-W'+String(wn).padStart(2,'0');
   }
+  // Helper: lunes de una semana ISO (igual que vtSemanaLabel pero más preciso)
+  function isoWeekToMonday(year,week){
+    const jan4=new Date(year,0,4);
+    const dow=jan4.getDay()||7;
+    return new Date(jan4.getTime()+(week-1)*7*86400000-(dow-1)*86400000);
+  }
   function bucketLabel(b){
     if(!b) return b;
     const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
     if(gran==='mes'){const[y,m]=b.split('-');return ms[+m-1]+' '+y.slice(2);}
-    if(gran==='semana'){const m=b.match(/^(\d{4})-W(\d{2})$/);if(m)return'S'+parseInt(m[2])+'/'+m[1].slice(2);}
+    if(gran==='semana'){
+      const m=b.match(/^(\d{4})-W(\d{2})$/);
+      if(m){
+        const lun=isoWeekToMonday(+m[1],+m[2]);
+        return lun.getDate()+' '+ms[lun.getMonth()];
+      }
+    }
     if(gran==='dia'){const[y,mo,d]=b.split('-');return +d+' '+ms[+mo-1];}
     return b;
   }
@@ -2694,7 +2721,14 @@ function vtRenderTendencia(datos){
     if(!b) return b;
     const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
     if(gran==='mes'){const[y,m]=b.split('-');return ms[+m-1]+' '+y;}
-    if(gran==='semana'){const m=b.match(/^(\d{4})-W(\d{2})$/);if(m)return'Semana '+parseInt(m[2])+', '+m[1];}
+    if(gran==='semana'){
+      const m=b.match(/^(\d{4})-W(\d{2})$/);
+      if(m){
+        const lun=isoWeekToMonday(+m[1],+m[2]);
+        const dom=new Date(lun.getTime()+6*86400000);
+        return 'Sem '+parseInt(m[2])+': '+lun.getDate()+' '+ms[lun.getMonth()]+' – '+dom.getDate()+' '+ms[dom.getMonth()]+' '+m[1];
+      }
+    }
     if(gran==='dia'){const[y,mo,d]=b.split('-');return +d+' '+ms[+mo-1]+' '+y;}
     return b;
   }
